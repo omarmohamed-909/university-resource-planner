@@ -1,4 +1,4 @@
-# University Resource Planner (SVNU)
+# University Resource Planner (ََََQNU)
 
 A comprehensive, AI-powered University Resource Planner built with the MERN stack. SVNU streamlines the management of university schedules, halls, courses, and attendance, providing specialized dashboards for Administrators, Doctors, and Students.
 
