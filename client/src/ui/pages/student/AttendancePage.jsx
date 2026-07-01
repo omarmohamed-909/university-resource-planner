@@ -5,8 +5,9 @@ import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
 import Modal from '../../components/ui/Modal'
 import toast from 'react-hot-toast'
-import { QrCode, ClipboardCheck, Camera, X } from 'lucide-react'
+import { FileText, FileSpreadsheet, Printer, QrCode, ClipboardCheck, Camera, X } from 'lucide-react'
 import api from '../../../infrastructure/api/axios'
+import { downloadFile } from '../../../infrastructure/api/download'
 
 const DAY_LABELS = { saturday: 'السبت', sunday: 'الأحد', monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس' }
 
@@ -73,13 +74,29 @@ export default function StudentAttendance() {
     }
   }
 
+  const handleExportPdf = () => downloadFile('/attendance/my/export/pdf', 'my-attendance.pdf')
+  const handleExportExcel = () => downloadFile('/attendance/my/export/excel', 'my-attendance.xlsx')
+
   if (loading) return <Skeleton type="card" count={6} />
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">تسجيل الحضور</h1>
-        <CardDescription>سجل حضورك في المحاضرات عبر مسح رمز QR بالكاميرا</CardDescription>
+    <div className="space-y-6 animate-fade-in print-container">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">تسجيل الحضور</h1>
+          <CardDescription>سجل حضورك في المحاضرات عبر مسح رمز QR بالكاميرا</CardDescription>
+        </div>
+        <div className="flex items-center gap-2 no-print">
+          <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={schedules.length === 0}>
+            <FileText className="w-4 h-4 ml-1" />سجل PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={schedules.length === 0}>
+            <FileSpreadsheet className="w-4 h-4 ml-1" />سجل Excel
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => window.print()} title="طباعة">
+            <Printer className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {schedules.length === 0 ? (

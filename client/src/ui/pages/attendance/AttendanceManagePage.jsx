@@ -7,8 +7,9 @@ import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
 import toast from 'react-hot-toast'
-import { ClipboardCheck, QrCode, RefreshCw, Users } from 'lucide-react'
+import { ClipboardCheck, FileText, FileSpreadsheet, Printer, QrCode, RefreshCw, Users } from 'lucide-react'
 import api from '../../../infrastructure/api/axios'
+import { downloadFile } from '../../../infrastructure/api/download'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -78,6 +79,16 @@ export default function AttendanceManagePage() {
     }
   }
 
+  const handleExportPdf = () => {
+    if (!selectedScheduleId) return toast.error('اختر محاضرة أولا')
+    downloadFile(`/attendance/export/pdf?scheduleId=${selectedScheduleId}&date=${date}`, 'attendance.pdf')
+  }
+
+  const handleExportExcel = () => {
+    if (!selectedScheduleId) return toast.error('اختر محاضرة أولا')
+    downloadFile(`/attendance/export/excel?scheduleId=${selectedScheduleId}&date=${date}`, 'attendance.xlsx')
+  }
+
   useEffect(() => {
     fetchSchedules()
       .catch(() => setSchedules([]))
@@ -93,7 +104,7 @@ export default function AttendanceManagePage() {
   if (loading) return <Skeleton type="card" count={4} />
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in print-container">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">إدارة الحضور</h1>
         <CardDescription>توليد رمز الحضور ومراجعة الطلاب المسجلين لكل محاضرة</CardDescription>
@@ -172,6 +183,15 @@ export default function AttendanceManagePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="success" size="lg">{presentCount} حاضر</Badge>
+                    <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={records.length === 0}>
+                      <FileText className="w-4 h-4 ml-1" />PDF
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={records.length === 0}>
+                      <FileSpreadsheet className="w-4 h-4 ml-1" />Excel
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={() => window.print()} title="طباعة">
+                      <Printer className="w-4 h-4" />
+                    </Button>
                     <Button variant="outline" size="icon" onClick={fetchRecords} loading={recordsLoading} title="تحديث">
                       <RefreshCw className="w-4 h-4" />
                     </Button>

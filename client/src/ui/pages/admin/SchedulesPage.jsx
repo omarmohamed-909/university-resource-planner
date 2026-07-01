@@ -11,9 +11,10 @@ import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
 import { useConfirm } from '../../components/ui/ConfirmModal'
 import toast from 'react-hot-toast'
-import { Plus, CalendarDays, Trash2, LayoutGrid, List } from 'lucide-react'
+import { Plus, CalendarDays, Trash2, LayoutGrid, List, FileText, FileSpreadsheet, Printer } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import api from '../../../infrastructure/api/axios'
+import { downloadFile } from '../../../infrastructure/api/download'
 
 const DAYS = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
 const DAY_LABELS = { saturday: 'السبت', sunday: 'الأحد', monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس' }
@@ -67,6 +68,9 @@ export default function AdminSchedules() {
     } catch { toast.error('حدث خطأ') }
   }
 
+  const handleExportPdf = () => downloadFile('/schedules/export/pdf', 'schedules.pdf')
+  const handleExportExcel = () => downloadFile('/schedules/export/excel', 'schedules.xlsx')
+
   if (loading) return <Skeleton type="card" count={6} />
 
   const groupedByDay = {}
@@ -74,13 +78,24 @@ export default function AdminSchedules() {
   const totalSchedules = schedules.length
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">الجداول الدراسية</h1>
           <CardDescription>إدارة مواعيد المحاضرات والقاعات</CardDescription>
         </div>
-        <Button onClick={() => setModalOpen(true)}><Plus className="w-4 h-4 ml-2" />إضافة محاضرة</Button>
+        <div className="flex items-center gap-2 no-print">
+          <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={totalSchedules === 0}>
+            <FileText className="w-4 h-4 ml-1" />PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={totalSchedules === 0}>
+            <FileSpreadsheet className="w-4 h-4 ml-1" />Excel
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => window.print()} title="طباعة">
+            <Printer className="w-4 h-4" />
+          </Button>
+          <Button onClick={() => setModalOpen(true)}><Plus className="w-4 h-4 ml-2" />إضافة محاضرة</Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">

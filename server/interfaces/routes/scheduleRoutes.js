@@ -11,6 +11,8 @@ function scheduleRoutes(container) {
   router.use(auth);
 
   // IMPORTANT: specific routes must come before parameterized routes like /:id
+  router.get('/export/pdf', (req, res, next) => controller.exportPdf(req, res, next));
+  router.get('/export/excel', (req, res, next) => controller.exportExcel(req, res, next));
   router.post('/auto-generate', role('admin'), (req, res, next) => controller.autoGenerate(req, res, next));
   router.get('/available', (req, res, next) => {
     const hallController = container.resolve('hallController');

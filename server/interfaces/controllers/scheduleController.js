@@ -1,10 +1,12 @@
 class ScheduleController {
-  constructor({ createScheduleUseCase, getScheduleUseCase, updateScheduleUseCase, deleteScheduleUseCase, autoGenerateScheduleUseCase }) {
+  constructor({ createScheduleUseCase, getScheduleUseCase, updateScheduleUseCase, deleteScheduleUseCase, autoGenerateScheduleUseCase, pdfExportService, excelExportService }) {
     this.createScheduleUseCase = createScheduleUseCase;
     this.getScheduleUseCase = getScheduleUseCase;
     this.updateScheduleUseCase = updateScheduleUseCase;
     this.deleteScheduleUseCase = deleteScheduleUseCase;
     this.autoGenerateScheduleUseCase = autoGenerateScheduleUseCase;
+    this.pdfExportService = pdfExportService;
+    this.excelExportService = excelExportService;
   }
 
   async create(req, res, next) {
@@ -69,6 +71,34 @@ class ScheduleController {
     } catch (error) {
       next(error);
     }
+  }
+
+  async exportPdf(req, res, next) {
+    try {
+      const { semester } = req.query;
+      const result = await this.getScheduleUseCase.execute({
+        semester, role: req.user.role, userId: req.user.id, page: null, limit: 10000
+      });
+      const schedules = result.data || result || [];
+      const buffer = await this.pdfExportService.exportSchedules(schedules);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="schedules.pdf"');
+      res.send(buffer);
+    } catch (error) { next(error); }
+  }
+
+  async exportExcel(req, res, next) {
+    try {
+      const { semester } = req.query;
+      const result = await this.getScheduleUseCase.execute({
+        semester, role: req.user.role, userId: req.user.id, page: null, limit: 10000
+      });
+      const schedules = result.data || result || [];
+      const buffer = await this.excelExportService.exportSchedules(schedules);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="schedules.xlsx"');
+      res.send(buffer);
+    } catch (error) { next(error); }
   }
 
   async autoGenerate(req, res, next) {

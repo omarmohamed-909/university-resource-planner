@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import Card, { CardContent, CardDescription } from '../../components/ui/Card'
+import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
-import { CalendarDays } from 'lucide-react'
+import { CalendarDays, FileText, FileSpreadsheet, Printer } from 'lucide-react'
 import api from '../../../infrastructure/api/axios'
+import { downloadFile } from '../../../infrastructure/api/download'
 import { cn } from '../../lib/utils'
 
 const DAYS = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
@@ -31,13 +33,29 @@ export default function DoctorSchedule() {
 
   if (loading) return <Skeleton type="card" count={6} />
 
+  const handleExportPdf = () => downloadFile('/schedules/export/pdf', 'my-schedule.pdf')
+  const handleExportExcel = () => downloadFile('/schedules/export/excel', 'my-schedule.xlsx')
+
   const timeSlots = ['08:00', '09:30', '11:00', '12:30', '14:00', '15:30']
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">جدولي الدراسي</h1>
-        <CardDescription>عرض جميع محاضراتي</CardDescription>
+    <div className="space-y-6 animate-fade-in print-container">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">جدولي الدراسي</h1>
+          <CardDescription>عرض جميع محاضراتي</CardDescription>
+        </div>
+        <div className="flex items-center gap-2 no-print">
+          <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={schedules.length === 0}>
+            <FileText className="w-4 h-4 ml-1" />PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={schedules.length === 0}>
+            <FileSpreadsheet className="w-4 h-4 ml-1" />Excel
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => window.print()} title="طباعة">
+            <Printer className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {schedules.length === 0 ? (

@@ -44,6 +44,17 @@ class MongooseAttendanceRepository {
     return new Attendance({ id: doc._id.toString(), ...doc, _id: undefined });
   }
 
+  async findByStudent(studentId) {
+    const docs = await AttendanceModel.find({ studentId })
+      .populate({
+        path: 'scheduleId',
+        populate: { path: 'courseId', select: 'name code' }
+      })
+      .sort({ date: -1 })
+      .lean();
+    return docs.map(doc => new Attendance({ id: doc._id.toString(), ...doc, _id: undefined }));
+  }
+
   async markBulk(scheduleId, date, studentIds, status) {
     const ops = studentIds.map(studentId => ({
       updateOne: {

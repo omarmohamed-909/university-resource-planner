@@ -87,7 +87,7 @@ function GeneratingView({ semester }) {
     return () => clearInterval(interval)
   }, [])
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-8 text-center space-y-8">
+    <div className="flex flex-col items-center justify-center py-8 px-8 text-center space-y-6">
       <div className="relative">
         <div className="w-20 h-20 rounded-full bg-primary-600 flex items-center justify-center shadow-sm">
           <Brain className="w-10 h-10 text-white" />
@@ -319,7 +319,7 @@ export default function AdminAutoSchedule() {
   const canApply = step === 3 && !hasConflicts && previewList.length > 0
 
   return (
-    <div className="animate-fade-in w-full max-w-7xl mr-auto min-h-[calc(100vh-12rem)] flex flex-col gap-6">
+    <div className="animate-fade-in w-full max-w-7xl mr-auto flex flex-col gap-6">
       <div className="flex items-start justify-between gap-4 shrink-0">
         <div>
           <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
@@ -338,7 +338,7 @@ export default function AdminAutoSchedule() {
       </div>
 
       {step === 1 && (
-        <div className="animate-slide-up flex-1 flex flex-col justify-center gap-6">
+        <div className="animate-slide-up flex flex-col gap-6">
           <Card>
             <CardHeader>
               <div><CardTitle>إعداد الجدول الجيني</CardTitle><CardDescription>حدد الفصل الدراسي وقم بضبط معلمات الخوارزمية الجينية إن لزم الأمر</CardDescription></div>
@@ -382,10 +382,10 @@ export default function AdminAutoSchedule() {
         </div>
       )}
 
-      {step === 2 && loading && <Card className="animate-fade-in flex-1 flex"><GeneratingView semester={semester} /></Card>}
+      {step === 2 && loading && <Card className="animate-fade-in"><GeneratingView semester={semester} /></Card>}
 
       {step === 3 && preview && (
-        <div className="animate-slide-up flex-1 flex flex-col gap-4 pb-10">
+        <div className="animate-slide-up flex flex-col gap-4">
           <div className={cn('rounded-xl border p-4 flex items-center gap-4', hasConflicts ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200')}>
             <div className={cn('p-2 rounded-full', hasConflicts ? 'bg-amber-100' : 'bg-emerald-100')}>
               {hasConflicts ? <AlertCircle className="w-5 h-5 text-amber-600" /> : <CheckCircle className="w-5 h-5 text-emerald-600" />}
@@ -409,7 +409,7 @@ export default function AdminAutoSchedule() {
       )}
 
       {step === 4 && result && (
-        <div className="animate-slide-up flex-1 flex flex-col gap-4 pb-10">
+        <div className="animate-slide-up flex flex-col gap-4">
           {result.applied ? (
             <div className="bg-white rounded-xl border border-emerald-200 p-10 text-center shadow-sm">
               <div className="space-y-4">

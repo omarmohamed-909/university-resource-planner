@@ -36,6 +36,7 @@ function registerDependencies() {
   registerPath('infrastructure/qr', asClass);
   registerPath('infrastructure/socket', asClass);
   registerPath('infrastructure/email', asClass);
+  registerPath('infrastructure/export', asClass);
   registerPath('interfaces/controllers', asClass);
 
   // Create aliases for repository interfaces
