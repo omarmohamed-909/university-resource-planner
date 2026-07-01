@@ -1,0 +1,26 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://mongo:27017/svnu
+      CLIENT_URL: http://localhost:5173
+      JWT_SECRET: change-this-before-production
+      QR_SECRET: change-this-before-production
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:

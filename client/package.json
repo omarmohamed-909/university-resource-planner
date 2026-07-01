@@ -1,0 +1,34 @@
+{
+  "name": "qnu-client",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-oauth/google": "^0.13.5",
+    "axios": "^1.7.0",
+    "clsx": "^2.1.0",
+    "framer-motion": "^12.42.0",
+    "html5-qrcode": "^2.3.8",
+    "lucide-react": "^0.510.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-hot-toast": "^2.5.0",
+    "react-router-dom": "^7.6.0",
+    "socket.io-client": "^4.8.0",
+    "tailwind-merge": "^3.0.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "tailwindcss": "^4.1.0",
+    "vite": "^8.1.0"
+  }
+}
