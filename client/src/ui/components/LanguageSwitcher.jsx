@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Languages } from 'lucide-react'
 
 const languages = [
   { code: 'ar', label: 'AR', native: 'العربية', dir: 'rtl' },
@@ -16,11 +17,12 @@ export default function LanguageSwitcher() {
   return (
     <button
       onClick={toggle}
-      className="w-9 h-9 rounded-full bg-white shadow-md ring-1 ring-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-100 hover:shadow-lg active:scale-90 active:shadow-sm transition-all duration-200 cursor-pointer"
+      className="group relative w-9 h-9 rounded-lg bg-surface border border-border text-body hover:bg-hover hover:border-active active:scale-95 transition-all duration-200 cursor-pointer flex items-center justify-center"
       aria-label={`Switch to ${next.native}`}
       title={next.native}
     >
-      {current.label}
+      <span className="text-[11px] font-bold tracking-tight">{current.label}</span>
+      <Languages className="w-3 h-3 absolute -bottom-0.5 -end-0.5 text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
     </button>
   )
 }

@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { UserPlus, GraduationCap, Eye, EyeOff, CheckCircle, Info, ArrowRight, ArrowLeft } from 'lucide-react'
 import QnuLogo from '../../components/ui/QnuLogo'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
+import DarkModeToggle from '../../components/DarkModeToggle'
 
 function GoogleIcon() {
   return (
@@ -22,9 +23,9 @@ function GoogleIcon() {
 function Field({ label, hint, children }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="block text-xs font-bold text-slate-500 uppercase tracking-[0.08em]">{label}</label>
+      <label className="block text-xs font-bold text-label uppercase tracking-[0.08em]">{label}</label>
       {children}
-      {hint && <p className="text-xs text-slate-400 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-muted mt-1">{hint}</p>}
     </div>
   )
 }
@@ -32,15 +33,13 @@ function Field({ label, hint, children }) {
 function PInput({ rightSlot, leftSlot, className = '', ...props }) {
   return (
     <div className="relative">
-      {rightSlot && <div className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400">{rightSlot}</div>}
+      {rightSlot && <div className="absolute end-4 top-1/2 -translate-y-1/2 text-muted">{rightSlot}</div>}
       <input
         className={`w-full h-14 px-5 ${leftSlot ? 'ps-12' : ''} ${rightSlot ? 'pe-12' : ''}
-                    rounded-lg border border-slate-200 bg-slate-50/50 shadow-sm text-slate-900 text-base
-                   placeholder:text-slate-400
+                    rounded-lg border border-border bg-surface shadow-sm text-title text-base
+                   placeholder:text-muted
                    focus:outline-none focus:border-slate-500 focus:ring-4 focus:ring-slate-900/15 focus:shadow-md
-                   hover:border-slate-300 transition-all duration-200
-                   ![autofill]:shadow-[inset_0_0_0px_1000px_white]
-                   ![autofill]:text-slate-900 ${className}`}
+                   hover:border-active transition-all duration-200 ${className}`}
         style={{
           paddingInlineStart: leftSlot ? '48px' : '20px',
           paddingInlineEnd: rightSlot ? '48px' : '20px',
@@ -62,7 +61,7 @@ function PasswordStrength({ password }) {
     { ok: /\d/.test(password),    label: t('auth.register.passwordDigit') },
   ]
   const score = checks.filter(c => c.ok).length
-  const barColor = ['bg-red-400', 'bg-amber-400', 'bg-emerald-500'][score - 1] || 'bg-slate-200'
+  const barColor = ['bg-red-400', 'bg-amber-400', 'bg-emerald-500'][score - 1] || 'bg-border'
   const strengthLabels = [t('auth.register.passwordWeak'), t('auth.register.passwordMedium'), t('auth.register.passwordStrong')]
   const strengthLabel = strengthLabels[score - 1] || ''
   const strengthColor = ['text-red-500', 'text-amber-500', 'text-emerald-600'][score - 1] || ''
@@ -71,13 +70,13 @@ function PasswordStrength({ password }) {
     <div className="flex flex-col gap-2 mt-2.5">
       <div className="flex gap-1.5 w-full">
         {[0, 1, 2].map(i => (
-          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < score ? barColor : 'bg-slate-200'}`} />
+          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < score ? barColor : 'bg-border'}`} />
         ))}
       </div>
       <div className="flex items-center justify-between">
         <div className="flex gap-3">
           {checks.map(c => (
-            <span key={c.label} className={`flex items-center gap-1 text-[11px] font-medium transition-colors ${c.ok ? 'text-emerald-600' : 'text-slate-400'}`}>
+            <span key={c.label} className={`flex items-center gap-1 text-[11px] font-medium transition-colors ${c.ok ? 'text-emerald-600' : 'text-muted'}`}>
               <CheckCircle size={10} />
               {c.label}
             </span>
@@ -170,30 +169,40 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 bg-[#f5f7fb]">
-      <div className="fixed top-4 end-4 z-50">
+    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 bg-canvas relative">
+      <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-primary-500/[0.05] to-transparent pointer-events-none" />
+      <div className="fixed top-4 end-4 z-50 flex items-center gap-2">
+        <DarkModeToggle />
         <LanguageSwitcher />
       </div>
 
-      <div className="w-full max-w-[560px] animate-slide-up">
+      <div className="relative w-full max-w-[560px] animate-slide-up">
 
-        <div className="bg-[#080f1a] rounded-t-lg px-8 pt-8 pb-6 text-center relative">
-          <div className="absolute inset-0 overflow-hidden rounded-t-lg">
-            <div className="absolute inset-0 bg-slate-900/30" />
-          </div>
+        <div className="relative rounded-t-2xl px-8 pt-8 pb-6 text-center overflow-hidden">
+          {/* Aurora background */}
+          <div className="absolute inset-0 bg-[#070b14]" />
+          <div
+            className="aurora-blob w-[400px] h-[400px] -top-32 -end-20"
+            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)' }}
+          />
+          <div
+            className="aurora-blob w-[300px] h-[300px] -bottom-24 -start-16"
+            style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%)', animationDelay: '-8s' }}
+          />
+          <div className="absolute inset-0 bg-grid bg-grid-fade opacity-30" />
 
-          <div className="absolute top-3 end-5 w-16 h-16 rounded-full overflow-hidden bg-white p-1 shadow-xl flex-shrink-0 flex items-center justify-center z-10">
+          <div className="absolute top-3 end-5 w-16 h-16 rounded-xl overflow-hidden bg-white/10 border border-white/15 backdrop-blur p-1.5 shadow-xl flex-shrink-0 flex items-center justify-center z-10">
             <QnuLogo className="w-full h-full object-contain" />
           </div>
 
           <div className="relative z-10 pt-4 pb-2 text-center mt-4">
-            <h1 className="text-2xl font-bold text-white">{t('auth.register.title')}</h1>
-            <p className="text-blue-400 text-sm mt-1 mb-6">{t('auth.register.subtitle')}</p>
+            <h1 className="text-2xl font-extrabold text-white tracking-tight">{t('auth.register.title')}</h1>
+            <p className="text-blue-300/80 text-sm mt-1.5 mb-6 font-medium">{t('auth.register.subtitle')}</p>
             <Steps current={step} />
           </div>
         </div>
 
-        <div className="bg-white rounded-b-lg shadow-xl px-8 pb-8 pt-8 border-x border-b border-slate-100">
+         <div className="bg-surface rounded-b-2xl shadow-2xl px-8 pb-8 pt-8 border-x border-b border-border">
 
           {step === 1 && (
             <div className="flex flex-col gap-4">
@@ -214,7 +223,7 @@ export default function RegisterPage() {
                 ) : (
                 <div className="relative">
                   <button disabled
-                    className="w-full h-12 flex items-center justify-center gap-3 px-5 border border-slate-200 rounded-lg text-slate-400 font-semibold text-[15px] opacity-55 cursor-not-allowed">
+                    className="w-full h-12 flex items-center justify-center gap-3 px-5 border border-border rounded-lg text-muted font-semibold text-[15px] opacity-55 cursor-not-allowed">
                     <GoogleIcon /> {t('auth.register.googleButton')}
                   </button>
                   <span className="absolute -top-3 inset-x-0 mx-auto w-fit whitespace-nowrap bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-medium px-3 py-0.5 rounded-full">
@@ -225,9 +234,9 @@ export default function RegisterPage() {
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-slate-100" />
-                <span className="text-xs text-slate-400">{t('auth.register.divider')}</span>
-                <div className="flex-1 h-px bg-slate-100" />
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-border" />
+                <span className="text-xs text-muted font-medium">{t('auth.register.divider')}</span>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-border" />
               </div>
 
               <Field label={t('auth.register.nameLabel')}>
@@ -242,13 +251,13 @@ export default function RegisterPage() {
                 <PInput value={form.department} onChange={upd('department')} placeholder={t('auth.register.departmentPlaceholder')} />
               </Field>
 
-              <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+              <div className="flex items-start gap-3 p-4 bg-blue-50/70 border border-blue-100 rounded-lg">
                 <Info size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-blue-700 leading-relaxed">{t('auth.register.infoNotice')}</p>
               </div>
 
               <button onClick={goNext}
-                className="w-full h-14 rounded-lg font-bold text-base text-white bg-slate-950 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-4">
+                className="w-full h-14 rounded-lg font-bold text-base text-primary-btn-text bg-primary-btn hover:bg-primary-btn/90 hover:shadow-lg active:scale-[0.99] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-4">
                 {t('auth.register.nextButton')}
                 {isRtl ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
               </button>
@@ -264,7 +273,7 @@ export default function RegisterPage() {
                   placeholder="••••••••" required dir="ltr"
                   rightSlot={
                     <button type="button" onClick={() => setShowPass(v => !v)}
-                      className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                      className="text-muted hover:text-title transition-colors cursor-pointer">
                       {showPass ? <Eye size={17} /> : <EyeOff size={17} />}
                     </button>
                   }
@@ -281,7 +290,7 @@ export default function RegisterPage() {
                     ? 'border-red-300 focus:border-red-400 focus:ring-red-400/10' : ''}
                   rightSlot={
                     <button type="button" onClick={() => setShowConfirm(v => !v)}
-                      className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                      className="text-muted hover:text-title transition-colors cursor-pointer">
                       {showConfirm ? <Eye size={17} /> : <EyeOff size={17} />}
                     </button>
                   }
@@ -298,11 +307,11 @@ export default function RegisterPage() {
 
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setStep(1)}
-                  className="flex items-center justify-center gap-2 px-5 h-12 rounded-lg border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 cursor-pointer">
+                  className="flex items-center justify-center gap-2 px-5 h-12 rounded-lg border border-border text-body font-semibold text-sm hover:bg-hover hover:border-active transition-all duration-200 cursor-pointer">
                   {isRtl ? <ArrowRight size={16} /> : <ArrowLeft size={16} />} {t('auth.register.backButton')}
                 </button>
                 <button type="submit" disabled={loading}
-                  className="flex-1 h-12 rounded-lg font-bold text-base text-white bg-slate-950 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2">
+                  className="flex-1 h-12 rounded-lg font-bold text-base text-primary-btn-text bg-primary-btn hover:bg-primary-btn/90 hover:shadow-lg active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2">
                   {loading
                     ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                     : <UserPlus size={18} />}
@@ -312,9 +321,9 @@ export default function RegisterPage() {
             </form>
           )}
 
-          <p className="text-center text-sm text-slate-500 mt-6">
+          <p className="text-center text-sm text-label mt-6">
             {t('auth.register.hasAccount')}{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">{t('auth.register.loginLink')}</Link>
+            <Link to="/login" className="text-primary-600 hover:text-primary-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors">{t('auth.register.loginLink')}</Link>
           </p>
         </div>
       </div>

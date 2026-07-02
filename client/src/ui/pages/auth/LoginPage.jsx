@@ -4,44 +4,60 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import { GoogleLogin } from '@react-oauth/google'
 import toast from 'react-hot-toast'
-import { LogIn, GraduationCap, BookOpen, Users, Building2, Shield, Sparkles, Eye, EyeOff, Mail } from 'lucide-react'
+import {
+  LogIn, GraduationCap, BookOpen, Users, Building2,
+  Shield, Sparkles, Eye, EyeOff, Mail, ArrowLeft,
+} from 'lucide-react'
 import QnuLogo from '../../components/ui/QnuLogo'
 import LanguageSwitcher from '../../components/LanguageSwitcher'
+import DarkModeToggle from '../../components/DarkModeToggle'
 
-function AnimatedBg() {
-  const canvasRef = useRef(null)
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    let id
-    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight }
-    resize()
-    window.addEventListener('resize', resize)
-    const pts = Array.from({ length: 45 }, () => ({
-      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-      r: 1 + Math.random() * 2.5, dx: (Math.random() - .5) * .4, dy: (Math.random() - .5) * .4,
-      a: .12 + Math.random() * .3,
-    }))
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      pts.forEach(p => {
-        p.x += p.dx; p.y += p.dy
-        if (p.x < 0 || p.x > canvas.width)  p.dx *= -1
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255,255,255,${p.a})`; ctx.fill()
-      }); id = requestAnimationFrame(draw)
-    }
-    draw()
-    return () => { cancelAnimationFrame(id); window.removeEventListener('resize', resize) }
-  }, [])
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+/* ─────────────────────────────────────────────────────────────
+   Aurora background — animated gradient blobs (dark panel only)
+   ───────────────────────────────────────────────────────────── */
+function AuroraBg() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Base color wash */}
+      <div className="absolute inset-0 bg-[#070b14]" />
+
+      {/* Gradient blobs */}
+      <div
+        className="aurora-blob w-[420px] h-[420px] -top-32 -end-20"
+        style={{
+          background: 'radial-gradient(circle, rgba(59,130,246,0.45) 0%, transparent 70%)',
+          animationDelay: '0s',
+        }}
+      />
+      <div
+        className="aurora-blob w-[380px] h-[380px] top-1/3 -start-24"
+        style={{
+          background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 70%)',
+          animationDelay: '-6s',
+        }}
+      />
+      <div
+        className="aurora-blob w-[320px] h-[320px] -bottom-24 end-1/4"
+        style={{
+          background: 'radial-gradient(circle, rgba(16,185,129,0.25) 0%, transparent 70%)',
+          animationDelay: '-12s',
+        }}
+      />
+
+      {/* Subtle grid overlay */}
+      <div className="absolute inset-0 bg-grid bg-grid-fade opacity-40" />
+
+      {/* Top vignette */}
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/30 to-transparent" />
+      {/* Bottom vignette */}
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/40 to-transparent" />
+    </div>
+  )
 }
 
 function GoogleIcon({ size = 20 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24">
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
@@ -53,7 +69,7 @@ function GoogleIcon({ size = 20 }) {
 function Field({ label, children }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="block text-xs font-bold text-slate-500 uppercase tracking-[0.08em]">{label}</label>
+      <label className="block text-xs font-bold text-label uppercase tracking-[0.08em]">{label}</label>
       {children}
     </div>
   )
@@ -61,21 +77,19 @@ function Field({ label, children }) {
 
 function PremiumInput({ icon: Icon, type = 'text', rightSlot, className = '', ...props }) {
   return (
-    <div className="relative flex-shrink-0">
+    <div className="relative flex-shrink-0 group/input">
       {Icon && (
-        <div className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+        <div className="absolute end-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none transition-colors group-focus-within/input:text-primary-500">
           <Icon size={17} />
         </div>
       )}
       <input
         type={type}
-        className={`w-full h-14 px-5 ${rightSlot ? 'pe-12' : Icon ? 'pe-11' : ''}
-                    rounded-lg border border-slate-200 bg-white shadow-sm
-                   text-slate-900 text-base placeholder:text-slate-400
-                    focus:outline-none focus:border-slate-500 focus:ring-4 focus:ring-slate-900/15 focus:shadow-md
-                   hover:border-slate-300 transition-all duration-200
-                   ![autofill]:shadow-[inset_0_0_0px_1000px_white]
-                   ![autofill]:text-slate-900 ${className}`}
+        className={`w-full h-14 rounded-lg border border-border bg-surface shadow-sm
+                   text-title text-base placeholder:text-muted
+                    focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/15 focus:shadow-md
+                   hover:border-active transition-all duration-200
+                   ![autofill]:shadow-[inset_0_0_0px_1000px_white] ${className}`}
         style={{
           paddingInlineStart: '20px',
           paddingInlineEnd: rightSlot ? '48px' : Icon ? '44px' : '20px',
@@ -84,7 +98,7 @@ function PremiumInput({ icon: Icon, type = 'text', rightSlot, className = '', ..
         {...props}
       />
       {rightSlot && (
-        <div className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400">
+        <div className="absolute end-4 top-1/2 -translate-y-1/2 text-muted">
           {rightSlot}
         </div>
       )}
@@ -102,22 +116,22 @@ export default function LoginPage() {
   const [password, setPassword]   = useState('')
   const [showPass, setShowPass]   = useState(false)
   const [loading, setLoading]     = useState(false)
-  const [quickLoading, setQuickLoading]   = useState(null)
-  const [googleLoading, setGoogleLoading] = useState(false)
+  const [quickLoading, setQuickLoading]         = useState(null)
+  const [googleLoading, setGoogleLoading]       = useState(false)
 
   const isGoogleConfigured = import.meta.env.VITE_GOOGLE_CLIENT_ID &&
     import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id_here'
 
   const demos = import.meta.env.DEV ? [
-    { label: t('auth.login.demoAdmin'), role: 'admin', email: 'admin@svnu.edu', password: 'admin123', className: 'bg-slate-950 hover:bg-slate-800', icon: Shield },
-    { label: t('auth.login.demoDoctor'), role: 'doctor', email: 'ahmed@svnu.edu', password: 'doctor123', className: 'bg-teal-700 hover:bg-teal-800', icon: BookOpen },
-    { label: t('auth.login.demoStudent'), role: 'student', email: 'student@svnu.edu', password: 'student123', className: 'bg-indigo-700 hover:bg-indigo-800', icon: GraduationCap },
+    { label: t('auth.login.demoAdmin'),   role: 'admin',   email: 'admin@svnu.edu',   password: 'admin123',   icon: Shield,        accent: 'from-blue-600 to-blue-800',         ring: 'hover:ring-blue-500/30' },
+    { label: t('auth.login.demoDoctor'),  role: 'doctor',  email: 'ahmed@svnu.edu',   password: 'doctor123',  icon: BookOpen,      accent: 'from-emerald-600 to-emerald-800',   ring: 'hover:ring-emerald-500/30' },
+    { label: t('auth.login.demoStudent'), role: 'student', email: 'student@svnu.edu', password: 'student123', icon: GraduationCap, accent: 'from-violet-600 to-violet-800',     ring: 'hover:ring-violet-500/30' },
   ] : []
 
   const features = [
-    { icon: BookOpen,  label: t('auth.login.feature1') },
-    { icon: Building2, label: t('auth.login.feature2') },
-    { icon: Users,     label: t('auth.login.feature3') },
+    { icon: BookOpen,   label: t('auth.login.feature1') },
+    { icon: Building2,  label: t('auth.login.feature2') },
+    { icon: Users,      label: t('auth.login.feature3') },
   ]
 
   const handleSubmit = async (e) => {
@@ -153,62 +167,91 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row-reverse">
-      <div className="fixed top-4 end-4 z-50">
+    <div className="min-h-screen flex flex-col lg:flex-row-reverse bg-surface">
+      {/* Top-right tools */}
+      <div className="fixed top-4 end-4 z-50 flex items-center gap-2">
+        <DarkModeToggle />
         <LanguageSwitcher />
       </div>
 
-      <div className="relative lg:w-[46%] h-52 lg:h-auto overflow-hidden flex items-center justify-center bg-[#080f1a]">
-        <AnimatedBg />
-        <div className="absolute inset-0 bg-slate-900/35" />
-        <div className="relative z-10 px-10 py-12 w-full max-w-md">
-          <div className="flex items-center gap-4 mb-10">
-            <div className="w-14 h-14 rounded-lg bg-white/10 border border-white/20 backdrop-blur flex items-center justify-center shadow-xl flex-shrink-0 overflow-hidden p-1">
+      {/* ─────────────────────────────────────────────
+          LEFT (RTL) — Aurora brand panel
+          ───────────────────────────────────────────── */}
+      <div className="relative lg:w-[46%] h-56 lg:h-auto overflow-hidden flex items-center justify-center">
+        <AuroraBg />
+
+        <div className="relative z-10 px-8 sm:px-10 lg:px-12 py-10 w-full max-w-md">
+          {/* Brand */}
+          <div className="flex items-center gap-4 mb-12">
+            <div className="relative w-14 h-14 rounded-xl bg-white/10 border border-white/15 backdrop-blur flex items-center justify-center shadow-2xl flex-shrink-0 overflow-hidden p-1.5">
               <QnuLogo className="w-full h-full" />
+              <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">QNU</h1>
-              <p className="text-blue-400 text-xs mt-0.5">{t('auth.login.systemTitle')}</p>
+              <h1 className="text-2xl font-extrabold text-white tracking-tight leading-none">QNU</h1>
+              <p className="text-blue-300/80 text-xs mt-1 font-medium tracking-wide">{t('auth.login.systemTitle')}</p>
             </div>
           </div>
 
-          <h2 className="text-3xl lg:text-4xl font-bold text-white leading-tight mb-4 hidden lg:block">
+          {/* Hero copy */}
+          <h2 className="text-3xl lg:text-[2.5rem] lg:leading-[1.15] font-extrabold text-white leading-tight mb-4 hidden lg:block text-balance">
             {t('auth.login.platformTitle')} <br />
-            <span className="text-blue-300">{t('auth.login.platformHighlight')}</span>
+            <span className="bg-gradient-to-r from-blue-300 via-violet-300 to-blue-200 bg-clip-text text-transparent">
+              {t('auth.login.platformHighlight')}
+            </span>
           </h2>
-          <p className="text-slate-400 text-base leading-relaxed mb-10 hidden lg:block">
+          <p className="text-slate-300/80 text-base leading-relaxed mb-10 hidden lg:block text-pretty">
             {t('auth.login.platformDesc')}
           </p>
 
-          <div className="hidden lg:flex flex-col gap-3">
-            {features.map(({ icon: Icon, label }) => (
-              <div key={label}
-                   className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 border border-white/8 text-slate-300 text-sm">
-                <div className="w-8 h-8 rounded-lg bg-blue-600/25 flex items-center justify-center flex-shrink-0">
-                  <Icon size={15} className="text-blue-400" />
+          {/* Feature list */}
+          <div className="hidden lg:flex flex-col gap-2.5">
+            {features.map(({ icon: Icon, label }, i) => (
+              <div
+                key={label}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-200 text-sm backdrop-blur-sm hover:bg-white/[0.07] hover:border-white/[0.12] transition-all duration-300 animate-slide-in-right"
+                style={{ animationDelay: `${i * 80 + 100}ms` }}
+              >
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/30 to-violet-500/20 border border-white/10 flex items-center justify-center flex-shrink-0">
+                  <Icon size={15} className="text-blue-200" />
                 </div>
-                {label}
+                <span className="font-medium">{label}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center bg-white p-6 lg:p-12 xl:p-20">
-        <div className="w-full max-w-[480px] animate-slide-up">
+      {/* ─────────────────────────────────────────────
+          RIGHT (RTL) — Form panel
+          ───────────────────────────────────────────── */}
+      <div className="flex-1 flex items-center justify-center bg-surface p-6 lg:p-12 xl:p-20 relative">
+        {/* Subtle radial accent at top */}
+        <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-primary-500/[0.04] to-transparent pointer-events-none" />
 
+        <div className="relative w-full max-w-[480px] animate-slide-up">
+
+          {/* Mobile brand */}
           <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ring-black/5">
               <QnuLogo className="w-full h-full" />
             </div>
-            <span className="text-xl font-bold text-slate-900">QNU</span>
+            <span className="text-xl font-bold text-title">QNU</span>
           </div>
 
+          {/* Heading */}
           <div className="mb-9">
-            <h2 className="text-3xl font-bold text-slate-900">{t('auth.login.welcomeBack')}</h2>
-            <p className="text-slate-500 mt-2 text-base">{t('auth.login.subtitle')}</p>
+            <span className="eyebrow mb-3">
+              <span className="w-1 h-1 rounded-full bg-primary-500" />
+              {t('auth.login.subtitle', { defaultValue: 'مرحباً بعودتك' })}
+            </span>
+            <h2 className="text-3xl font-extrabold text-title tracking-tight text-balance">
+              {t('auth.login.welcomeBack')}
+            </h2>
+            <p className="text-label mt-2 text-base text-pretty">{t('auth.login.subtitle')}</p>
           </div>
 
+          {/* Google */}
           <div className="mt-6 mb-6">
             {isGoogleConfigured ? (
               <div className="w-full flex justify-center">
@@ -224,24 +267,26 @@ export default function LoginPage() {
                 />
               </div>
             ) : (
-            <div className="relative">
-              <button disabled
-                className="w-full h-12 flex items-center justify-center gap-3 px-5 border border-slate-200 rounded-lg text-slate-400 font-semibold text-[15px] opacity-55 cursor-not-allowed">
-                <GoogleIcon />&nbsp;{t('auth.login.googleButton')}
-              </button>
-              <span className="absolute -top-3 inset-x-0 mx-auto w-fit whitespace-nowrap bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-medium px-3 py-0.5 rounded-full">
-                {t('auth.login.googleNotConfigured')}
-              </span>
-            </div>
-          )}
+              <div className="relative">
+                <button disabled
+                  className="w-full h-12 flex items-center justify-center gap-3 px-5 border border-border rounded-lg text-muted font-semibold text-[15px] opacity-60 cursor-not-allowed">
+                  <GoogleIcon />&nbsp;{t('auth.login.googleButton')}
+                </button>
+                <span className="absolute -top-2.5 inset-x-0 mx-auto w-fit whitespace-nowrap bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-medium px-3 py-0.5 rounded-full">
+                  {t('auth.login.googleNotConfigured')}
+                </span>
+              </div>
+            )}
           </div>
 
+          {/* Divider */}
           <div className="flex items-center gap-4 mb-7">
-            <div className="flex-1 h-px bg-slate-100" />
-            <span className="text-xs text-slate-400 font-medium">{t('auth.login.divider')}</span>
-            <div className="flex-1 h-px bg-slate-100" />
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-border" />
+            <span className="text-xs text-muted font-medium">{t('auth.login.divider')}</span>
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent to-border" />
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <Field label={t('auth.login.emailLabel')}>
               <PremiumInput
@@ -258,49 +303,66 @@ export default function LoginPage() {
                 placeholder={t('auth.login.passwordPlaceholder')} required dir="ltr"
                 rightSlot={
                   <button type="button" onClick={() => setShowPass(v => !v)}
-                    className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                    className="text-muted hover:text-title transition-colors cursor-pointer p-1 -m-1 rounded"
+                    aria-label={showPass ? t('auth.login.hidePassword', { defaultValue: 'إخفاء' }) : t('auth.login.showPassword', { defaultValue: 'إظهار' })}>
                     {showPass ? <Eye size={17}/> : <EyeOff size={17}/>}
                   </button>
                 }
               />
             </Field>
+
             <button type="submit" disabled={loading}
-              className="w-full h-14 rounded-lg font-bold text-base text-white bg-slate-950 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99] transition-all duration-200 disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 mt-4">
+              className="group relative w-full h-14 rounded-lg font-bold text-base text-primary-btn-text bg-primary-btn hover:brightness-110 active:scale-[0.99] transition-all duration-200 disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 mt-4 shadow-md overflow-hidden">
+              {/* Sheen on hover */}
+              <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
               {loading
                 ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                : <LogIn size={18} />}
-              {loading ? t('auth.login.loadingButton') : t('auth.login.submitButton')}
+                : <LogIn size={18} className="relative z-10" />}
+              <span className="relative z-10">{loading ? t('auth.login.loadingButton') : t('auth.login.submitButton')}</span>
             </button>
           </form>
 
-          <div className="mt-9">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-slate-100" />
-              <span className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                <Sparkles size={12} /> {t('auth.login.quickLogin')}
-              </span>
-              <div className="flex-1 h-px bg-slate-100" />
+          {/* Quick login */}
+          {demos.length > 0 && (
+            <div className="mt-9">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-border" />
+                <span className="flex items-center gap-1.5 text-xs text-muted font-medium">
+                  <Sparkles size={12} /> {t('auth.login.quickLogin')}
+                </span>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-border" />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {demos.map((d, i) => {
+                  const Icon = d.icon
+                  return (
+                    <button
+                      key={d.role}
+                      onClick={() => quickLogin(d)}
+                      disabled={!!quickLoading}
+                      className={`group relative flex flex-col items-center gap-2 py-4 px-3 rounded-lg font-semibold text-sm text-white bg-gradient-to-br ${d.accent} shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-60 ring-2 ring-transparent ${d.ring} animate-slide-up overflow-hidden`}
+                      style={{ animationDelay: `${i * 60 + 80}ms` }}
+                    >
+                      <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                      {quickLoading === d.role
+                        ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin relative z-10" />
+                        : <Icon size={20} className="relative z-10" />}
+                      <span className="relative z-10">{d.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-center text-[11px] text-muted mt-2.5">{t('auth.login.quickLoginHint')}</p>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {demos.map(d => {
-                const Icon = d.icon
-                return (
-                  <button key={d.role} onClick={() => quickLogin(d)} disabled={!!quickLoading}
-                    className={`flex flex-col items-center gap-2 py-4 px-3 rounded-lg font-semibold text-sm text-white ${d.className} hover:shadow-md active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-60`}>
-                    {quickLoading === d.role
-                      ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      : <Icon size={20} />}
-                    {d.label}
-                  </button>
-                )
-              })}
-            </div>
-            <p className="text-center text-[11px] text-slate-400 mt-2.5">{t('auth.login.quickLoginHint')}</p>
-          </div>
+          )}
 
-          <p className="text-center text-sm text-slate-500 mt-8">
-            {t('auth.login.noAccount')}{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">{t('auth.login.createAccount')}</Link>
+          {/* Footer link */}
+          <p className="text-center text-sm text-label mt-8 flex items-center justify-center gap-1.5">
+            {t('auth.login.noAccount')}
+            <Link to="/register" className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold group">
+              {t('auth.login.createAccount')}
+              <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5 rtl:rotate-0" />
+            </Link>
           </p>
         </div>
       </div>

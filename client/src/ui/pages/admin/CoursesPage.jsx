@@ -140,8 +140,8 @@ export default function AdminCourses() {
   if (fetchError) return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <XCircle className="w-12 h-12 text-red-400 mb-4" />
-      <h2 className="text-lg font-semibold text-slate-900 mb-1">{t('common.error.loadData')}</h2>
-      <p className="text-sm text-slate-500 mb-4">{t('common.error.connectionError')}</p>
+      <h2 className="text-lg font-semibold text-title mb-1">{t('common.error.loadData')}</h2>
+      <p className="text-sm text-label mb-4">{t('common.error.connectionError')}</p>
       <Button onClick={() => { setFetchError(false); setLoading(true); fetchData().finally(() => setLoading(false)) }}><RefreshCw className="w-4 h-4 me-2" />{t('common.retry')}</Button>
     </div>
   )
@@ -149,9 +149,13 @@ export default function AdminCourses() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.courses.title')}</h1>
-          <CardDescription>{t('admin.courses.description')}</CardDescription>
+        <div className="min-w-0">
+          <span className="eyebrow mb-2">
+            <span className="w-1 h-1 rounded-full bg-blue-500" />
+            {t('sidebar.courses', { defaultValue: 'courses' })}
+          </span>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.courses.title')}</h1>
+          <CardDescription className="mt-1.5 text-pretty">{t('admin.courses.description')}</CardDescription>
         </div>
         <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.courses.addButton')}</Button>
       </div>
@@ -173,23 +177,23 @@ export default function AdminCourses() {
                       {course.code?.slice(0, 2) || 'CO'}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900">{course.name}</h3>
-                      <p className="text-xs text-slate-500 font-mono">{course.code}</p>
+                      <h3 className="font-semibold text-title">{course.name}</h3>
+                      <p className="text-xs text-label font-mono">{course.code}</p>
                     </div>
                   </div>
                   <Badge variant="purple" size="lg">{t('admin.courses.creditHours', { count: course.creditHours })}</Badge>
                 </div>
-                <div className="mt-3 space-y-1 text-sm text-slate-600">
+                <div className="mt-3 space-y-1 text-sm text-body">
                   <p>{t('admin.courses.department', { department: course.department || t('admin.courses.departmentUnknown') })}</p>
                   <p>{t('admin.courses.doctor', { doctor: users.find(u => u.id === getId(course.doctorId))?.name || t('admin.courses.doctorUnknown') })}</p>
                 </div>
                 {/* Enrollment bar */}
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-slate-500">{t('admin.courses.enrollment')}</span>
-                    <span className={cn('font-medium', pct >= 80 ? 'text-green-600' : 'text-slate-700')}>{t('admin.courses.enrolled', { count: enrolled })}</span>
+                    <span className="text-label">{t('admin.courses.enrollment')}</span>
+                    <span className={cn('font-medium', pct >= 80 ? 'text-green-600' : 'text-body')}>{t('admin.courses.enrolled', { count: enrolled })}</span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-hover rounded-full h-2 overflow-hidden">
                     <div className={cn(
                       'h-full rounded-full transition-all',
                       pct >= 80 ? 'bg-green-500' : pct >= 50 ? 'bg-primary-500' : 'bg-amber-500'
@@ -212,25 +216,25 @@ export default function AdminCourses() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formCode')}</label>
+              <label className="block text-sm font-medium text-body mb-1">{t('admin.courses.formCode')}</label>
               <Input value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formName')}</label>
+              <label className="block text-sm font-medium text-body mb-1">{t('admin.courses.formName')}</label>
               <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formDoctor')}</label>
+            <label className="block text-sm font-medium text-body mb-1">{t('admin.courses.formDoctor')}</label>
             <Select value={form.doctorId} onChange={e => setForm({ ...form, doctorId: e.target.value })} placeholder={t('admin.courses.formDoctorPlaceholder')} options={users.map(u => ({ value: u.id, label: u.name }))} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formDepartment')}</label>
+              <label className="block text-sm font-medium text-body mb-1">{t('admin.courses.formDepartment')}</label>
               <Input value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formHours')}</label>
+              <label className="block text-sm font-medium text-body mb-1">{t('admin.courses.formHours')}</label>
               <Input type="number" value={form.creditHours} onChange={e => setForm({ ...form, creditHours: Number(e.target.value) })} />
             </div>
           </div>
@@ -242,27 +246,27 @@ export default function AdminCourses() {
       </Modal>
       <Modal isOpen={enrollmentOpen} onClose={() => setEnrollmentOpen(false)} title={t('admin.courses.modalEnroll')} description={enrollmentCourse ? `${enrollmentCourse.code} - ${enrollmentCourse.name}` : ''} size="lg">
         <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
-            <span className="text-sm text-slate-600">{t('admin.courses.enrolledStudents')}</span>
+          <div className="flex items-center justify-between rounded-lg bg-surface px-4 py-3">
+            <span className="text-sm text-body">{t('admin.courses.enrolledStudents')}</span>
             <Badge variant="primary" size="lg">{selectedStudents.length}</Badge>
           </div>
 
-          <div className="max-h-[360px] overflow-y-auto rounded-lg border border-slate-200 divide-y">
+          <div className="max-h-[360px] overflow-y-auto rounded-lg border border-border divide-y">
             {students.length === 0 ? (
-              <div className="p-5 text-center text-sm text-slate-400">{t('admin.courses.noStudents')}</div>
+              <div className="p-5 text-center text-sm text-muted">{t('admin.courses.noStudents')}</div>
             ) : students.map(student => {
               const checked = selectedStudents.includes(student.id)
               return (
-                <label key={student.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 cursor-pointer">
+                <label key={student.id} className="flex items-center gap-3 p-3 hover:bg-hover cursor-pointer">
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleStudent(student.id)}
-                    className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                    className="h-4 w-4 rounded border-active text-primary-600 focus:ring-primary-500"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-900 truncate">{student.name}</p>
-                    <p className="text-xs text-slate-500 truncate">{student.email}</p>
+                    <p className="text-sm font-medium text-title truncate">{student.name}</p>
+                    <p className="text-xs text-label truncate">{student.email}</p>
                   </div>
                   {student.department && <Badge variant="default">{student.department}</Badge>}
                 </label>

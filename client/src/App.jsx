@@ -4,6 +4,7 @@ import { useAuthStore } from './ui/store/authStore'
 import { Toaster } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import ErrorBoundary from './ui/components/ErrorBoundary'
+import { useThemeStore } from './ui/store/themeStore'
 import Skeleton, { SkeletonCard } from './ui/components/ui/Skeleton'
 import './ui/lib/i18n'
 
@@ -45,16 +46,21 @@ function PublicRoute({ children }) {
 
 export default function App() {
   const checkAuth = useAuthStore(s => s.checkAuth)
+  const isDark = useThemeStore(s => s.isDark)
   const [initializing, setInitializing] = useState(true)
 
   useEffect(() => {
     checkAuth().finally(() => setInitializing(false))
   }, [checkAuth])
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+  }, [isDark])
+
   if (initializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-8">
-        <div className="w-full max-w-lg space-y-4">
+      <div className="min-h-screen flex items-center justify-center bg-canvas p-page">
+        <div className="w-full max-w-lg section-stack">
           <SkeletonCard />
           <SkeletonCard />
         </div>
@@ -68,12 +74,29 @@ export default function App() {
         position="top-center"
         toastOptions={{
           duration: 3000,
-          style: { borderRadius: '12px', padding: '12px 16px' },
+          style: {
+            borderRadius: '12px',
+            padding: '12px 16px',
+            background: isDark ? '#18181b' : '#ffffff',
+            color: isDark ? '#f4f4f5' : '#0f172a',
+            border: isDark ? '1px solid #27272a' : '1px solid #e2e8f0',
+            boxShadow: isDark
+              ? '0 10px 30px -10px rgba(0,0,0,0.6), 0 4px 8px -4px rgba(0,0,0,0.4)'
+              : '0 10px 30px -10px rgba(15,23,42,0.15), 0 4px 8px -4px rgba(15,23,42,0.06)',
+            fontSize: '14px',
+            fontWeight: 500,
+          },
           success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
-          error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+          error:   { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
         }}
       />
-      <Suspense fallback={<div className="p-6"><Skeleton type="card" count={3} /></div>}>
+      <Suspense
+        fallback={
+          <div className="p-page section-stack max-w-5xl mx-auto">
+            <Skeleton type="card" count={3} />
+          </div>
+        }
+      >
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />

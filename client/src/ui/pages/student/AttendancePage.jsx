@@ -92,7 +92,7 @@ export default function StudentAttendance() {
     <div className="space-y-6 animate-fade-in print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('student.attendance.title')}</h1>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('student.attendance.title')}</h1>
           <CardDescription>{t('student.attendance.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">
@@ -118,11 +118,11 @@ export default function StudentAttendance() {
                 <div className="flex items-center gap-3 mb-3">
                   <div className="bg-violet-100 p-2 rounded-lg"><ClipboardCheck className="w-5 h-5 text-violet-600" /></div>
                   <div>
-                    <h3 className="font-semibold text-slate-900">{sch.courseId?.name || sch.courseId?.code}</h3>
-                    <p className="text-xs text-slate-500">{sch.hallId?.name}</p>
+                    <h3 className="font-semibold text-title">{sch.courseId?.name || sch.courseId?.code}</h3>
+                    <p className="text-xs text-label">{sch.hallId?.name}</p>
                   </div>
                 </div>
-                <div className="text-sm text-slate-600 mb-4">
+                <div className="text-sm text-body mb-4">
                   <p>{dayLabels[sch.day] || sch.day} | {sch.startTime} - {sch.endTime}</p>
                 </div>
                 <Button className="w-full" onClick={() => { setSelectedSchedule(sch); setModalOpen(true) }}>
@@ -136,7 +136,7 @@ export default function StudentAttendance() {
 
       <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setQrData(''); stopScanner() }} title={t('student.attendance.modalTitle')} size="lg">
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-body">
             {selectedSchedule?.courseId?.name || selectedSchedule?.courseId?.code}
           </p>
 
@@ -160,15 +160,15 @@ export default function StudentAttendance() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex-1 border-t border-slate-200" />
-            <span className="text-xs text-slate-400">{t('student.attendance.manualDivider')}</span>
-            <div className="flex-1 border-t border-slate-200" />
+            <div className="flex-1 border-t border-border" />
+            <span className="text-xs text-muted">{t('student.attendance.manualDivider')}</span>
+            <div className="flex-1 border-t border-border" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">{t('student.attendance.qrLabel')}</label>
+            <label className="block text-sm font-medium text-body mb-1">{t('student.attendance.qrLabel')}</label>
             <textarea
-              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-mono focus:ring-4 focus:ring-slate-900/10 focus:border-slate-500 outline-none transition-all"
+              className="w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm font-mono focus:ring-4 focus:ring-slate-900/10 focus:border-active outline-none transition-all"
               rows={2}
               value={qrData}
               onChange={e => setQrData(e.target.value)}

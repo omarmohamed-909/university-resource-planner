@@ -19,12 +19,12 @@ import { downloadFile } from '../../../infrastructure/api/download'
 
 const DAYS = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
 const DAY_STYLES = {
-  saturday: { bar: 'bg-blue-500', title: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600' },
-  sunday: { bar: 'bg-emerald-500', title: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-600' },
-  monday: { bar: 'bg-indigo-500', title: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-100', text: 'text-indigo-600' },
-  tuesday: { bar: 'bg-violet-500', title: 'text-violet-700', bg: 'bg-violet-50', border: 'border-violet-100', text: 'text-violet-600' },
-  wednesday: { bar: 'bg-amber-500', title: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-600' },
-  thursday: { bar: 'bg-rose-500', title: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-100', text: 'text-rose-600' },
+  saturday: { bar: 'bg-blue-500', title: 'text-blue-600', bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-500' },
+  sunday: { bar: 'bg-emerald-500', title: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-500' },
+  monday: { bar: 'bg-indigo-500', title: 'text-indigo-600', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-500' },
+  tuesday: { bar: 'bg-violet-500', title: 'text-violet-600', bg: 'bg-violet-500/10', border: 'border-violet-500/20', text: 'text-violet-500' },
+  wednesday: { bar: 'bg-amber-500', title: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-500' },
+  thursday: { bar: 'bg-rose-500', title: 'text-rose-600', bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-500' },
 }
 
 export default function AdminSchedules() {
@@ -80,9 +80,13 @@ export default function AdminSchedules() {
   return (
     <div className="space-y-6 animate-fade-in print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.schedules.title')}</h1>
-          <CardDescription>{t('admin.schedules.description')}</CardDescription>
+        <div className="min-w-0">
+          <span className="eyebrow mb-2">
+            <span className="w-1 h-1 rounded-full bg-blue-500" />
+            {t('sidebar.schedules', { defaultValue: 'schedules' })}
+          </span>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.schedules.title')}</h1>
+          <CardDescription className="mt-1.5 text-pretty">{t('admin.schedules.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">
           <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={totalSchedules === 0}>
@@ -117,26 +121,26 @@ export default function AdminSchedules() {
               <Card key={day}>
                 <CardHeader>
                   <CardTitle className={style.title}>{t('day.' + day)}</CardTitle>
-                  <span className="text-xs text-slate-400">{t('admin.schedules.lectureCount', { count: (groupedByDay[day] || []).length })}</span>
+                  <span className="text-xs text-muted">{t('admin.schedules.lectureCount', { count: (groupedByDay[day] || []).length })}</span>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {(groupedByDay[day] || []).length === 0 && (
-                      <p className="text-sm text-slate-400 text-center py-4">{t('admin.schedules.noLectures')}</p>
+                      <p className="text-sm text-muted text-center py-4">{t('admin.schedules.noLectures')}</p>
                     )}
                     {(groupedByDay[day] || []).map(sch => (
                       <div key={sch.id} className={cn('p-3 rounded-lg text-sm hover:shadow-sm transition-all border', style.bg, style.border)}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="font-medium text-slate-900">{sch.courseId?.name || sch.courseId?.code || t('admin.schedules.courseUnknown')}</p>
+                            <p className="font-medium text-title">{sch.courseId?.name || sch.courseId?.code || t('admin.schedules.courseUnknown')}</p>
                             <p className={cn('text-xs mt-1', style.text)}>{sch.startTime} - {sch.endTime}</p>
-                            <p className="text-slate-500 text-xs">{sch.hallId?.name || t('admin.schedules.hallUnknown')}</p>
+                            <p className="text-label text-xs">{sch.hallId?.name || t('admin.schedules.hallUnknown')}</p>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
                             <Badge variant={sch.weekPattern === 'weekly' ? 'default' : sch.weekPattern === 'odd' ? 'warning' : 'info'}>
                               {t('weekPattern.' + sch.weekPattern)}
                             </Badge>
-                            <button onClick={() => handleDelete(sch.id)} className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-1 rounded-lg hover:bg-red-100" aria-label={t('admin.schedules.deleteLabel')}>
+                            <button onClick={() => handleDelete(sch.id)} className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-1 rounded-lg hover:bg-red-500/20" aria-label={t('admin.schedules.deleteLabel')}>
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -154,29 +158,29 @@ export default function AdminSchedules() {
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b bg-slate-50">
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableCourse')}</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableDay')}</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableTime')}</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableHall')}</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tablePattern')}</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableActions')}</th>
+                <tr className="border-b bg-surface">
+                  <th className="text-start px-4 py-3 text-sm font-medium text-body">{t('admin.schedules.tableCourse')}</th>
+                  <th className="text-start px-4 py-3 text-sm font-medium text-body">{t('admin.schedules.tableDay')}</th>
+                  <th className="text-start px-4 py-3 text-sm font-medium text-body">{t('admin.schedules.tableTime')}</th>
+                  <th className="text-start px-4 py-3 text-sm font-medium text-body">{t('admin.schedules.tableHall')}</th>
+                  <th className="text-start px-4 py-3 text-sm font-medium text-body">{t('admin.schedules.tablePattern')}</th>
+                  <th className="text-end px-4 py-3 text-sm font-medium text-body">{t('admin.schedules.tableActions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {schedules.map(sch => (
-                  <tr key={sch.id} className="border-b last:border-0 hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-slate-900">{sch.courseId?.name || sch.courseId?.code || t('admin.schedules.courseUnknown')}</td>
-                    <td className="px-4 py-3 text-sm text-slate-500">{t('day.' + sch.day)}</td>
-                    <td className="px-4 py-3 text-sm text-slate-500">{sch.startTime} - {sch.endTime}</td>
-                    <td className="px-4 py-3 text-sm text-slate-500">{sch.hallId?.name || t('admin.schedules.hallUnknown')}</td>
+                  <tr key={sch.id} className="border-b last:border-0 hover:bg-hover transition-colors">
+                    <td className="px-4 py-3 text-sm font-medium text-title">{sch.courseId?.name || sch.courseId?.code || t('admin.schedules.courseUnknown')}</td>
+                    <td className="px-4 py-3 text-sm text-label">{t('day.' + sch.day)}</td>
+                    <td className="px-4 py-3 text-sm text-label">{sch.startTime} - {sch.endTime}</td>
+                    <td className="px-4 py-3 text-sm text-label">{sch.hallId?.name || t('admin.schedules.hallUnknown')}</td>
                     <td className="px-4 py-3">
                       <Badge variant={sch.weekPattern === 'weekly' ? 'default' : sch.weekPattern === 'odd' ? 'warning' : 'info'}>
                         {t('weekPattern.' + sch.weekPattern)}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-left">
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(sch.id)} className="text-red-400 hover:text-red-600 hover:bg-red-50">
+                    <td className="px-4 py-3 text-end">
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(sch.id)} className="text-red-400 hover:text-red-600 hover:bg-red-500/20">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
@@ -192,21 +196,21 @@ export default function AdminSchedules() {
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="sch-course" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formCourse')}</label>
+              <label htmlFor="sch-course" className="block text-sm font-medium text-body mb-1">{t('admin.schedules.formCourse')}</label>
               <Select id="sch-course" options={courses.map(c => ({ value: c.id, label: `${c.code} - ${c.name}` }))} value={form.courseId} onChange={e => setForm({ ...form, courseId: e.target.value })} placeholder={t('admin.schedules.formCoursePlaceholder')} />
             </div>
             <div>
-              <label htmlFor="sch-hall" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formHall')}</label>
+              <label htmlFor="sch-hall" className="block text-sm font-medium text-body mb-1">{t('admin.schedules.formHall')}</label>
               <Select id="sch-hall" options={halls.filter(h => h.status === 'active').map(h => ({ value: h.id, label: `${h.name} (${h.capacity})` }))} value={form.hallId} onChange={e => setForm({ ...form, hallId: e.target.value })} placeholder={t('admin.schedules.formHallPlaceholder')} />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="sch-day" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formDay')}</label>
+              <label htmlFor="sch-day" className="block text-sm font-medium text-body mb-1">{t('admin.schedules.formDay')}</label>
               <Select id="sch-day" options={DAYS.map(d => ({ value: d, label: t('day.' + d) }))} value={form.day} onChange={e => setForm({ ...form, day: e.target.value })} />
             </div>
             <div>
-              <label htmlFor="sch-pattern" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formPattern')}</label>
+              <label htmlFor="sch-pattern" className="block text-sm font-medium text-body mb-1">{t('admin.schedules.formPattern')}</label>
               <Select id="sch-pattern" options={[
                 { value: 'weekly', label: t('weekPattern.weekly') },
                 { value: 'odd', label: t('weekPattern.odd') },
@@ -216,16 +220,16 @@ export default function AdminSchedules() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="sch-start" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formStart')}</label>
+              <label htmlFor="sch-start" className="block text-sm font-medium text-body mb-1">{t('admin.schedules.formStart')}</label>
               <Input id="sch-start" type="time" value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })} />
             </div>
             <div>
-              <label htmlFor="sch-end" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formEnd')}</label>
+              <label htmlFor="sch-end" className="block text-sm font-medium text-body mb-1">{t('admin.schedules.formEnd')}</label>
               <Input id="sch-end" type="time" value={form.endTime} onChange={e => setForm({ ...form, endTime: e.target.value })} />
             </div>
           </div>
           <div>
-            <label htmlFor="sch-semester" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formSemester')}</label>
+            <label htmlFor="sch-semester" className="block text-sm font-medium text-body mb-1">{t('admin.schedules.formSemester')}</label>
             <Input id="sch-semester" value={form.semester} onChange={e => setForm({ ...form, semester: e.target.value })} />
           </div>
           <div className="flex gap-3 pt-2">

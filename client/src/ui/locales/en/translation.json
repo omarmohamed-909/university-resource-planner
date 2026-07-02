@@ -225,7 +225,9 @@
     "attendance": "Attendance",
     "swaps": "Swap Requests",
     "autoSchedule": "Schedule Generator",
-    "mySchedule": "My Schedule"
+    "mySchedule": "My Schedule",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
   },
 
   "layout": {

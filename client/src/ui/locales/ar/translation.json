@@ -225,7 +225,9 @@
     "attendance": "الحضور",
     "swaps": "طلبات التبديل",
     "autoSchedule": "توليد الجداول",
-    "mySchedule": "جدولي"
+    "mySchedule": "جدولي",
+    "collapse": "طي القائمة",
+    "expand": "فتح القائمة"
   },
 
   "layout": {

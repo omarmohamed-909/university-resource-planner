@@ -23,7 +23,7 @@ function StatusSelect({ value, onChange }) {
     <select
       value={value}
       onChange={onChange}
-      className="w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
+      className="w-full appearance-none rounded-md border border-border bg-surface px-2.5 py-1.5 text-[11px] font-medium text-body outline-none transition-colors hover:border-active focus:border-active focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
       aria-label={t('admin.halls.toast.statusError')}
     >
       <option value="active">{t('status.active')}</option>
@@ -43,14 +43,14 @@ function AvailabilityBadge({ status, label }) {
         'flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold',
         status === 'available' && 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
         status === 'occupied' && 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
-        status === 'unknown' && 'bg-slate-100 text-slate-400 ring-1 ring-slate-200'
+        status === 'unknown' && 'bg-hover text-muted ring-1 ring-border'
       )}
     >
       <span className={cn(
         'relative flex h-2 w-2',
         status === 'available' && 'text-emerald-500',
         status === 'occupied' && 'text-amber-500',
-        status === 'unknown' && 'text-slate-300'
+        status === 'unknown' && 'text-muted'
       )}>
         <span className={cn(
           'absolute inline-flex h-full w-full rounded-full opacity-50',
@@ -61,7 +61,7 @@ function AvailabilityBadge({ status, label }) {
           'relative inline-flex rounded-full h-2 w-2',
           status === 'available' && 'bg-emerald-500',
           status === 'occupied' && 'bg-amber-500',
-          status === 'unknown' && 'bg-slate-300'
+          status === 'unknown' && 'bg-border'
         )} />
       </span>
       {label}
@@ -160,13 +160,29 @@ export default function AdminHalls() {
     }
   }
 
-  if (loading) return <Skeleton type="card" count={6} />
+  if (loading) return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton variant="title" className="w-48" />
+          <Skeleton variant="text" className="w-72" />
+        </div>
+        <Skeleton variant="button" />
+      </div>
+      <Skeleton type="card" count={6} />
+    </div>
+  )
   if (fetchError) return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <XCircle className="w-12 h-12 text-red-400 mb-4" />
-      <h2 className="text-lg font-semibold text-slate-900 mb-1">{t('common.error.loadData')}</h2>
-      <p className="text-sm text-slate-500 mb-4">{t('common.error.connectionError')}</p>
-      <Button onClick={() => { setFetchError(false); setLoading(true); fetchHalls().catch(() => setFetchError(true)).finally(() => setLoading(false)) }}><RefreshCw className="w-4 h-4 ms-2" />{t('common.retry')}</Button>
+    <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
+      <div className="relative mb-4">
+        <div className="absolute inset-0 rounded-2xl bg-rose-500/5 blur-xl" />
+        <div className="relative w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/15 text-rose-500 flex items-center justify-center ring-1 ring-rose-100 dark:ring-rose-500/20">
+          <XCircle className="w-6 h-6" />
+        </div>
+      </div>
+      <h2 className="text-lg font-semibold text-title mb-1">{t('common.error.loadData')}</h2>
+      <p className="text-sm text-label mb-4">{t('common.error.connectionError')}</p>
+      <Button onClick={() => { setFetchError(false); setLoading(true); fetchHalls().catch(() => setFetchError(true)).finally(() => setLoading(false)) }}><RefreshCw className="w-4 h-4 me-2" />{t('common.retry')}</Button>
     </div>
   )
 
@@ -174,9 +190,13 @@ export default function AdminHalls() {
     <div className="space-y-6 animate-fade-in">
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.halls.title')}</h1>
-          <CardDescription>{t('admin.halls.description')}</CardDescription>
+        <div className="min-w-0">
+          <span className="eyebrow mb-2">
+            <span className="w-1 h-1 rounded-full bg-blue-500" />
+            {t('sidebar.halls')}
+          </span>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.halls.title')}</h1>
+          <CardDescription className="mt-1.5 text-pretty">{t('admin.halls.description')}</CardDescription>
         </div>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.halls.addButton')}</Button>
@@ -185,8 +205,8 @@ export default function AdminHalls() {
 
       {/* ── Search & Filters ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        <div className="relative flex-1 max-w-sm group">
+          <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none transition-colors group-focus-within:text-primary-500" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -195,7 +215,7 @@ export default function AdminHalls() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-400" />
+          <Filter className="w-4 h-4 text-muted" />
           <Select options={typeFilterOptions} value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="w-32" />
           <Select options={statusFilterOptions} value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-36" />
         </div>
@@ -203,7 +223,7 @@ export default function AdminHalls() {
           <motion.span
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-xs text-slate-400 whitespace-nowrap"
+            className="text-xs text-muted whitespace-nowrap"
           >
             {filteredHalls.length} {t('common.from')} {halls.length}
           </motion.span>
@@ -235,29 +255,29 @@ export default function AdminHalls() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 >
-                  <Card hover className="relative flex flex-col overflow-hidden">
+                  <Card hover className="relative flex flex-col overflow-hidden group">
 
                     <CardContent className="flex flex-1 flex-col p-6">
                       {/* Header row */}
                       <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <motion.div
                             whileHover={{ scale: 1.05 }}
                             className={cn(
-                              'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-sm',
-                              hall.type === 'lecture' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'
+                              'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-sm flex-shrink-0',
+                              hall.type === 'lecture' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400' : 'bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400'
                             )}
                           >
                             <DoorOpen className="w-5 h-5" />
                           </motion.div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="truncate text-base font-bold text-slate-900">{hall.name}</h3>
-                              <Badge variant={hall.status === 'active' ? 'success' : hall.status === 'maintenance' ? 'warning' : 'default'} dot size="lg">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="truncate text-base font-bold text-title">{hall.name}</h3>
+                              <Badge variant={hall.status === 'active' ? 'success' : hall.status === 'maintenance' ? 'warning' : 'default'} dot size="sm">
                                 {hall.status === 'active' ? t('status.active') : hall.status === 'maintenance' ? t('status.maintenance') : t('status.inactive')}
                               </Badge>
                             </div>
-                            <p className="mt-0.5 text-sm text-slate-500">
+                            <p className="mt-0.5 text-sm text-label">
                               {hall.type === 'lecture' ? t('hallType.lecture') : t('hallType.lab')}
                             </p>
                           </div>
@@ -265,18 +285,18 @@ export default function AdminHalls() {
                       </div>
 
                       {/* Stats grid */}
-                      <div className="mt-2 grid grid-cols-3 gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center">
+                      <div className="mt-2 grid grid-cols-3 gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-center">
                         <div>
-                          <p className="text-[11px] font-medium text-slate-400">{t('admin.halls.building')}</p>
-                          <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">{hall.building || t('admin.halls.buildingUnknown')}</p>
+                          <p className="text-[11px] font-medium text-muted">{t('admin.halls.building')}</p>
+                          <p className="mt-0.5 truncate text-sm font-semibold text-title">{hall.building || t('admin.halls.buildingUnknown')}</p>
                         </div>
-                        <div className="border-x border-slate-200">
-                          <p className="text-[11px] font-medium text-slate-400">{t('admin.halls.floor')}</p>
-                          <p className="mt-0.5 text-sm font-semibold text-slate-800">{hall.floor}</p>
+                        <div className="border-x border-border">
+                          <p className="text-[11px] font-medium text-muted">{t('admin.halls.floor')}</p>
+                          <p className="mt-0.5 text-sm font-semibold text-title">{hall.floor}</p>
                         </div>
                         <div>
-                          <p className="text-[11px] font-medium text-slate-400">{t('admin.halls.capacity')}</p>
-                          <p className="mt-0.5 text-sm font-semibold text-slate-800">{hall.capacity}</p>
+                          <p className="text-[11px] font-medium text-muted">{t('admin.halls.capacity')}</p>
+                          <p className="mt-0.5 text-sm font-semibold text-title">{hall.capacity}</p>
                         </div>
                       </div>
 
@@ -287,12 +307,12 @@ export default function AdminHalls() {
                       )}
 
                       {/* Capacity bar */}
-                      <div className="mt-2 rounded-lg border border-slate-100 bg-white px-3 py-2">
+                      <div className="mt-2 rounded-lg border border-border bg-surface px-3 py-2">
                         <div className="mb-1.5 flex items-center justify-between text-sm">
-                          <span className="font-medium text-slate-500">{t('capacity.max')}</span>
-                          <span className="font-semibold text-slate-800">{t('capacity.students', { count: hall.capacity })}</span>
+                          <span className="font-medium text-label">{t('capacity.max')}</span>
+                          <span className="font-semibold text-title">{t('capacity.students', { count: hall.capacity })}</span>
                         </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-hover">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min((hall.capacity / 200) * 100, 100)}%` }}
@@ -305,7 +325,7 @@ export default function AdminHalls() {
                         </div>
                         <p className={cn(
                           'mt-1 text-[11px] font-medium',
-                          hall.capacity > 100 ? 'text-amber-600' : 'text-slate-400'
+                          hall.capacity > 100 ? 'text-amber-600' : 'text-muted'
                         )}>
                           {hall.capacity > 100 ? t('capacity.large') : t('capacity.medium')}
                         </p>
@@ -313,7 +333,7 @@ export default function AdminHalls() {
                     </CardContent>
 
                     {/* Quick Actions */}
-                    <div className="mt-auto flex items-center gap-2 border-t border-slate-100 bg-slate-50/80 px-6 py-2">
+                    <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface/80 px-6 py-2">
                       <div className="relative flex-1">
                         <StatusSelect
                           value={hall.status}
@@ -322,7 +342,7 @@ export default function AdminHalls() {
                       </div>
                       <button
                         onClick={() => openEdit(hall)}
-                        className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold text-slate-600 transition-colors hover:bg-slate-100 cursor-pointer"
+                        className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold text-body transition-colors hover:bg-hover cursor-pointer"
                         aria-label={t('admin.halls.editButton')}
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -330,7 +350,7 @@ export default function AdminHalls() {
                       </button>
                       <button
                         onClick={() => handleDelete(hall.id)}
-                        className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
+                        className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold text-red-600 transition-colors hover:bg-red-100/50 cursor-pointer"
                         aria-label={t('admin.halls.deleteButton')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -359,7 +379,7 @@ export default function AdminHalls() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-950/45 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
               onClick={() => setModalOpen(false)}
             />
             <motion.div
@@ -371,19 +391,19 @@ export default function AdminHalls() {
               aria-modal="true"
               aria-labelledby="hall-modal-title"
               className={cn(
-                'relative bg-white rounded-lg shadow-[0_25px_50px_rgba(15,23,42,0.25)] w-full overflow-hidden border border-white/70',
+                'relative bg-surface rounded-lg shadow-[0_25px_50px_rgba(15,23,42,0.25)] w-full overflow-hidden border border-white/70',
                 'max-w-lg'
               )}
             >
               {/* Modal header */}
-              <div className="flex items-start justify-between p-5 pb-4 border-b border-slate-100 bg-slate-50/70">
+              <div className="flex items-start justify-between p-5 pb-4 border-b border-border bg-surface">
                 <div>
-                  <h2 id="hall-modal-title" className="text-lg font-bold text-slate-950">{editItem ? t('admin.halls.modalEdit') : t('admin.halls.modalAdd')}</h2>
-                  {editItem && <p className="text-sm text-slate-500 mt-1">{editItem.name}</p>}
+                  <h2 id="hall-modal-title" className="text-lg font-bold text-title">{editItem ? t('admin.halls.modalEdit') : t('admin.halls.modalAdd')}</h2>
+                  {editItem && <p className="text-sm text-label mt-1">{editItem.name}</p>}
                 </div>
                 <button
                   onClick={() => setModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 hover:bg-white rounded-lg p-1.5 transition-colors cursor-pointer"
+                  className="text-muted hover:text-body hover:bg-hover rounded-lg p-1.5 transition-colors cursor-pointer"
                   aria-label={t('common.close')}
                 >
                   <svg aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -395,31 +415,31 @@ export default function AdminHalls() {
               {/* Modal form */}
               <form onSubmit={handleSubmit} className="p-5 space-y-4">
                 <div>
-                  <label htmlFor="hall-name" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formName')}</label>
+                  <label htmlFor="hall-name" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formName')}</label>
                   <Input id="hall-name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="hall-type" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formType')}</label>
+                    <label htmlFor="hall-type" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formType')}</label>
                     <Select id="hall-type" options={[{ value: 'lecture', label: t('hallType.lecture') }, { value: 'lab', label: t('hallType.lab') }]} value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} />
                   </div>
                   <div>
-                    <label htmlFor="hall-capacity" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formCapacity')}</label>
+                    <label htmlFor="hall-capacity" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formCapacity')}</label>
                     <Input id="hall-capacity" type="number" value={form.capacity} onChange={e => setForm({ ...form, capacity: Number(e.target.value) })} required />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="hall-building" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formBuilding')}</label>
+                    <label htmlFor="hall-building" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formBuilding')}</label>
                     <Input id="hall-building" value={form.building} onChange={e => setForm({ ...form, building: e.target.value })} />
                   </div>
                   <div>
-                    <label htmlFor="hall-floor" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formFloor')}</label>
+                    <label htmlFor="hall-floor" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formFloor')}</label>
                     <Input id="hall-floor" type="number" value={form.floor} onChange={e => setForm({ ...form, floor: Number(e.target.value) })} />
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="hall-status" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formStatus')}</label>
+                  <label htmlFor="hall-status" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formStatus')}</label>
                   <Select id="hall-status" options={[
                     { value: 'active', label: t('status.active') },
                     { value: 'maintenance', label: t('status.maintenance') },

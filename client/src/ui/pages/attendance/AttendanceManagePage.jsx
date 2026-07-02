@@ -100,7 +100,7 @@ export default function AttendanceManagePage() {
   return (
     <div className="space-y-6 animate-fade-in print-container">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{t('attendance.title')}</h1>
+        <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('attendance.title')}</h1>
         <CardDescription>{t('attendance.description')}</CardDescription>
       </div>
 
@@ -112,7 +112,7 @@ export default function AttendanceManagePage() {
             <CardContent className="p-5">
               <div className="grid grid-cols-1 lg:grid-cols-[1fr_180px_auto] gap-4 items-end">
                 <div>
-                  <label htmlFor="att-schedule" className="block text-sm font-medium text-slate-700 mb-1">{t('attendance.formLecture')}</label>
+                  <label htmlFor="att-schedule" className="block text-sm font-medium text-body mb-1">{t('attendance.formLecture')}</label>
                   <Select
                     id="att-schedule"
                     value={selectedScheduleId}
@@ -127,7 +127,7 @@ export default function AttendanceManagePage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="att-date" className="block text-sm font-medium text-slate-700 mb-1">{t('attendance.formDate')}</label>
+                  <label htmlFor="att-date" className="block text-sm font-medium text-body mb-1">{t('attendance.formDate')}</label>
                   <Input id="att-date" type="date" value={date} onChange={event => setDate(event.target.value)} />
                 </div>
                 <Button onClick={generateQr} loading={qrLoading}>
@@ -151,7 +151,7 @@ export default function AttendanceManagePage() {
               <CardContent>
                 {qr ? (
                   <div className="space-y-4">
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                    <div className="rounded-lg border border-border bg-surface p-4">
                       <img src={qr.qrCode} alt="QR Code" className="mx-auto w-64 max-w-full" />
                     </div>
                     {qr.expiresAt && (
@@ -161,7 +161,7 @@ export default function AttendanceManagePage() {
                     )}
                   </div>
                 ) : (
-                  <div className="rounded-lg border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400">
+                  <div className="rounded-lg border border-dashed border-active p-6 text-center text-sm text-muted">
                     {t('attendance.qrPlaceholder')}
                   </div>
                 )}
@@ -197,29 +197,29 @@ export default function AttendanceManagePage() {
                   <div className="p-5"><Skeleton type="table" rows={4} /></div>
                 ) : records.length === 0 ? (
                   <div className="p-8 text-center">
-                    <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                    <p className="text-sm text-slate-400">{t('attendance.recordsEmpty')}</p>
+                    <Users className="w-10 h-10 text-muted mx-auto mb-3" />
+                    <p className="text-sm text-muted">{t('attendance.recordsEmpty')}</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b bg-slate-50">
-                          <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('attendance.tableStudent')}</th>
-                          <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('attendance.tableStatus')}</th>
-                          <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('attendance.tableTime')}</th>
+                        <tr className="border-b bg-surface">
+                          <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-body">{t('attendance.tableStudent')}</th>
+                          <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-body">{t('attendance.tableStatus')}</th>
+                          <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-body">{t('attendance.tableTime')}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {records.map(record => (
-                          <tr key={record.id} className="border-b last:border-0 hover:bg-slate-50">
-                            <td className="px-4 py-3 text-sm font-medium text-slate-900">{getStudentName(record)}</td>
+                          <tr key={record.id} className="border-b last:border-0 hover:bg-hover">
+                            <td className="px-4 py-3 text-sm font-medium text-title">{getStudentName(record)}</td>
                             <td className="px-4 py-3">
                               <Badge variant={record.status === 'present' ? 'success' : 'warning'}>
                                 {record.status === 'present' ? t('status.present') : t('status.absent')}
                               </Badge>
                             </td>
-                            <td className="px-4 py-3 text-sm text-slate-500">
+                            <td className="px-4 py-3 text-sm text-label">
                               {record.createdAt ? formatTime(record.createdAt) : '-'}
                             </td>
                           </tr>

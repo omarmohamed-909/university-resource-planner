@@ -28,7 +28,7 @@ export default function Pagination({ page, pages, total, onPageChange }) {
 
   return (
     <div className="flex items-center justify-between mt-6">
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-label">
         {t('pagination.pageInfo', { page, pages, total })}
       </p>
       <div className="flex items-center gap-1">
@@ -38,8 +38,8 @@ export default function Pagination({ page, pages, total, onPageChange }) {
           className={cn(
             'p-2 rounded-lg transition-colors duration-200',
             page <= 1
-              ? 'text-slate-300 cursor-not-allowed'
-              : 'text-slate-600 hover:bg-slate-100 cursor-pointer'
+              ? 'text-muted cursor-not-allowed'
+              : 'text-body hover:bg-hover cursor-pointer'
           )}
           aria-label={t('pagination.previous')}
         >
@@ -48,7 +48,7 @@ export default function Pagination({ page, pages, total, onPageChange }) {
 
         {getRange().map((item, i) =>
           item === '...' ? (
-            <span key={`ellipsis-${i}`} className="px-2 text-slate-400 text-sm">...</span>
+            <span key={`ellipsis-${i}`} className="px-2 text-muted text-sm">...</span>
           ) : (
             <button
               key={item}
@@ -56,8 +56,8 @@ export default function Pagination({ page, pages, total, onPageChange }) {
               className={cn(
                 'min-w-[36px] h-9 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer',
                 item === page
-                  ? 'bg-slate-950 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-primary-btn text-primary-btn-text shadow-sm'
+                  : 'text-body hover:bg-hover'
               )}
             >
               {item}
@@ -71,8 +71,8 @@ export default function Pagination({ page, pages, total, onPageChange }) {
           className={cn(
             'p-2 rounded-lg transition-colors duration-200',
             page >= pages
-              ? 'text-slate-300 cursor-not-allowed'
-              : 'text-slate-600 hover:bg-slate-100 cursor-pointer'
+              ? 'text-muted cursor-not-allowed'
+              : 'text-body hover:bg-hover cursor-pointer'
           )}
           aria-label={t('pagination.next')}
         >

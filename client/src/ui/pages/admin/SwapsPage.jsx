@@ -91,9 +91,13 @@ export default function AdminSwaps() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.swaps.title')}</h1>
-          <CardDescription>{t('admin.swaps.description')}</CardDescription>
+        <div className="min-w-0">
+          <span className="eyebrow mb-2">
+            <span className="w-1 h-1 rounded-full bg-blue-500" />
+            {t('sidebar.swaps', { defaultValue: 'swaps' })}
+          </span>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.swaps.title')}</h1>
+          <CardDescription className="mt-1.5 text-pretty">{t('admin.swaps.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant={pendingCount > 0 ? 'warning' : 'success'} size="lg">{t('admin.swaps.pending', { count: pendingCount })}</Badge>
@@ -111,8 +115,8 @@ export default function AdminSwaps() {
                 <XCircle className="w-6 h-6 text-red-500" />
               </div>
               <div>
-                <p className="font-semibold text-slate-900">{t('common.error.loadData')}</p>
-                <p className="text-sm text-slate-500 mt-1">{t('common.error.tryAgain')}</p>
+                <p className="font-semibold text-title">{t('common.error.loadData')}</p>
+                <p className="text-sm text-label mt-1">{t('common.error.tryAgain')}</p>
               </div>
               <Button variant="outline" onClick={fetchSwaps}><RefreshCw className="w-4 h-4 me-2" />{t('common.retry')}</Button>
             </div>
@@ -132,20 +136,20 @@ export default function AdminSwaps() {
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-semibold text-slate-900">{getScheduleTitle(swap.originalScheduleId, t)}</h3>
+                        <h3 className="font-semibold text-title">{getScheduleTitle(swap.originalScheduleId, t)}</h3>
                         <Badge variant={cfg.variant} dot>{t(`status.${swap.status}`)}</Badge>
                       </div>
                       <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div className="rounded-lg bg-slate-50 p-3">
-                          <p className="text-xs text-slate-400 mb-1">{t('admin.swaps.currentSchedule')}</p>
-                          <p className="font-medium text-slate-800">{getOriginalText(swap.originalScheduleId, t)}</p>
+                        <div className="rounded-lg bg-surface p-3">
+                          <p className="text-xs text-muted mb-1">{t('admin.swaps.currentSchedule')}</p>
+                          <p className="font-medium text-title">{getOriginalText(swap.originalScheduleId, t)}</p>
                         </div>
                         <div className="rounded-lg bg-blue-50 p-3">
                           <p className="text-xs text-blue-400 mb-1">{t('admin.swaps.proposedSchedule')}</p>
                           <p className="font-medium text-blue-900">{getProposalText(swap, t)}</p>
                         </div>
                       </div>
-                      <div className="mt-3 text-sm text-slate-500">
+                      <div className="mt-3 text-sm text-label">
                         {t('admin.swaps.requester', { name: requester })}
                         {swap.reason && t('admin.swaps.reason', { reason: swap.reason })}
                       </div>

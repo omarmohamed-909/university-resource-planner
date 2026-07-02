@@ -31,7 +31,7 @@ export function useConfirm() {
           <AlertTriangle className="w-5 h-5 text-danger-500" />
         </div>
         <div>
-          <p className="text-slate-600">{state.message}</p>
+          <p className="text-body">{state.message}</p>
         </div>
       </div>
       <div className="flex gap-3 mt-6">

@@ -71,7 +71,7 @@ export default function DoctorSwap() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('doctor.swap.title')}</h1>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('doctor.swap.title')}</h1>
           <CardDescription>{t('doctor.swap.description')}</CardDescription>
         </div>
         <Button onClick={() => setModalOpen(true)}><Plus className="w-4 h-4 ms-2" />{t('doctor.swap.requestButton')}</Button>
@@ -89,13 +89,13 @@ export default function DoctorSwap() {
                   <div className="flex min-w-0 items-start gap-4">
                     <div className="p-2 rounded-lg bg-blue-100 shrink-0"><SwitchCamera className="w-5 h-5 text-blue-600" /></div>
                     <div className="min-w-0">
-                      <p className="font-medium text-slate-900">{t('doctor.swap.requestCard')}</p>
-                      <p className="text-sm text-slate-500">
+                      <p className="font-medium text-title">{t('doctor.swap.requestCard')}</p>
+                      <p className="text-sm text-label">
                         {swap.originalScheduleId?.courseId?.name || t('doctor.swap.courseUnknown')}
                         {swap.proposedDay && t('doctor.swap.to', { day: dayLabels[swap.proposedDay] || swap.proposedDay })}
                         {swap.proposedHallId && t('doctor.swap.toHall', { hall: swap.proposedHallId?.name || t('doctor.swap.hallNew') })}
                       </p>
-                      {swap.reason && <p className="text-xs text-slate-400 mt-1">{t('doctor.swap.reason', { reason: swap.reason })}</p>}
+                      {swap.reason && <p className="text-xs text-muted mt-1">{t('doctor.swap.reason', { reason: swap.reason })}</p>}
                     </div>
                   </div>
                   <Badge variant={cfg.variant} dot>{cfg.label}</Badge>
@@ -109,7 +109,7 @@ export default function DoctorSwap() {
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={t('doctor.swap.modalTitle')} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">{t('doctor.swap.formLecture')}</label>
+            <label className="block text-sm font-medium text-body mb-1">{t('doctor.swap.formLecture')}</label>
             <Select options={schedules.map(s => ({
               value: s.id,
               label: `${s.courseId?.name || s.courseId?.code} - ${dayLabels[s.day]} ${s.startTime}-${s.endTime}`
@@ -117,27 +117,27 @@ export default function DoctorSwap() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t('doctor.swap.formHall')}</label>
+              <label className="block text-sm font-medium text-body mb-1">{t('doctor.swap.formHall')}</label>
               <Select options={halls.filter(h => h.status === 'active').map(h => ({ value: h.id, label: h.name }))} value={form.proposedHallId} onChange={e => setForm({ ...form, proposedHallId: e.target.value })} placeholder={t('doctor.swap.formHallPlaceholder')} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t('doctor.swap.formDay')}</label>
+              <label className="block text-sm font-medium text-body mb-1">{t('doctor.swap.formDay')}</label>
               <Select options={Object.entries(dayLabels).map(([v, l]) => ({ value: v, label: l }))} value={form.proposedDay} onChange={e => setForm({ ...form, proposedDay: e.target.value })} placeholder={t('doctor.swap.formDayPlaceholder')} />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t('doctor.swap.formStart')}</label>
+              <label className="block text-sm font-medium text-body mb-1">{t('doctor.swap.formStart')}</label>
               <Input type="time" value={form.proposedStartTime} onChange={e => setForm({ ...form, proposedStartTime: e.target.value })} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t('doctor.swap.formEnd')}</label>
+              <label className="block text-sm font-medium text-body mb-1">{t('doctor.swap.formEnd')}</label>
               <Input type="time" value={form.proposedEndTime} onChange={e => setForm({ ...form, proposedEndTime: e.target.value })} />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">{t('doctor.swap.formReason')}</label>
-            <textarea className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:ring-4 focus:ring-slate-900/10 focus:border-slate-500 outline-none transition-all" rows={3} value={form.reason} onChange={e => setForm({ ...form, reason: e.target.value })} placeholder={t('doctor.swap.formReasonPlaceholder')} />
+            <label className="block text-sm font-medium text-body mb-1">{t('doctor.swap.formReason')}</label>
+            <textarea className="w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-title focus:ring-4 focus:ring-slate-900/10 focus:border-active outline-none transition-all" rows={3} value={form.reason} onChange={e => setForm({ ...form, reason: e.target.value })} placeholder={t('doctor.swap.formReasonPlaceholder')} />
           </div>
           <div className="flex gap-3 pt-2">
             <Button type="submit">{t('doctor.swap.submitButton')}</Button>

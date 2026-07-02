@@ -12,12 +12,12 @@ import { cn } from '../../lib/utils'
 
 const DAYS = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
 const DAY_STYLES = {
-  saturday: { title: 'text-blue-700', bg: 'bg-blue-50', course: 'text-blue-800', time: 'text-blue-600', hall: 'text-blue-500' },
-  sunday: { title: 'text-emerald-700', bg: 'bg-emerald-50', course: 'text-emerald-800', time: 'text-emerald-600', hall: 'text-emerald-500' },
-  monday: { title: 'text-indigo-700', bg: 'bg-indigo-50', course: 'text-indigo-800', time: 'text-indigo-600', hall: 'text-indigo-500' },
-  tuesday: { title: 'text-violet-700', bg: 'bg-violet-50', course: 'text-violet-800', time: 'text-violet-600', hall: 'text-violet-500' },
-  wednesday: { title: 'text-amber-700', bg: 'bg-amber-50', course: 'text-amber-800', time: 'text-amber-600', hall: 'text-amber-500' },
-  thursday: { title: 'text-rose-700', bg: 'bg-rose-50', course: 'text-rose-800', time: 'text-rose-600', hall: 'text-rose-500' },
+  saturday: { title: 'text-blue-600', bg: 'bg-blue-500/10', course: 'text-blue-600', time: 'text-blue-500', hall: 'text-blue-500' },
+  sunday: { title: 'text-emerald-600', bg: 'bg-emerald-500/10', course: 'text-emerald-600', time: 'text-emerald-500', hall: 'text-emerald-500' },
+  monday: { title: 'text-indigo-600', bg: 'bg-indigo-500/10', course: 'text-indigo-600', time: 'text-indigo-500', hall: 'text-indigo-500' },
+  tuesday: { title: 'text-violet-600', bg: 'bg-violet-500/10', course: 'text-violet-600', time: 'text-violet-500', hall: 'text-violet-500' },
+  wednesday: { title: 'text-amber-600', bg: 'bg-amber-500/10', course: 'text-amber-600', time: 'text-amber-500', hall: 'text-amber-500' },
+  thursday: { title: 'text-rose-600', bg: 'bg-rose-500/10', course: 'text-rose-600', time: 'text-rose-500', hall: 'text-rose-500' },
 }
 
 export default function StudentSchedule() {
@@ -50,7 +50,7 @@ export default function StudentSchedule() {
     <div className="space-y-6 animate-fade-in print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('student.schedule.title')}</h1>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('student.schedule.title')}</h1>
           <CardDescription>{t('student.schedule.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">
@@ -77,11 +77,11 @@ export default function StudentSchedule() {
               <Card key={day}>
                 <CardHeader>
                   <CardTitle className={styles.title}>{dayLabels[day]}</CardTitle>
-                  <span className="text-xs text-slate-400">{t('student.schedule.lectureCount', { count: daySchedules.length })}</span>
+                  <span className="text-xs text-muted">{t('student.schedule.lectureCount', { count: daySchedules.length })}</span>
                 </CardHeader>
                 <CardContent>
                   {daySchedules.length === 0 ? (
-                    <p className="text-sm text-slate-400 text-center py-4">{t('student.schedule.noLectures')}</p>
+                    <p className="text-sm text-muted text-center py-4">{t('student.schedule.noLectures')}</p>
                   ) : (
                     <div className="space-y-2">
                       {daySchedules.map(sch => (

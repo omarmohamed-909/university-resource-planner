@@ -104,15 +104,19 @@ export default function AdminUsers() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.users.title')}</h1>
-          <CardDescription>{t('admin.users.description')}</CardDescription>
+        <div className="min-w-0">
+          <span className="eyebrow mb-2">
+            <span className="w-1 h-1 rounded-full bg-blue-500" />
+            {t('sidebar.users', { defaultValue: 'users' })}
+          </span>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.users.title')}</h1>
+          <CardDescription className="mt-1.5 text-pretty">{t('admin.users.description')}</CardDescription>
         </div>
         <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.users.addButton')}</Button>
       </div>
 
       <div className="relative max-w-sm">
-        <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
         <Input value={search} onChange={event => setSearch(event.target.value)} placeholder={t('admin.users.searchPlaceholder')} className="pe-10" />
       </div>
 
@@ -120,12 +124,12 @@ export default function AdminUsers() {
         <Card>
           <CardContent>
             <div className="flex flex-col items-center gap-4 text-center py-6">
-              <div className="p-3 rounded-full bg-red-50">
+              <div className="p-3 rounded-full bg-red-500/10">
                 <XCircle className="w-6 h-6 text-red-500" />
               </div>
               <div>
-                <p className="font-semibold text-slate-900">{t('common.error.loadUsers')}</p>
-                <p className="text-sm text-slate-500 mt-1">{t('common.error.tryAgain')}</p>
+                <p className="font-semibold text-title">{t('common.error.loadUsers')}</p>
+                <p className="text-sm text-label mt-1">{t('common.error.tryAgain')}</p>
               </div>
               <Button variant="outline" onClick={fetchUsers}><RefreshCw className="w-4 h-4 me-2" />{t('common.retry')}</Button>
             </div>
@@ -144,34 +148,34 @@ export default function AdminUsers() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b bg-slate-50">
-                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('admin.users.tableName')}</th>
-                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('admin.users.tableEmail')}</th>
-                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('admin.users.tableRole')}</th>
-                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('admin.users.tableDepartment')}</th>
-                    <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-slate-600">{t('admin.users.tableActions')}</th>
+                  <tr className="border-b bg-surface">
+                    <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-body">{t('admin.users.tableName')}</th>
+                    <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-body">{t('admin.users.tableEmail')}</th>
+                    <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-body">{t('admin.users.tableRole')}</th>
+                    <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-body">{t('admin.users.tableDepartment')}</th>
+                    <th scope="col" className="px-4 py-3 text-end text-sm font-medium text-body">{t('admin.users.tableActions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map(user => {
                     const cfg = roleConfig[user.role] || { label: user.role, variant: 'default' }
                     return (
-                      <tr key={user.id} className="border-b last:border-0 hover:bg-slate-50 transition-colors">
+                      <tr key={user.id} className="border-b last:border-0 hover:bg-hover transition-colors">
                         <td className="px-4 py-3 max-w-[200px]">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-bold shrink-0">
+                            <div className="w-9 h-9 rounded-lg bg-hover text-body flex items-center justify-center text-sm font-bold shrink-0">
                               {user.name?.charAt(0)}
                             </div>
-                            <span className="text-sm font-medium text-slate-900 truncate">{user.name}</span>
+                            <span className="text-sm font-medium text-title truncate">{user.name}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-500 truncate max-w-[200px]">{user.email}</td>
+                        <td className="px-4 py-3 text-sm text-label truncate max-w-[200px]">{user.email}</td>
                         <td className="px-4 py-3"><Badge variant={cfg.variant} size="lg">{t(`role.${user.role}`)}</Badge></td>
-                        <td className="px-4 py-3 text-sm text-slate-500">{user.department || '-'}</td>
-                        <td className="px-4 py-3 text-left">
+                        <td className="px-4 py-3 text-sm text-label">{user.department || '-'}</td>
+                        <td className="px-4 py-3 text-end">
                           <div className="flex items-center justify-end gap-1">
                             <Button variant="ghost" size="icon" onClick={() => openEdit(user)} aria-label={t('admin.users.editButton', { name: user.name })}><Pencil className="w-4 h-4" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)} aria-label={t('admin.users.deleteButton', { name: user.name })} className="text-red-400 hover:text-red-600 hover:bg-red-50">
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)} aria-label={t('admin.users.deleteButton', { name: user.name })} className="text-red-400 hover:text-red-600 hover:bg-red-500/20">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -182,7 +186,7 @@ export default function AdminUsers() {
                 </tbody>
               </table>
               {filtered.length === 0 && search && (
-                <div className="py-8 text-center text-sm text-slate-400">{t('admin.users.noSearchResults')}</div>
+                <div className="py-8 text-center text-sm text-muted">{t('admin.users.noSearchResults')}</div>
               )}
             </div>
           </CardContent>
@@ -192,19 +196,19 @@ export default function AdminUsers() {
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editUser ? t('admin.users.modalEdit') : t('admin.users.modalAdd')}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="user-name" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formName')}</label>
+            <label htmlFor="user-name" className="block text-sm font-medium text-body mb-1">{t('admin.users.formName')}</label>
             <Input id="user-name" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder={t('admin.users.formNamePlaceholder')} required />
           </div>
           <div>
-            <label htmlFor="user-email" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formEmail')}</label>
+            <label htmlFor="user-email" className="block text-sm font-medium text-body mb-1">{t('admin.users.formEmail')}</label>
             <Input id="user-email" type="email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} placeholder={t('admin.users.formEmailPlaceholder')} required />
           </div>
           <div>
-            <label htmlFor="user-password" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formPassword')}</label>
+            <label htmlFor="user-password" className="block text-sm font-medium text-body mb-1">{t('admin.users.formPassword')}</label>
             <Input id="user-password" type="password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} placeholder={editUser ? t('admin.users.formPasswordEditPlaceholder') : t('admin.users.formPasswordPlaceholder')} required={!editUser} />
           </div>
           <div>
-            <label htmlFor="user-role" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formRole')}</label>
+            <label htmlFor="user-role" className="block text-sm font-medium text-body mb-1">{t('admin.users.formRole')}</label>
             <Select
               id="user-role"
               options={[{ value: 'admin', label: t('role.admin') }, { value: 'doctor', label: t('role.doctor') }, { value: 'student', label: t('role.student') }]}
@@ -214,7 +218,7 @@ export default function AdminUsers() {
             />
           </div>
           <div>
-            <label htmlFor="user-department" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formDepartment')}</label>
+            <label htmlFor="user-department" className="block text-sm font-medium text-body mb-1">{t('admin.users.formDepartment')}</label>
             <Input id="user-department" value={form.department} onChange={event => setForm({ ...form, department: event.target.value })} placeholder={t('admin.users.formDepartmentPlaceholder')} />
           </div>
           <div className="flex gap-3 pt-2">

@@ -1,43 +1,87 @@
 import { cn } from '../../lib/utils'
 
-const variants = {
-  default: 'bg-slate-100 text-slate-700 ring-slate-200',
-  primary: 'bg-blue-50 text-blue-700 ring-blue-100',
-  success: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
-  warning: 'bg-amber-50 text-amber-700 ring-amber-100',
-  danger: 'bg-red-50 text-red-700 ring-red-100',
-  info: 'bg-sky-50 text-sky-700 ring-sky-100',
-  purple: 'bg-violet-50 text-violet-700 ring-violet-100',
+/* ─────────────────────────────────────────────────────────────
+   Badge Variants  —  "Academic Cockpit" v2
+   ─────────────────────────────────────────────────────────────
+   Each variant has a `soft` (default) and `solid` style.
+   Soft uses tinted backgrounds with matching text colors + 1px ring-inset.
+   Solid uses saturated backgrounds with white text.
+   All variants are theme-aware (light + dark).
+   Added: subtle inner-top highlight on solid variants. */
+const softVariants = {
+  default:  'bg-slate-100 text-slate-700 ring-slate-200/70 dark:bg-slate-800/60 dark:text-slate-300 dark:ring-slate-700/60',
+  primary:  'bg-blue-50 text-blue-700 ring-blue-200/70 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-500/25',
+  success:  'bg-emerald-50 text-emerald-700 ring-emerald-200/70 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/25',
+  warning:  'bg-amber-50 text-amber-700 ring-amber-200/70 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-500/25',
+  danger:   'bg-rose-50 text-rose-700 ring-rose-200/70 dark:bg-rose-500/15 dark:text-rose-300 dark:ring-rose-500/25',
+  info:     'bg-sky-50 text-sky-700 ring-sky-200/70 dark:bg-sky-500/15 dark:text-sky-300 dark:ring-sky-500/25',
+  purple:   'bg-violet-50 text-violet-700 ring-violet-200/70 dark:bg-violet-500/15 dark:text-violet-300 dark:ring-violet-500/25',
+}
+
+const solidVariants = {
+  default:  'bg-slate-700 text-white ring-slate-700/50',
+  primary:  'bg-blue-600 text-white ring-blue-600/50',
+  success:  'bg-emerald-600 text-white ring-emerald-600/50',
+  warning:  'bg-amber-500 text-white ring-amber-500/50',
+  danger:   'bg-rose-600 text-white ring-rose-600/50',
+  info:     'bg-sky-600 text-white ring-sky-600/50',
+  purple:   'bg-violet-600 text-white ring-violet-600/50',
+}
+
+const dotColors = {
+  default:  'bg-slate-500',
+  primary:  'bg-blue-500',
+  success:  'bg-emerald-500',
+  warning:  'bg-amber-500',
+  danger:   'bg-rose-500',
+  info:     'bg-sky-500',
+  purple:   'bg-violet-500',
 }
 
 const sizes = {
-  sm: 'px-2 py-0.5 text-xs',
-  md: 'px-2.5 py-0.5 text-xs',
-  lg: 'px-3 py-1 text-sm',
-  xl: 'px-4 py-1.5 text-sm',
+  xs: 'px-2 py-0.5 text-[11px] gap-1',
+  sm: 'px-2.5 py-0.5 text-xs gap-1.5',
+  md: 'px-3 py-1 text-xs gap-1.5',
+  lg: 'px-3.5 py-1.5 text-sm gap-2',
 }
 
-export default function Badge({ children, variant = 'default', size = 'md', dot, className }) {
+const dotSizes = {
+  xs: 'w-1 h-1',
+  sm: 'w-1.5 h-1.5',
+  md: 'w-1.5 h-1.5',
+  lg: 'w-2 h-2',
+}
+
+export default function Badge({
+  children,
+  variant = 'default',
+  size = 'md',
+  dot = false,
+  solid = false,
+  pulse = false,
+  className,
+}) {
+  const variants = solid ? solidVariants : softVariants
+
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-md font-semibold ring-1 transition-all',
-      variants[variant],
-      sizes[size],
-      className
-    )}>
-      {dot && (
-        <span className={cn(
-          'w-1.5 h-1.5 rounded-full',
-          variant === 'success' && 'bg-success-500',
-          variant === 'warning' && 'bg-warning-500',
-          variant === 'danger' && 'bg-danger-500',
-          variant === 'primary' && 'bg-primary-500',
-          variant === 'info' && 'bg-info-500',
-          variant === 'purple' && 'bg-purple-500',
-          variant === 'default' && 'bg-slate-400'
-        )} />
+    <span
+      className={cn(
+        'inline-flex items-center font-semibold rounded-md ring-1 ring-inset transition-colors whitespace-nowrap',
+        'leading-none',
+        variants[variant],
+        sizes[size],
+        className
       )}
-      <span className="pe-1.5">{children}</span>
+    >
+      {dot && (
+        <span className="relative flex flex-shrink-0">
+          {pulse && (
+            <span className={cn('absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping', dotColors[variant])} />
+          )}
+          <span className={cn('relative inline-flex rounded-full', dotSizes[size], dotColors[variant])} />
+        </span>
+      )}
+      {children}
     </span>
   )
 }

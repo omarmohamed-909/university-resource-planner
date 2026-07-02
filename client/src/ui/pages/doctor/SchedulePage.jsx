@@ -12,12 +12,12 @@ import { cn } from '../../lib/utils'
 
 const DAYS = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
 const DAY_STYLES = {
-  saturday: { box: 'bg-blue-50 border-blue-200', course: 'text-blue-800', hall: 'text-blue-600', time: 'text-blue-500' },
-  sunday: { box: 'bg-emerald-50 border-emerald-200', course: 'text-emerald-800', hall: 'text-emerald-600', time: 'text-emerald-500' },
-  monday: { box: 'bg-indigo-50 border-indigo-200', course: 'text-indigo-800', hall: 'text-indigo-600', time: 'text-indigo-500' },
-  tuesday: { box: 'bg-violet-50 border-violet-200', course: 'text-violet-800', hall: 'text-violet-600', time: 'text-violet-500' },
-  wednesday: { box: 'bg-amber-50 border-amber-200', course: 'text-amber-800', hall: 'text-amber-600', time: 'text-amber-500' },
-  thursday: { box: 'bg-rose-50 border-rose-200', course: 'text-rose-800', hall: 'text-rose-600', time: 'text-rose-500' },
+  saturday: { box: 'bg-blue-500/10 border-blue-500/20', course: 'text-blue-600', hall: 'text-blue-500', time: 'text-blue-500' },
+  sunday: { box: 'bg-emerald-500/10 border-emerald-500/20', course: 'text-emerald-600', hall: 'text-emerald-500', time: 'text-emerald-500' },
+  monday: { box: 'bg-indigo-500/10 border-indigo-500/20', course: 'text-indigo-600', hall: 'text-indigo-500', time: 'text-indigo-500' },
+  tuesday: { box: 'bg-violet-500/10 border-violet-500/20', course: 'text-violet-600', hall: 'text-violet-500', time: 'text-violet-500' },
+  wednesday: { box: 'bg-amber-500/10 border-amber-500/20', course: 'text-amber-600', hall: 'text-amber-500', time: 'text-amber-500' },
+  thursday: { box: 'bg-rose-500/10 border-rose-500/20', course: 'text-rose-600', hall: 'text-rose-500', time: 'text-rose-500' },
 }
 
 export default function DoctorSchedule() {
@@ -52,7 +52,7 @@ export default function DoctorSchedule() {
     <div className="space-y-6 animate-fade-in print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('doctor.schedule.title')}</h1>
+          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('doctor.schedule.title')}</h1>
           <CardDescription>{t('doctor.schedule.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">
@@ -75,10 +75,10 @@ export default function DoctorSchedule() {
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full min-w-[700px]">
               <thead>
-                <tr className="border-b bg-slate-50">
-                  <th className="text-center px-3 py-4 text-sm font-bold text-slate-700 w-28 border-e border-slate-200">{t('doctor.schedule.tableDay')}</th>
+                <tr className="border-b bg-surface">
+                  <th className="text-center px-3 py-4 text-sm font-bold text-body w-28 border-e border-border">{t('doctor.schedule.tableDay')}</th>
                   {timeSlots.map(time => (
-                    <th key={time} className="text-center px-3 py-4 text-sm font-semibold text-slate-600 min-w-[160px] border-e border-slate-100 last:border-e-0">{time}</th>
+                    <th key={time} className="text-center px-3 py-4 text-sm font-semibold text-body min-w-[160px] border-e border-border last:border-e-0">{time}</th>
                   ))}
                 </tr>
               </thead>
@@ -86,15 +86,15 @@ export default function DoctorSchedule() {
                 {DAYS.map(day => {
                   const styles = DAY_STYLES[day]
                   return (
-                    <tr key={day} className="border-b border-slate-200 last:border-0 hover:bg-slate-50/30 transition-colors">
-                      <td className="text-center px-3 py-4 text-sm font-bold text-slate-700 border-e border-slate-200">{dayLabels[day]}</td>
+                    <tr key={day} className="border-b border-border last:border-0 hover:bg-hover/30 transition-colors">
+                      <td className="text-center px-3 py-4 text-sm font-bold text-body border-e border-border">{dayLabels[day]}</td>
                       {timeSlots.map((time, idx) => {
                         const nextTime = timeSlots[idx + 1] || '23:59'
                         const slot = schedules.filter(s => s.day === day && s.startTime < nextTime && s.endTime > time)
                         return (
-                          <td key={time} className="text-center px-2 py-2 align-top h-[120px] border-e border-slate-100 last:border-e-0">
+                          <td key={time} className="text-center px-2 py-2 align-top h-[120px] border-e border-border last:border-e-0">
                             {slot.length === 0 ? (
-                              <div className="w-full h-full min-h-[80px] rounded-lg border border-dashed border-slate-200 bg-slate-50/50 flex items-center justify-center text-slate-300 text-xs">
+                              <div className="w-full h-full min-h-[80px] rounded-lg border border-dashed border-border bg-surface/50 flex items-center justify-center text-muted text-xs">
                                 —
                               </div>
                             ) : (
