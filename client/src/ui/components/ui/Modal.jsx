@@ -1,7 +1,9 @@
 import { useEffect, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '../../lib/utils'
 
 export default function Modal({ isOpen, onClose, title, description, children, size = 'md', footer, headerColor }) {
+  const { t } = useTranslation()
   const panelRef = useRef(null)
 
   const handleKeyDown = useCallback((e) => {
@@ -62,7 +64,7 @@ export default function Modal({ isOpen, onClose, title, description, children, s
             <button
               onClick={onClose}
               className="text-slate-400 hover:text-slate-700 hover:bg-white rounded-lg p-1.5 transition-colors cursor-pointer"
-              aria-label="إغلاق"
+              aria-label={t('common.close')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

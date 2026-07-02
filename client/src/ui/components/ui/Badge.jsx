@@ -37,7 +37,7 @@ export default function Badge({ children, variant = 'default', size = 'md', dot,
           variant === 'default' && 'bg-slate-400'
         )} />
       )}
-      <span className="pr-1.5">{children}</span>
+      <span className="pe-1.5">{children}</span>
     </span>
   )
 }

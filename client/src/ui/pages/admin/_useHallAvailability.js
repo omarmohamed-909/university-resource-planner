@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
+import i18n from '../../lib/i18n'
 import api from '../../../infrastructure/api/axios'
 
-/**
- * Polls today's schedules and returns a map of hallId → status.
- * Status is 'available', 'occupied', 'upcoming', or 'unknown'.
- */
 export function useHallAvailability(halls) {
   const [schedules, setSchedules] = useState([])
 
@@ -22,7 +19,6 @@ export function useHallAvailability(halls) {
       api.get('/schedules')
         .then(r => {
           const all = r.data.data || []
-          // Filter only today's schedules
           const todaySchedules = all.filter(s => s.day === dayName && s.hallId)
           setSchedules(todaySchedules)
         })
@@ -30,7 +26,7 @@ export function useHallAvailability(halls) {
     }
 
     fetchSchedule()
-    const interval = setInterval(fetchSchedule, 60000) // كل دقيقة بدل 30 ثانية
+    const interval = setInterval(fetchSchedule, 60000)
 
     return () => clearInterval(interval)
   }, [halls?.length])
@@ -47,11 +43,10 @@ export function useHallAvailability(halls) {
       })
 
       if (hallSchedules.length === 0) {
-        availabilityMap[hall.id || hall._id] = { status: 'unknown', label: 'غير معروف' }
+        availabilityMap[hall.id || hall._id] = { status: 'unknown', label: i18n.t('status.unknown') }
         return
       }
 
-      // Check each schedule for current/upcoming
       let isCurrentlyOccupied = false
       let earliestUpcoming = null
 
@@ -71,11 +66,11 @@ export function useHallAvailability(halls) {
       })
 
       if (isCurrentlyOccupied) {
-        availabilityMap[hall.id || hall._id] = { status: 'occupied', label: 'محاضرة حالياً' }
+        availabilityMap[hall.id || hall._id] = { status: 'occupied', label: i18n.t('status.occupied') }
       } else if (earliestUpcoming) {
-        availabilityMap[hall.id || hall._id] = { status: 'available', label: `متاح حتى ${earliestUpcoming.startTime}`, nextLecture: earliestUpcoming.startTime }
+        availabilityMap[hall.id || hall._id] = { status: 'available', label: i18n.t('status.availableUntil', { time: earliestUpcoming.startTime }), nextLecture: earliestUpcoming.startTime }
       } else {
-        availabilityMap[hall.id || hall._id] = { status: 'available', label: 'متاح اليوم', nextLecture: null }
+        availabilityMap[hall.id || hall._id] = { status: 'available', label: i18n.t('status.availableToday'), nextLecture: null }
       }
     })
   }

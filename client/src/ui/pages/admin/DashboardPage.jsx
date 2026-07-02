@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useHallStore } from '../../store/hallStore'
 import { useScheduleStore } from '../../store/scheduleStore'
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card'
@@ -8,22 +9,11 @@ import api from '../../../infrastructure/api/axios'
 import { useAuthStore } from '../../store/authStore'
 import { Activity, CalendarDays, DoorOpen, GraduationCap, UserCog, Wrench } from 'lucide-react'
 
-const DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
-const DAY_LABELS = { saturday: 'السبت', sunday: 'الأحد', monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس' }
-const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
-
-function formatDate(date) {
-  const d = new Date(date)
-  return `${DAYS[d.getDay()]}، ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
-}
-
-function weekLabel(pattern) {
-  if (pattern === 'weekly') return 'أسبوعي'
-  if (pattern === 'odd') return 'فردي'
-  return 'زوجي'
-}
+const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+const monthKeys = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
 
 export default function AdminDashboard() {
+  const { t } = useTranslation()
   const { halls, fetchHalls, loading: hallLoading } = useHallStore()
   const { schedules, fetchSchedules, loading: scheduleLoading } = useScheduleStore()
   const [studentCount, setStudentCount] = useState(0)
@@ -37,6 +27,18 @@ export default function AdminDashboard() {
     api.get('/users?role=doctor').then(r => setDoctorCount(r.data.data?.length || 0)).catch(err => console.error('[Dashboard] doctor count:', err?.message))
   }, [])
 
+  const formatDate = (date) => {
+    const d = new Date(date)
+    return t('common.dateFormat', {
+      day: t('day.' + dayKeys[d.getDay()]),
+      date: d.getDate(),
+      month: t('month.' + monthKeys[d.getMonth()]),
+      year: d.getFullYear(),
+    })
+  }
+
+  const weekLabel = (pattern) => t('weekPattern.' + pattern)
+
   const loading = hallLoading || scheduleLoading
   if (loading) return (
     <div className="space-y-8 animate-fade-in">
@@ -49,12 +51,12 @@ export default function AdminDashboard() {
   const maintenanceHalls = halls.filter(h => h.status === 'maintenance').length
 
   const stats = [
-    { label: 'المدرجات والمعامل', value: halls.length, icon: DoorOpen, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-    { label: 'الجداول الدراسية', value: schedules.length, icon: CalendarDays, color: 'text-violet-600', bg: 'bg-violet-50', border: 'border-violet-100' },
-    { label: 'أعضاء هيئة التدريس', value: doctorCount, icon: GraduationCap, color: 'text-teal-600', bg: 'bg-teal-50', border: 'border-teal-100' },
-    { label: 'الطلاب المسجلون', value: studentCount, icon: UserCog, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
-    { label: 'القاعات النشطة', value: activeHalls, icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-    { label: 'قيد الصيانة', value: maintenanceHalls, icon: Wrench, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+    { label: t('admin.dashboard.statHalls'), value: halls.length, icon: DoorOpen, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+    { label: t('admin.dashboard.statSchedules'), value: schedules.length, icon: CalendarDays, color: 'text-violet-600', bg: 'bg-violet-50', border: 'border-violet-100' },
+    { label: t('admin.dashboard.statDoctors'), value: doctorCount, icon: GraduationCap, color: 'text-teal-600', bg: 'bg-teal-50', border: 'border-teal-100' },
+    { label: t('admin.dashboard.statStudents'), value: studentCount, icon: UserCog, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+    { label: t('admin.dashboard.statActiveHalls'), value: activeHalls, icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    { label: t('admin.dashboard.statMaintenance'), value: maintenanceHalls, icon: Wrench, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
   ]
 
   return (
@@ -67,16 +69,16 @@ export default function AdminDashboard() {
             <div>
               <p className="text-sm font-medium text-slate-400">{formatDate(Date.now())}</p>
               <h1 className="mt-2 text-3xl font-bold text-slate-900">
-                مرحباً، {user?.name || 'المدير'}
+                {t('admin.dashboard.welcome', { name: user?.name || t('admin.dashboard.welcomeDefault') })}
               </h1>
               <p className="mt-2 text-sm text-slate-500 leading-relaxed">
-                نظرة عامة على المدرجات والجداول وإحصائيات المستخدمين داخل النظام.
+                {t('admin.dashboard.description')}
               </p>
             </div>
             <div className="flex items-center gap-3 flex-shrink-0">
               <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-2.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-sm font-semibold text-emerald-700">{activeHalls} قاعة جاهزة</span>
+                <span className="text-sm font-semibold text-emerald-700">{t('admin.dashboard.hallsReady', { count: activeHalls })}</span>
               </div>
             </div>
           </div>
@@ -111,14 +113,14 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <div>
-                <CardTitle>المدرجات والمعامل</CardTitle>
-                <CardDescription>{halls.length} مسجلة في النظام</CardDescription>
+                <CardTitle>{t('admin.dashboard.hallsCard')}</CardTitle>
+                <CardDescription>{t('admin.dashboard.hallsDesc', { count: halls.length })}</CardDescription>
               </div>
-              <Badge variant="info">{activeHalls} نشطة</Badge>
+              <Badge variant="info">{t('admin.dashboard.hallsActive', { count: activeHalls })}</Badge>
             </CardHeader>
             <CardContent className="p-0">
               {halls.length === 0 ? (
-                <div className="py-14 text-center text-sm text-slate-400">أضف مدرجاً جديداً للبدء</div>
+                <div className="py-14 text-center text-sm text-slate-400">{t('admin.dashboard.hallsEmpty')}</div>
               ) : (
                 <div className="divide-y divide-slate-50">
                   {halls.slice(0, 6).map(hall => {
@@ -132,11 +134,11 @@ export default function AdminDashboard() {
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold text-slate-900">{hall.name}</p>
                           <p className="mt-0.5 text-xs text-slate-400">
-                            {hall.building || 'مبنى غير محدد'} · الطابق {hall.floor} · {hall.capacity} طالب
+                            {hall.building || t('admin.dashboard.buildingUnknown')} · {t('admin.dashboard.floor', { floor: hall.floor })} · {t('capacity.students', { count: hall.capacity })}
                           </p>
                         </div>
                         <Badge variant={active ? 'success' : maintenance ? 'warning' : 'default'} dot>
-                          {active ? 'نشط' : maintenance ? 'صيانة' : 'غير نشط'}
+                          {active ? t('status.active') : maintenance ? t('status.maintenance') : t('status.inactive')}
                         </Badge>
                       </div>
                     )
@@ -150,14 +152,14 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <div>
-                <CardTitle>أحدث الجداول</CardTitle>
-                <CardDescription>{schedules.length} محاضرة في النظام</CardDescription>
+                <CardTitle>{t('admin.dashboard.schedulesCard')}</CardTitle>
+                <CardDescription>{t('admin.dashboard.schedulesDesc', { count: schedules.length })}</CardDescription>
               </div>
-              <Badge variant="primary">{schedules.length} إجمالي</Badge>
+              <Badge variant="primary">{t('admin.dashboard.schedulesTotal', { count: schedules.length })}</Badge>
             </CardHeader>
             <CardContent className="p-0">
               {schedules.length === 0 ? (
-                <div className="py-14 text-center text-sm text-slate-400">أنشئ جدولاً جديداً للبدء</div>
+                <div className="py-14 text-center text-sm text-slate-400">{t('admin.dashboard.schedulesEmpty')}</div>
               ) : (
                 <div className="divide-y divide-slate-50">
                   {schedules.slice(0, 6).map(schedule => (
@@ -167,10 +169,10 @@ export default function AdminDashboard() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-slate-900">
-                          {schedule.courseId?.name || schedule.courseId?.code || 'مادة غير محددة'}
+                          {schedule.courseId?.name || schedule.courseId?.code || t('admin.dashboard.courseUnknown')}
                         </p>
                         <p className="mt-0.5 text-xs text-slate-400">
-                          {DAY_LABELS[schedule.day] || schedule.day} · {schedule.startTime} – {schedule.endTime}
+                          {t('day.' + schedule.day) || schedule.day} · {schedule.startTime} – {schedule.endTime}
                         </p>
                       </div>
                       <Badge variant={schedule.weekPattern === 'weekly' ? 'default' : 'warning'}>

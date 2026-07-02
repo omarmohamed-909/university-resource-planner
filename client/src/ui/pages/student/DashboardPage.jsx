@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Card, { CardContent, CardDescription } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
@@ -7,6 +8,7 @@ import api from '../../../infrastructure/api/axios'
 import { useAuthStore } from '../../store/authStore'
 
 export default function StudentDashboard() {
+  const { t } = useTranslation()
   const user = useAuthStore(s => s.user)
   const [schedules, setSchedules] = useState([])
   const [loading, setLoading] = useState(true)
@@ -26,8 +28,8 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">مرحباً، {user?.name}</h1>
-        <CardDescription>لوحة تحكم الطالب</CardDescription>
+        <h1 className="text-2xl font-bold text-slate-900">{t('student.dashboard.welcome', { name: user?.name })}</h1>
+        <CardDescription>{t('student.dashboard.description')}</CardDescription>
       </div>
 
       <div>
@@ -36,7 +38,7 @@ export default function StudentDashboard() {
             <CardContent className="flex items-center gap-5 px-6 py-5">
               <div className="w-12 h-12 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center flex-shrink-0"><BookOpen className="w-6 h-6" /></div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-slate-400 truncate">المسجل في مواد</p>
+                <p className="text-xs font-medium text-slate-400 truncate">{t('student.dashboard.statEnrolled')}</p>
                 <p className="mt-1 text-2xl font-bold text-slate-900 leading-none">{uniqueCourses}</p>
               </div>
             </CardContent>
@@ -45,7 +47,7 @@ export default function StudentDashboard() {
             <CardContent className="flex items-center gap-5 px-6 py-5">
               <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0"><CalendarDays className="w-6 h-6" /></div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-slate-400 truncate">محاضرات أسبوعياً</p>
+                <p className="text-xs font-medium text-slate-400 truncate">{t('student.dashboard.statWeekly')}</p>
                 <p className="mt-1 text-2xl font-bold text-slate-900 leading-none">{schedules.length}</p>
               </div>
             </CardContent>
@@ -54,7 +56,7 @@ export default function StudentDashboard() {
             <CardContent className="flex items-center gap-5 px-6 py-5">
               <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0"><ClipboardCheck className="w-6 h-6" /></div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-slate-400 truncate">أيام الدراسة</p>
+                <p className="text-xs font-medium text-slate-400 truncate">{t('student.dashboard.statDays')}</p>
                 <p className="mt-1 text-2xl font-bold text-slate-900 leading-none">{uniqueDays}</p>
               </div>
             </CardContent>

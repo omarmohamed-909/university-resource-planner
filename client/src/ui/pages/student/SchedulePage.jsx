@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Card, { CardContent, CardTitle, CardHeader, CardDescription } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
@@ -10,7 +11,6 @@ import { downloadFile } from '../../../infrastructure/api/download'
 import { cn } from '../../lib/utils'
 
 const DAYS = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
-const DAY_LABELS = { saturday: 'السبت', sunday: 'الأحد', monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس' }
 const DAY_STYLES = {
   saturday: { title: 'text-blue-700', bg: 'bg-blue-50', course: 'text-blue-800', time: 'text-blue-600', hall: 'text-blue-500' },
   sunday: { title: 'text-emerald-700', bg: 'bg-emerald-50', course: 'text-emerald-800', time: 'text-emerald-600', hall: 'text-emerald-500' },
@@ -21,8 +21,18 @@ const DAY_STYLES = {
 }
 
 export default function StudentSchedule() {
+  const { t } = useTranslation()
   const [schedules, setSchedules] = useState([])
   const [loading, setLoading] = useState(true)
+
+  const dayLabels = {
+    saturday: t('day.saturday'),
+    sunday: t('day.sunday'),
+    monday: t('day.monday'),
+    tuesday: t('day.tuesday'),
+    wednesday: t('day.wednesday'),
+    thursday: t('day.thursday'),
+  }
 
   useEffect(() => {
     api.get('/schedules')
@@ -40,24 +50,24 @@ export default function StudentSchedule() {
     <div className="space-y-6 animate-fade-in print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">جدولي الدراسي</h1>
-          <CardDescription>عرض جميع محاضراتي المسجلة</CardDescription>
+          <h1 className="text-2xl font-bold text-slate-900">{t('student.schedule.title')}</h1>
+          <CardDescription>{t('student.schedule.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">
           <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={schedules.length === 0}>
-            <FileText className="w-4 h-4 ml-1" />PDF
+            <FileText className="w-4 h-4 ms-1" />PDF
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={schedules.length === 0}>
-            <FileSpreadsheet className="w-4 h-4 ml-1" />Excel
+            <FileSpreadsheet className="w-4 h-4 ms-1" />Excel
           </Button>
-          <Button variant="outline" size="icon" onClick={() => window.print()} title="طباعة">
+          <Button variant="outline" size="icon" onClick={() => window.print()} title={t('common.print')}>
             <Printer className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
       {schedules.length === 0 ? (
-        <EmptyState icon={CalendarDays} title="لا توجد محاضرات" description="لم يتم تسجيل أي محاضرات لك بعد." />
+        <EmptyState icon={CalendarDays} title={t('student.schedule.emptyTitle')} description={t('student.schedule.emptyDescription')} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {DAYS.map(day => {
@@ -66,12 +76,12 @@ export default function StudentSchedule() {
             return (
               <Card key={day}>
                 <CardHeader>
-                  <CardTitle className={styles.title}>{DAY_LABELS[day]}</CardTitle>
-                  <span className="text-xs text-slate-400">{daySchedules.length} محاضرة</span>
+                  <CardTitle className={styles.title}>{dayLabels[day]}</CardTitle>
+                  <span className="text-xs text-slate-400">{t('student.schedule.lectureCount', { count: daySchedules.length })}</span>
                 </CardHeader>
                 <CardContent>
                   {daySchedules.length === 0 ? (
-                    <p className="text-sm text-slate-400 text-center py-4">لا توجد محاضرات</p>
+                    <p className="text-sm text-slate-400 text-center py-4">{t('student.schedule.noLectures')}</p>
                   ) : (
                     <div className="space-y-2">
                       {daySchedules.map(sch => (
@@ -81,7 +91,7 @@ export default function StudentSchedule() {
                           <div className="flex items-center justify-between mt-1">
                             <span className={cn('text-xs', styles.hall)}>{sch.hallId?.name}</span>
                             <Badge variant={sch.weekPattern === 'weekly' ? 'default' : 'warning'}>
-                              {sch.weekPattern === 'weekly' ? 'أسبوعي' : sch.weekPattern === 'odd' ? 'فردي' : 'زوجي'}
+                              {sch.weekPattern === 'weekly' ? t('weekPattern.weekly') : sch.weekPattern === 'odd' ? t('weekPattern.odd') : t('weekPattern.even')}
                             </Badge>
                           </div>
                         </div>

@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import { GoogleLogin } from '@react-oauth/google'
 import toast from 'react-hot-toast'
 import { LogIn, GraduationCap, BookOpen, Users, Building2, Shield, Sparkles, Eye, EyeOff, Mail } from 'lucide-react'
 import QnuLogo from '../../components/ui/QnuLogo'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
 
-/* Animated canvas background */
 function AnimatedBg() {
   const canvasRef = useRef(null)
   useEffect(() => {
@@ -38,7 +39,6 @@ function AnimatedBg() {
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 }
 
-/* Google SVG */
 function GoogleIcon({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24">
@@ -50,43 +50,41 @@ function GoogleIcon({ size = 20 }) {
   )
 }
 
-/* Reusable field */
 function Field({ label, children }) {
   return (
-    <div className="flex flex-col gap-1.5 text-right" dir="rtl">
+    <div className="flex flex-col gap-1.5">
       <label className="block text-xs font-bold text-slate-500 uppercase tracking-[0.08em]">{label}</label>
       {children}
     </div>
   )
 }
 
-/* Premium input */
 function PremiumInput({ icon: Icon, type = 'text', rightSlot, className = '', ...props }) {
   return (
     <div className="relative flex-shrink-0">
       {Icon && (
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+        <div className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
           <Icon size={17} />
         </div>
       )}
       <input
         type={type}
-        className={`w-full h-14 px-5 ${rightSlot ? 'pr-12' : Icon ? 'pr-11' : ''}
+        className={`w-full h-14 px-5 ${rightSlot ? 'pe-12' : Icon ? 'pe-11' : ''}
                     rounded-lg border border-slate-200 bg-white shadow-sm
                    text-slate-900 text-base placeholder:text-slate-400
                     focus:outline-none focus:border-slate-500 focus:ring-4 focus:ring-slate-900/15 focus:shadow-md
                    hover:border-slate-300 transition-all duration-200
                    ![autofill]:shadow-[inset_0_0_0px_1000px_white]
                    ![autofill]:text-slate-900 ${className}`}
-        style={{ 
-          paddingLeft: '20px',
-          paddingRight: rightSlot ? '48px' : Icon ? '44px' : '20px',
-          ...props.style 
+        style={{
+          paddingInlineStart: '20px',
+          paddingInlineEnd: rightSlot ? '48px' : Icon ? '44px' : '20px',
+          ...props.style
         }}
         {...props}
       />
       {rightSlot && (
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+        <div className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400">
           {rightSlot}
         </div>
       )}
@@ -94,20 +92,8 @@ function PremiumInput({ icon: Icon, type = 'text', rightSlot, className = '', ..
   )
 }
 
-/* Quick-login demo accounts — مخفية في production */
-const demos = import.meta.env.DEV ? [
-  { label: 'مدير', role: 'admin', email: 'admin@svnu.edu', password: 'admin123', className: 'bg-slate-950 hover:bg-slate-800', icon: Shield },
-  { label: 'أستاذ', role: 'doctor', email: 'ahmed@svnu.edu', password: 'doctor123', className: 'bg-teal-700 hover:bg-teal-800', icon: BookOpen },
-  { label: 'طالب', role: 'student', email: 'student@svnu.edu', password: 'student123', className: 'bg-indigo-700 hover:bg-indigo-800', icon: GraduationCap },
-] : []
-
-const features = [
-  { icon: BookOpen,  label: 'مواد دراسية وجداول ذكية' },
-  { icon: Building2, label: 'إدارة مدرجات ومعامل' },
-  { icon: Users,     label: 'كوادر أكاديمية وطلاب' },
-]
-
 export default function LoginPage() {
+  const { t } = useTranslation()
   const navigate    = useNavigate()
   const login       = useAuthStore(s => s.login)
   const googleLogin = useAuthStore(s => s.googleLogin)
@@ -122,16 +108,27 @@ export default function LoginPage() {
   const isGoogleConfigured = import.meta.env.VITE_GOOGLE_CLIENT_ID &&
     import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id_here'
 
-  /* Handlers */
+  const demos = import.meta.env.DEV ? [
+    { label: t('auth.login.demoAdmin'), role: 'admin', email: 'admin@svnu.edu', password: 'admin123', className: 'bg-slate-950 hover:bg-slate-800', icon: Shield },
+    { label: t('auth.login.demoDoctor'), role: 'doctor', email: 'ahmed@svnu.edu', password: 'doctor123', className: 'bg-teal-700 hover:bg-teal-800', icon: BookOpen },
+    { label: t('auth.login.demoStudent'), role: 'student', email: 'student@svnu.edu', password: 'student123', className: 'bg-indigo-700 hover:bg-indigo-800', icon: GraduationCap },
+  ] : []
+
+  const features = [
+    { icon: BookOpen,  label: t('auth.login.feature1') },
+    { icon: Building2, label: t('auth.login.feature2') },
+    { icon: Users,     label: t('auth.login.feature3') },
+  ]
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email.trim() || !password) return toast.error('يرجى إدخال البريد وكلمة المرور')
+    if (!email.trim() || !password) return toast.error(t('auth.login.toast.emptyFields'))
     setLoading(true)
     try {
       const user = await login(email, password)
-      toast.success('أهلاً بك! 👋')
+      toast.success(t('auth.login.toast.welcomeBack'))
       navigate(`/${user.role}`)
-    } catch (err) { toast.error(err.response?.data?.message || 'بيانات الدخول غير صحيحة') }
+    } catch (err) { toast.error(err.response?.data?.message || t('auth.login.toast.invalidCredentials')) }
     finally { setLoading(false) }
   }
 
@@ -139,63 +136,54 @@ export default function LoginPage() {
     setQuickLoading(d.role)
     try {
       const user = await login(d.email, d.password)
-      toast.success(`مرحباً! 👋`)
+      toast.success(t('auth.login.toast.welcome'))
       navigate(`/${user.role}`)
-    } catch { toast.error('فشل الدخول السريع') }
+    } catch { toast.error(t('auth.login.toast.quickLoginFailed')) }
     finally { setQuickLoading(null) }
   }
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setGoogleLoading(true)
     try {
-      // credentialResponse.credential هو ID token (JWT) — هذا ما يتوقعه السيرفر
       const user = await googleLogin(credentialResponse.credential)
-      toast.success('أهلاً بك! 🎉')
+      toast.success(t('auth.login.toast.welcomeGoogle'))
       navigate(`/${user.role}`)
-    } catch (err) { toast.error(err.response?.data?.message || 'فشل تسجيل الدخول بـ Google') }
+    } catch (err) { toast.error(err.response?.data?.message || t('auth.login.toast.googleFailed')) }
     finally { setGoogleLoading(false) }
   }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row-reverse">
+      <div className="fixed top-4 end-4 z-50">
+        <LanguageSwitcher />
+      </div>
 
-      {/* Visual panel */}
-      <div className="relative lg:w-[46%] h-52 lg:h-auto overflow-hidden flex items-center justify-center
-                      bg-[#080f1a]">
+      <div className="relative lg:w-[46%] h-52 lg:h-auto overflow-hidden flex items-center justify-center bg-[#080f1a]">
         <AnimatedBg />
-
-        {/* radial glow */}
         <div className="absolute inset-0 bg-slate-900/35" />
-
         <div className="relative z-10 px-10 py-12 w-full max-w-md">
-          {/* Logo */}
           <div className="flex items-center gap-4 mb-10">
-            <div className="w-14 h-14 rounded-lg bg-white/10 border border-white/20 backdrop-blur
-                            flex items-center justify-center shadow-xl flex-shrink-0 overflow-hidden p-1">
+            <div className="w-14 h-14 rounded-lg bg-white/10 border border-white/20 backdrop-blur flex items-center justify-center shadow-xl flex-shrink-0 overflow-hidden p-1">
               <QnuLogo className="w-full h-full" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white tracking-tight">QNU</h1>
-              <p className="text-blue-400 text-xs mt-0.5">نظام إدارة الموارد الجامعية</p>
+              <p className="text-blue-400 text-xs mt-0.5">{t('auth.login.systemTitle')}</p>
             </div>
           </div>
 
           <h2 className="text-3xl lg:text-4xl font-bold text-white leading-tight mb-4 hidden lg:block">
-            منصة إدارية <br />
-            <span className="text-blue-300">
-              متكاملة وذكية
-            </span>
+            {t('auth.login.platformTitle')} <br />
+            <span className="text-blue-300">{t('auth.login.platformHighlight')}</span>
           </h2>
           <p className="text-slate-400 text-base leading-relaxed mb-10 hidden lg:block">
-            أدر مدرجاتك وجداولك ومادتك الدراسية من مكان واحد بكل سهولة.
+            {t('auth.login.platformDesc')}
           </p>
 
-          {/* Feature list */}
           <div className="hidden lg:flex flex-col gap-3">
             {features.map(({ icon: Icon, label }) => (
               <div key={label}
-                   className="flex items-center gap-3 px-4 py-3 rounded-lg
-                              bg-white/5 border border-white/8 text-slate-300 text-sm">
+                   className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 border border-white/8 text-slate-300 text-sm">
                 <div className="w-8 h-8 rounded-lg bg-blue-600/25 flex items-center justify-center flex-shrink-0">
                   <Icon size={15} className="text-blue-400" />
                 </div>
@@ -206,7 +194,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Form panel */}
       <div className="flex-1 flex items-center justify-center bg-white p-6 lg:p-12 xl:p-20">
         <div className="w-full max-w-[480px] animate-slide-up">
 
@@ -218,17 +205,16 @@ export default function LoginPage() {
           </div>
 
           <div className="mb-9">
-            <h2 className="text-3xl font-bold text-slate-900">مرحباً بعودتك 👋</h2>
-            <p className="text-slate-500 mt-2 text-base">سجل دخولك للوصول إلى لوحة التحكم</p>
+            <h2 className="text-3xl font-bold text-slate-900">{t('auth.login.welcomeBack')}</h2>
+            <p className="text-slate-500 mt-2 text-base">{t('auth.login.subtitle')}</p>
           </div>
 
-          {/* Google button */}
           <div className="mt-6 mb-6">
             {isGoogleConfigured ? (
               <div className="w-full flex justify-center">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
-                  onError={() => toast.error('فشل تسجيل الدخول بـ Google')}
+                  onError={() => toast.error(t('auth.login.toast.googleFailed'))}
                   width={440}
                   text="continue_with"
                   shape="rectangular"
@@ -240,43 +226,36 @@ export default function LoginPage() {
             ) : (
             <div className="relative">
               <button disabled
-                className="w-full h-12 flex items-center justify-center gap-3 px-5
-                           border border-slate-200 rounded-lg text-slate-400 font-semibold text-[15px]
-                           opacity-55 cursor-not-allowed">
-                <GoogleIcon />&nbsp;المتابعة بحساب Google
+                className="w-full h-12 flex items-center justify-center gap-3 px-5 border border-slate-200 rounded-lg text-slate-400 font-semibold text-[15px] opacity-55 cursor-not-allowed">
+                <GoogleIcon />&nbsp;{t('auth.login.googleButton')}
               </button>
-              <span className="absolute -top-3 start-1/2 -translate-x-1/2 whitespace-nowrap
-                               bg-amber-50 border border-amber-200 text-amber-700
-                               text-[11px] font-medium px-3 py-0.5 rounded-full">
-                يحتاج GOOGLE_CLIENT_ID في .env
+              <span className="absolute -top-3 inset-x-0 mx-auto w-fit whitespace-nowrap bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-medium px-3 py-0.5 rounded-full">
+                {t('auth.login.googleNotConfigured')}
               </span>
             </div>
           )}
           </div>
 
-
-          {/* Divider */}
           <div className="flex items-center gap-4 mb-7">
             <div className="flex-1 h-px bg-slate-100" />
-            <span className="text-xs text-slate-400 font-medium">أو بالبريد الإلكتروني</span>
+            <span className="text-xs text-slate-400 font-medium">{t('auth.login.divider')}</span>
             <div className="flex-1 h-px bg-slate-100" />
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5" dir="rtl">
-            <Field label="البريد الإلكتروني">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <Field label={t('auth.login.emailLabel')}>
               <PremiumInput
                 icon={Mail}
                 type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="admin@svnu.edu" required dir="ltr"
+                placeholder={t('auth.login.emailPlaceholder')} required dir="ltr"
               />
             </Field>
 
-            <Field label="كلمة المرور">
+            <Field label={t('auth.login.passwordLabel')}>
               <PremiumInput
                 type={showPass ? 'text' : 'password'}
                 value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••" required dir="ltr"
+                placeholder={t('auth.login.passwordPlaceholder')} required dir="ltr"
                 rightSlot={
                   <button type="button" onClick={() => setShowPass(v => !v)}
                     className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
@@ -286,24 +265,19 @@ export default function LoginPage() {
               />
             </Field>
             <button type="submit" disabled={loading}
-              className="w-full h-14 rounded-lg font-bold text-base text-white
-                         bg-slate-950 hover:bg-slate-800
-                         hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99]
-                         transition-all duration-200 disabled:opacity-60 cursor-pointer
-                         flex items-center justify-center gap-2 mt-4">
+              className="w-full h-14 rounded-lg font-bold text-base text-white bg-slate-950 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99] transition-all duration-200 disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 mt-4">
               {loading
                 ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                 : <LogIn size={18} />}
-              {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+              {loading ? t('auth.login.loadingButton') : t('auth.login.submitButton')}
             </button>
           </form>
 
-          {/* Quick login */}
           <div className="mt-9">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex-1 h-px bg-slate-100" />
               <span className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                <Sparkles size={12} /> دخول سريع للتجربة
+                <Sparkles size={12} /> {t('auth.login.quickLogin')}
               </span>
               <div className="flex-1 h-px bg-slate-100" />
             </div>
@@ -312,10 +286,7 @@ export default function LoginPage() {
                 const Icon = d.icon
                 return (
                   <button key={d.role} onClick={() => quickLogin(d)} disabled={!!quickLoading}
-                    className={`flex flex-col items-center gap-2 py-4 px-3 rounded-lg font-semibold text-sm text-white
-                                ${d.className}
-                                hover:shadow-md  active:scale-95
-                                transition-all duration-200 cursor-pointer disabled:opacity-60`}>
+                    className={`flex flex-col items-center gap-2 py-4 px-3 rounded-lg font-semibold text-sm text-white ${d.className} hover:shadow-md active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-60`}>
                     {quickLoading === d.role
                       ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                       : <Icon size={20} />}
@@ -324,12 +295,12 @@ export default function LoginPage() {
                 )
               })}
             </div>
-            <p className="text-center text-[11px] text-slate-400 mt-2.5">للاختبار فقط</p>
+            <p className="text-center text-[11px] text-slate-400 mt-2.5">{t('auth.login.quickLoginHint')}</p>
           </div>
 
           <p className="text-center text-sm text-slate-500 mt-8">
-            ليس لديك حساب؟{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">إنشاء حساب</Link>
+            {t('auth.login.noAccount')}{' '}
+            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">{t('auth.login.createAccount')}</Link>
           </p>
         </div>
       </div>

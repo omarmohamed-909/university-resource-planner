@@ -1,7 +1,11 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '../../lib/utils'
 
 export default function Pagination({ page, pages, total, onPageChange }) {
+  const { t, i18n } = useTranslation()
+  const isRtl = i18n.dir() === 'rtl'
+
   if (pages <= 1) return null
 
   function getRange() {
@@ -19,10 +23,13 @@ export default function Pagination({ page, pages, total, onPageChange }) {
     return range
   }
 
+  const PrevIcon = isRtl ? ChevronRight : ChevronLeft
+  const NextIcon = isRtl ? ChevronLeft : ChevronRight
+
   return (
     <div className="flex items-center justify-between mt-6">
       <p className="text-sm text-slate-500">
-        الصفحة {page} من {pages} ({total} إجمالاً)
+        {t('pagination.pageInfo', { page, pages, total })}
       </p>
       <div className="flex items-center gap-1">
         <button
@@ -34,9 +41,9 @@ export default function Pagination({ page, pages, total, onPageChange }) {
               ? 'text-slate-300 cursor-not-allowed'
               : 'text-slate-600 hover:bg-slate-100 cursor-pointer'
           )}
-          aria-label="الصفحة السابقة"
+          aria-label={t('pagination.previous')}
         >
-          <ChevronRight className="w-4 h-4" />
+          <PrevIcon className="w-4 h-4" />
         </button>
 
         {getRange().map((item, i) =>
@@ -67,9 +74,9 @@ export default function Pagination({ page, pages, total, onPageChange }) {
               ? 'text-slate-300 cursor-not-allowed'
               : 'text-slate-600 hover:bg-slate-100 cursor-pointer'
           )}
-          aria-label="الصفحة التالية"
+          aria-label={t('pagination.next')}
         >
-          <ChevronLeft className="w-4 h-4" />
+          <NextIcon className="w-4 h-4" />
         </button>
       </div>
     </div>

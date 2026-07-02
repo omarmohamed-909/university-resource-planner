@@ -1,27 +1,32 @@
 import { useState } from 'react'
 import { Outlet, useLocation, NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Sidebar from '../components/layout/Sidebar'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useAuthStore } from '../store/authStore'
 import { Menu, ChevronLeft, LayoutDashboard, CalendarDays, ClipboardCheck } from 'lucide-react'
 import { cn } from '../lib/utils'
 
-const bottomNav = [
-  { to: '/student', icon: LayoutDashboard, label: 'الرئيسية' },
-  { to: '/student/schedule', icon: CalendarDays, label: 'جدولي' },
-  { to: '/student/attendance', icon: ClipboardCheck, label: 'الحضور' },
+const bottomNavKeys = [
+  { to: '/student', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+  { to: '/student/schedule', icon: CalendarDays, labelKey: 'sidebar.mySchedule' },
+  { to: '/student/attendance', icon: ClipboardCheck, labelKey: 'sidebar.attendance' },
 ]
 
-const breadcrumbMap = {
-  '/student': 'لوحة التحكم',
-  '/student/schedule': 'جدولي',
-  '/student/attendance': 'الحضور',
+const breadcrumbKeys = {
+  '/student': 'sidebar.dashboard',
+  '/student/schedule': 'sidebar.mySchedule',
+  '/student/attendance': 'sidebar.attendance',
 }
 
 export default function StudentLayout() {
+  const { t, i18n } = useTranslation()
   const user = useAuthStore(s => s.user)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
-  const currentPage = breadcrumbMap[location.pathname] || ''
+  const bcKey = breadcrumbKeys[location.pathname]
+  const currentPage = bcKey ? t(bcKey) : ''
+  const isRtl = i18n.dir() === 'rtl'
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -48,25 +53,28 @@ export default function StudentLayout() {
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-                aria-label="فتح القائمة"
+                aria-label={t('layout.openMenu')}
               >
                 <Menu className="w-5 h-5 text-slate-700" />
               </button>
               <div className="hidden sm:flex items-center gap-2 text-sm rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
-                <span className="text-slate-500">الطالب</span>
+                <span className="text-slate-500">{t('layout.student.prefix')}</span>
                 {currentPage && (
                   <>
-                    <ChevronLeft className="w-3.5 h-3.5 text-slate-300" />
+                    {isRtl
+                      ? <ChevronLeft className="w-3.5 h-3.5 text-slate-300" />
+                      : <ChevronLeft className="w-3.5 h-3.5 text-slate-300 rotate-180" />}
                     <span className="text-slate-950 font-semibold">{currentPage}</span>
                   </>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
               <div className="hidden sm:block text-end">
                 <p className="text-sm font-semibold text-slate-950">{user?.name}</p>
-                <p className="text-xs text-slate-500">طالب</p>
+                <p className="text-xs text-slate-500">{t('layout.student.role')}</p>
               </div>
               <div className="w-9 h-9 rounded-lg bg-violet-700 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                 {user?.name?.charAt(0)}
@@ -85,7 +93,7 @@ export default function StudentLayout() {
         {/* Mobile Bottom Navigation */}
         <nav className="lg:hidden fixed bottom-0 start-0 end-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 z-40">
           <div className="flex items-center justify-around py-2">
-            {bottomNav.map(item => (
+            {bottomNavKeys.map(item => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -96,7 +104,7 @@ export default function StudentLayout() {
                 )}
               >
                 <item.icon className="w-5 h-5" />
-                {item.label}
+                {t(item.labelKey)}
               </NavLink>
             ))}
           </div>

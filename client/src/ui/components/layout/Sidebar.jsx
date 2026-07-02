@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import {
   LayoutDashboard, GraduationCap, CalendarDays, Users, DoorOpen,
@@ -7,54 +8,43 @@ import {
 import { cn } from '../../lib/utils'
 import QnuLogo from '../ui/QnuLogo'
 
-const roleConfig = {
-  admin: {
-    label: 'مدير النظام',
-    accent: '#3b82f6',
-    avatar: 'bg-blue-700',
-  },
-  doctor: {
-    label: 'عضو هيئة تدريس',
-    accent: '#10b981',
-    avatar: 'bg-emerald-700',
-  },
-  student: {
-    label: 'طالب',
-    accent: '#8b5cf6',
-    avatar: 'bg-violet-700',
-  },
+const roleMeta = {
+  admin: { accent: '#3b82f6', avatar: 'bg-blue-700', labelKey: 'role.adminFull' },
+  doctor: { accent: '#10b981', avatar: 'bg-emerald-700', labelKey: 'role.doctorFull' },
+  student: { accent: '#8b5cf6', avatar: 'bg-violet-700', labelKey: 'role.studentFull' },
 }
 
-const navItems = {
+const navDefs = {
   admin: [
-    { to: '/admin', icon: LayoutDashboard, label: 'لوحة التحكم' },
-    { to: '/admin/halls', icon: DoorOpen, label: 'المدرجات والمعامل' },
-    { to: '/admin/schedules', icon: CalendarDays, label: 'الجداول' },
-    { to: '/admin/courses', icon: GraduationCap, label: 'المواد الدراسية' },
-    { to: '/admin/users', icon: Users, label: 'المستخدمون' },
-    { to: '/admin/attendance', icon: ClipboardCheck, label: 'الحضور' },
-    { to: '/admin/swaps', icon: SwitchCamera, label: 'طلبات التبديل' },
-    { to: '/admin/auto-schedule', icon: Settings, label: 'توليد الجداول' },
+    { to: '/admin', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+    { to: '/admin/halls', icon: DoorOpen, labelKey: 'sidebar.halls' },
+    { to: '/admin/schedules', icon: CalendarDays, labelKey: 'sidebar.schedules' },
+    { to: '/admin/courses', icon: GraduationCap, labelKey: 'sidebar.courses' },
+    { to: '/admin/users', icon: Users, labelKey: 'sidebar.users' },
+    { to: '/admin/attendance', icon: ClipboardCheck, labelKey: 'sidebar.attendance' },
+    { to: '/admin/swaps', icon: SwitchCamera, labelKey: 'sidebar.swaps' },
+    { to: '/admin/auto-schedule', icon: Settings, labelKey: 'sidebar.autoSchedule' },
   ],
   doctor: [
-    { to: '/doctor', icon: LayoutDashboard, label: 'لوحة التحكم' },
-    { to: '/doctor/schedule', icon: CalendarDays, label: 'جدولي' },
-    { to: '/doctor/attendance', icon: ClipboardCheck, label: 'الحضور' },
-    { to: '/doctor/swap', icon: SwitchCamera, label: 'طلبات التبديل' },
+    { to: '/doctor', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+    { to: '/doctor/schedule', icon: CalendarDays, labelKey: 'sidebar.mySchedule' },
+    { to: '/doctor/attendance', icon: ClipboardCheck, labelKey: 'sidebar.attendance' },
+    { to: '/doctor/swap', icon: SwitchCamera, labelKey: 'sidebar.swaps' },
   ],
   student: [
-    { to: '/student', icon: LayoutDashboard, label: 'لوحة التحكم' },
-    { to: '/student/schedule', icon: CalendarDays, label: 'جدولي' },
-    { to: '/student/attendance', icon: ClipboardCheck, label: 'الحضور' },
+    { to: '/student', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+    { to: '/student/schedule', icon: CalendarDays, labelKey: 'sidebar.mySchedule' },
+    { to: '/student/attendance', icon: ClipboardCheck, labelKey: 'sidebar.attendance' },
   ],
 }
 
 export default function Sidebar({ role, onClose }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const user = useAuthStore(s => s.user)
   const logout = useAuthStore(s => s.logout)
-  const items = navItems[role] || []
-  const cfg = roleConfig[role] || roleConfig.admin
+  const items = navDefs[role] || []
+  const cfg = roleMeta[role] || roleMeta.admin
 
   const handleLogout = () => {
     logout()
@@ -70,7 +60,7 @@ export default function Sidebar({ role, onClose }) {
           </div>
           <div>
             <h1 className="text-base font-bold text-white leading-tight">QNU</h1>
-            <p className="text-[11px] text-zinc-400 mt-0.5">نظام إدارة الموارد</p>
+            <p className="text-[11px] text-zinc-400 mt-0.5">{t('sidebar.title')}</p>
           </div>
         </div>
       </div>
@@ -83,14 +73,14 @@ export default function Sidebar({ role, onClose }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-white truncate">{user.name}</p>
-              <p className="text-xs text-zinc-400 mt-0.5">{cfg.label}</p>
+              <p className="text-xs text-zinc-400 mt-0.5">{t(cfg.labelKey)}</p>
             </div>
           </div>
         </div>
       )}
 
       <p className="px-5 mb-2 text-[10px] font-bold tracking-[0.18em] text-zinc-500 uppercase">
-        القائمة
+        {t('sidebar.menu')}
       </p>
 
       <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto">
@@ -112,7 +102,7 @@ export default function Sidebar({ role, onClose }) {
                 style={isActive ? { borderInlineEnd: `3px solid ${cfg.accent}` } : {}}
               >
                 <item.icon className={cn('w-5 h-5 flex-shrink-0', isActive ? 'text-slate-950' : 'text-zinc-500')} />
-                <span className="flex-1 truncate">{item.label}</span>
+                <span className="flex-1 truncate">{t(item.labelKey)}</span>
               </div>
             )}
           </NavLink>
@@ -125,7 +115,7 @@ export default function Sidebar({ role, onClose }) {
           className="group flex items-center gap-3 w-full px-3.5 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 cursor-pointer"
         >
           <LogOut aria-hidden="true" className="w-5 h-5 flex-shrink-0" />
-          تسجيل الخروج
+          {t('sidebar.logout')}
         </button>
       </div>
     </aside>

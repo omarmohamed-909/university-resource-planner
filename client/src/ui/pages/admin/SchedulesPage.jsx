@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useScheduleStore } from '../../store/scheduleStore'
 import { useHallStore } from '../../store/hallStore'
 import Card, { CardContent, CardTitle, CardHeader, CardDescription } from '../../components/ui/Card'
@@ -17,8 +18,6 @@ import api from '../../../infrastructure/api/axios'
 import { downloadFile } from '../../../infrastructure/api/download'
 
 const DAYS = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
-const DAY_LABELS = { saturday: 'السبت', sunday: 'الأحد', monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس' }
-const WEEK_LABELS = { weekly: 'أسبوعي', odd: 'فردي', even: 'زوجي' }
 const DAY_STYLES = {
   saturday: { bar: 'bg-blue-500', title: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600' },
   sunday: { bar: 'bg-emerald-500', title: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-600' },
@@ -29,6 +28,7 @@ const DAY_STYLES = {
 }
 
 export default function AdminSchedules() {
+  const { t } = useTranslation()
   const { schedules, fetchSchedules, createSchedule, deleteSchedule } = useScheduleStore()
   const { halls, fetchHalls } = useHallStore()
   const [courses, setCourses] = useState([])
@@ -52,20 +52,20 @@ export default function AdminSchedules() {
     e.preventDefault()
     try {
       await createSchedule(form)
-      toast.success('تم إضافة المحاضرة بنجاح')
+      toast.success(t('admin.schedules.toast.added'))
       setModalOpen(false)
     } catch (error) {
-      toast.error(error.response?.data?.message || 'حدث خطأ')
+      toast.error(error.response?.data?.message || t('admin.schedules.toast.error'))
     }
   }
 
   const handleDelete = async (id) => {
-    const ok = await confirm('هل أنت متأكد من حذف هذه المحاضرة؟')
+    const ok = await confirm(t('admin.schedules.confirmDelete'))
     if (!ok) return
     try {
       await deleteSchedule(id)
-      toast.success('تم الحذف')
-    } catch { toast.error('حدث خطأ') }
+      toast.success(t('admin.schedules.toast.deleted'))
+    } catch { toast.error(t('admin.schedules.toast.error')) }
   }
 
   const handleExportPdf = () => downloadFile('/schedules/export/pdf', 'schedules.pdf')
@@ -81,34 +81,34 @@ export default function AdminSchedules() {
     <div className="space-y-6 animate-fade-in print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">الجداول الدراسية</h1>
-          <CardDescription>إدارة مواعيد المحاضرات والقاعات</CardDescription>
+          <h1 className="text-2xl font-bold text-slate-900">{t('admin.schedules.title')}</h1>
+          <CardDescription>{t('admin.schedules.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">
           <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={totalSchedules === 0}>
-            <FileText className="w-4 h-4 ml-1" />PDF
+            <FileText className="w-4 h-4 ms-1" />PDF
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={totalSchedules === 0}>
-            <FileSpreadsheet className="w-4 h-4 ml-1" />Excel
+            <FileSpreadsheet className="w-4 h-4 ms-1" />Excel
           </Button>
-          <Button variant="outline" size="icon" onClick={() => window.print()} title="طباعة">
+          <Button variant="outline" size="icon" onClick={() => window.print()} title={t('common.print')}>
             <Printer className="w-4 h-4" />
           </Button>
-          <Button onClick={() => setModalOpen(true)}><Plus className="w-4 h-4 ml-2" />إضافة محاضرة</Button>
+          <Button onClick={() => setModalOpen(true)}><Plus className="w-4 h-4 ms-2" />{t('admin.schedules.addButton')}</Button>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
         <Button variant={viewMode === 'grid' ? 'primary' : 'outline'} size="sm" onClick={() => setViewMode('grid')}>
-          <LayoutGrid className="w-4 h-4 ml-1" />مجموعات
+          <LayoutGrid className="w-4 h-4 ms-1" />{t('admin.schedules.viewGrid')}
         </Button>
         <Button variant={viewMode === 'list' ? 'primary' : 'outline'} size="sm" onClick={() => setViewMode('list')}>
-          <List className="w-4 h-4 ml-1" />قائمة
+          <List className="w-4 h-4 ms-1" />{t('admin.schedules.viewList')}
         </Button>
       </div>
 
       {totalSchedules === 0 ? (
-        <EmptyState icon={CalendarDays} title="لا توجد جداول" description="لم يتم إضافة أي محاضرة بعد. أضف أول محاضرة لبدء تنظيم الجدول." action={<Button onClick={() => setModalOpen(true)}><Plus className="w-4 h-4 ml-2" />إضافة محاضرة</Button>} />
+        <EmptyState icon={CalendarDays} title={t('admin.schedules.emptyTitle')} description={t('admin.schedules.emptyDescription')} action={<Button onClick={() => setModalOpen(true)}><Plus className="w-4 h-4 ms-2" />{t('admin.schedules.addButton')}</Button>} />
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {DAYS.map(day => {
@@ -116,27 +116,27 @@ export default function AdminSchedules() {
             return (
               <Card key={day}>
                 <CardHeader>
-                  <CardTitle className={style.title}>{DAY_LABELS[day]}</CardTitle>
-                  <span className="text-xs text-slate-400">{(groupedByDay[day] || []).length} محاضرة</span>
+                  <CardTitle className={style.title}>{t('day.' + day)}</CardTitle>
+                  <span className="text-xs text-slate-400">{t('admin.schedules.lectureCount', { count: (groupedByDay[day] || []).length })}</span>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {(groupedByDay[day] || []).length === 0 && (
-                      <p className="text-sm text-slate-400 text-center py-4">لا توجد محاضرات</p>
+                      <p className="text-sm text-slate-400 text-center py-4">{t('admin.schedules.noLectures')}</p>
                     )}
                     {(groupedByDay[day] || []).map(sch => (
                       <div key={sch.id} className={cn('p-3 rounded-lg text-sm hover:shadow-sm transition-all border', style.bg, style.border)}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="font-medium text-slate-900">{sch.courseId?.name || sch.courseId?.code || 'مادة'}</p>
+                            <p className="font-medium text-slate-900">{sch.courseId?.name || sch.courseId?.code || t('admin.schedules.courseUnknown')}</p>
                             <p className={cn('text-xs mt-1', style.text)}>{sch.startTime} - {sch.endTime}</p>
-                            <p className="text-slate-500 text-xs">{sch.hallId?.name || 'مدرج'}</p>
+                            <p className="text-slate-500 text-xs">{sch.hallId?.name || t('admin.schedules.hallUnknown')}</p>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
                             <Badge variant={sch.weekPattern === 'weekly' ? 'default' : sch.weekPattern === 'odd' ? 'warning' : 'info'}>
-                              {WEEK_LABELS[sch.weekPattern] || sch.weekPattern}
+                              {t('weekPattern.' + sch.weekPattern)}
                             </Badge>
-                            <button onClick={() => handleDelete(sch.id)} className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-1 rounded-lg hover:bg-red-100" aria-label="حذف المحاضرة">
+                            <button onClick={() => handleDelete(sch.id)} className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-1 rounded-lg hover:bg-red-100" aria-label={t('admin.schedules.deleteLabel')}>
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -155,24 +155,24 @@ export default function AdminSchedules() {
             <table className="w-full">
               <thead>
                 <tr className="border-b bg-slate-50">
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">المادة</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">اليوم</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">الوقت</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">المدرج</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">النمط</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-600">إجراءات</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableCourse')}</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableDay')}</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableTime')}</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableHall')}</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tablePattern')}</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-600">{t('admin.schedules.tableActions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {schedules.map(sch => (
                   <tr key={sch.id} className="border-b last:border-0 hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-slate-900">{sch.courseId?.name || sch.courseId?.code || 'مادة'}</td>
-                    <td className="px-4 py-3 text-sm text-slate-500">{DAY_LABELS[sch.day]}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-slate-900">{sch.courseId?.name || sch.courseId?.code || t('admin.schedules.courseUnknown')}</td>
+                    <td className="px-4 py-3 text-sm text-slate-500">{t('day.' + sch.day)}</td>
                     <td className="px-4 py-3 text-sm text-slate-500">{sch.startTime} - {sch.endTime}</td>
-                    <td className="px-4 py-3 text-sm text-slate-500">{sch.hallId?.name || 'مدرج'}</td>
+                    <td className="px-4 py-3 text-sm text-slate-500">{sch.hallId?.name || t('admin.schedules.hallUnknown')}</td>
                     <td className="px-4 py-3">
                       <Badge variant={sch.weekPattern === 'weekly' ? 'default' : sch.weekPattern === 'odd' ? 'warning' : 'info'}>
-                        {WEEK_LABELS[sch.weekPattern] || sch.weekPattern}
+                        {t('weekPattern.' + sch.weekPattern)}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-left">
@@ -188,45 +188,49 @@ export default function AdminSchedules() {
         </Card>
       )}
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="إضافة محاضرة" size="lg">
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={t('admin.schedules.modalTitle')} size="lg">
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="sch-course" className="block text-sm font-medium text-slate-700 mb-1">المادة</label>
-              <Select id="sch-course" options={courses.map(c => ({ value: c.id, label: `${c.code} - ${c.name}` }))} value={form.courseId} onChange={e => setForm({ ...form, courseId: e.target.value })} placeholder="اختر المادة" />
+              <label htmlFor="sch-course" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formCourse')}</label>
+              <Select id="sch-course" options={courses.map(c => ({ value: c.id, label: `${c.code} - ${c.name}` }))} value={form.courseId} onChange={e => setForm({ ...form, courseId: e.target.value })} placeholder={t('admin.schedules.formCoursePlaceholder')} />
             </div>
             <div>
-              <label htmlFor="sch-hall" className="block text-sm font-medium text-slate-700 mb-1">المدرج</label>
-              <Select id="sch-hall" options={halls.filter(h => h.status === 'active').map(h => ({ value: h.id, label: `${h.name} (${h.capacity})` }))} value={form.hallId} onChange={e => setForm({ ...form, hallId: e.target.value })} placeholder="اختر المدرج" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="sch-day" className="block text-sm font-medium text-slate-700 mb-1">اليوم</label>
-              <Select id="sch-day" options={DAYS.map(d => ({ value: d, label: DAY_LABELS[d] }))} value={form.day} onChange={e => setForm({ ...form, day: e.target.value })} />
-            </div>
-            <div>
-              <label htmlFor="sch-pattern" className="block text-sm font-medium text-slate-700 mb-1">النمط</label>
-              <Select id="sch-pattern" options={[{ value: 'weekly', label: 'أسبوعي' }, { value: 'odd', label: 'فردي' }, { value: 'even', label: 'زوجي' }]} value={form.weekPattern} onChange={e => setForm({ ...form, weekPattern: e.target.value })} />
+              <label htmlFor="sch-hall" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formHall')}</label>
+              <Select id="sch-hall" options={halls.filter(h => h.status === 'active').map(h => ({ value: h.id, label: `${h.name} (${h.capacity})` }))} value={form.hallId} onChange={e => setForm({ ...form, hallId: e.target.value })} placeholder={t('admin.schedules.formHallPlaceholder')} />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="sch-start" className="block text-sm font-medium text-slate-700 mb-1">بداية</label>
+              <label htmlFor="sch-day" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formDay')}</label>
+              <Select id="sch-day" options={DAYS.map(d => ({ value: d, label: t('day.' + d) }))} value={form.day} onChange={e => setForm({ ...form, day: e.target.value })} />
+            </div>
+            <div>
+              <label htmlFor="sch-pattern" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formPattern')}</label>
+              <Select id="sch-pattern" options={[
+                { value: 'weekly', label: t('weekPattern.weekly') },
+                { value: 'odd', label: t('weekPattern.odd') },
+                { value: 'even', label: t('weekPattern.even') }
+              ]} value={form.weekPattern} onChange={e => setForm({ ...form, weekPattern: e.target.value })} />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="sch-start" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formStart')}</label>
               <Input id="sch-start" type="time" value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })} />
             </div>
             <div>
-              <label htmlFor="sch-end" className="block text-sm font-medium text-slate-700 mb-1">نهاية</label>
+              <label htmlFor="sch-end" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formEnd')}</label>
               <Input id="sch-end" type="time" value={form.endTime} onChange={e => setForm({ ...form, endTime: e.target.value })} />
             </div>
           </div>
           <div>
-            <label htmlFor="sch-semester" className="block text-sm font-medium text-slate-700 mb-1">الفصل الدراسي</label>
+            <label htmlFor="sch-semester" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.schedules.formSemester')}</label>
             <Input id="sch-semester" value={form.semester} onChange={e => setForm({ ...form, semester: e.target.value })} />
           </div>
           <div className="flex gap-3 pt-2">
-            <Button type="submit">إضافة</Button>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>إلغاء</Button>
+            <Button type="submit">{t('admin.schedules.addButtonSubmit')}</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
           </div>
         </form>
       </Modal>

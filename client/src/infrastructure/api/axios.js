@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { translateServerError } from '../../ui/lib/errorMap'
 
 const api = axios.create({
   baseURL: '/api',
@@ -53,6 +54,11 @@ api.interceptors.response.use(
       clearStoredAuth()
       setTimeout(() => window.location.replace('/login'), 100)
     }
+
+    if (error.response?.data?.message) {
+      error.response.data.message = translateServerError(error.response.data.message)
+    }
+
     return Promise.reject(error)
   }
 )

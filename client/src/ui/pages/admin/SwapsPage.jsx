@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Card, { CardContent, CardDescription } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
@@ -9,34 +10,34 @@ import toast from 'react-hot-toast'
 import api from '../../../infrastructure/api/axios'
 import { CheckCircle, RefreshCw, SwitchCamera, XCircle } from 'lucide-react'
 
-const DAY_LABELS = { saturday: 'السبت', sunday: 'الأحد', monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس' }
 const statusConfig = {
-  pending: { label: 'قيد الانتظار', variant: 'warning' },
-  approved: { label: 'تمت الموافقة', variant: 'success' },
-  rejected: { label: 'مرفوض', variant: 'danger' }
+  pending: { variant: 'warning' },
+  approved: { variant: 'success' },
+  rejected: { variant: 'danger' }
 }
 
-function getScheduleTitle(schedule) {
-  if (!schedule) return 'محاضرة غير محددة'
-  return schedule.courseId?.name || schedule.courseId?.code || 'محاضرة'
+function getScheduleTitle(schedule, t) {
+  if (!schedule) return t('admin.swaps.scheduleUnknown')
+  return schedule.courseId?.name || schedule.courseId?.code || t('admin.swaps.lecture')
 }
 
-function getOriginalText(schedule) {
+function getOriginalText(schedule, t) {
   if (!schedule) return '-'
-  const day = DAY_LABELS[schedule.day] || schedule.day
-  const hall = schedule.hallId?.name || 'قاعة غير محددة'
-  return `${day} ${schedule.startTime}-${schedule.endTime} في ${hall}`
+  const day = t(`day.${schedule.day}`, schedule.day)
+  const hall = schedule.hallId?.name || t('admin.swaps.hallUnknown')
+  return t('admin.swaps.scheduleInfo', { day, time: `${schedule.startTime}-${schedule.endTime}`, hall })
 }
 
-function getProposalText(swap) {
+function getProposalText(swap, t) {
   const parts = []
-  if (swap.proposedDay) parts.push(DAY_LABELS[swap.proposedDay] || swap.proposedDay)
+  if (swap.proposedDay) parts.push(t(`day.${swap.proposedDay}`, swap.proposedDay))
   if (swap.proposedStartTime && swap.proposedEndTime) parts.push(`${swap.proposedStartTime}-${swap.proposedEndTime}`)
-  if (swap.proposedHallId?.name) parts.push(`في ${swap.proposedHallId.name}`)
-  return parts.length ? parts.join(' ') : 'لم يتم تحديد بديل'
+  if (swap.proposedHallId?.name) parts.push(t('admin.swaps.atHall', { hall: swap.proposedHallId.name }))
+  return parts.length ? parts.join(' ') : t('admin.swaps.noProposal')
 }
 
 export default function AdminSwaps() {
+  const { t } = useTranslation()
   const [swaps, setSwaps] = useState([])
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState(null)
@@ -63,24 +64,22 @@ export default function AdminSwaps() {
 
   const respond = async (swapId, action) => {
     const isApprove = action === 'approve'
-    const ok = await confirm(isApprove
-      ? 'هل أنت متأكد من الموافقة على طلب التبديل هذا؟'
-      : 'هل أنت متأكد من رفض طلب التبديل هذا؟')
+    const ok = await confirm(isApprove ? t('admin.swaps.confirmApprove') : t('admin.swaps.confirmReject'))
     if (!ok) return
 
     setSavingId(`${swapId}-${action}`)
     try {
       await api.put(`/swaps/${swapId}/respond`, { action })
-      toast.success(isApprove ? 'تمت الموافقة على الطلب' : 'تم رفض الطلب')
+      toast.success(isApprove ? t('admin.swaps.toast.approved') : t('admin.swaps.toast.rejected'))
       await fetchSwaps()
     } catch (error) {
       const msg = error.response?.data?.message
       if (error.response?.status === 404) {
-        toast.error('لم يعد الطلب موجوداً')
+        toast.error(t('common.error.notFound'))
       } else if (error.response?.status === 409) {
-        toast.error('تعذر التحديث — المدرج أو الوقت محجوز بالفعل')
+        toast.error(t('admin.swaps.toast.conflict'))
       } else {
-        toast.error(msg || 'تعذر تحديث الطلب')
+        toast.error(msg || t('admin.swaps.toast.error'))
       }
     } finally {
       setSavingId(null)
@@ -93,12 +92,12 @@ export default function AdminSwaps() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">طلبات التبديل</h1>
-          <CardDescription>مراجعة طلبات تبديل مواعيد المحاضرات والقاعات والموافقة عليها</CardDescription>
+          <h1 className="text-2xl font-bold text-slate-900">{t('admin.swaps.title')}</h1>
+          <CardDescription>{t('admin.swaps.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={pendingCount > 0 ? 'warning' : 'success'} size="lg">{pendingCount} معلق</Badge>
-          <Button variant="outline" size="icon" onClick={fetchSwaps} aria-label="تحديث الطلبات">
+          <Badge variant={pendingCount > 0 ? 'warning' : 'success'} size="lg">{t('admin.swaps.pending', { count: pendingCount })}</Badge>
+          <Button variant="outline" size="icon" onClick={fetchSwaps} aria-label={t('common.refresh')}>
             <RefreshCw className="w-4 h-4" />
           </Button>
         </div>
@@ -112,20 +111,20 @@ export default function AdminSwaps() {
                 <XCircle className="w-6 h-6 text-red-500" />
               </div>
               <div>
-                <p className="font-semibold text-slate-900">تعذر تحميل الطلبات</p>
-                <p className="text-sm text-slate-500 mt-1">حدث خطأ في الاتصال. حاول مرة أخرى.</p>
+                <p className="font-semibold text-slate-900">{t('common.error.loadData')}</p>
+                <p className="text-sm text-slate-500 mt-1">{t('common.error.tryAgain')}</p>
               </div>
-              <Button variant="outline" onClick={fetchSwaps}><RefreshCw className="w-4 h-4 me-2" />إعادة المحاولة</Button>
+              <Button variant="outline" onClick={fetchSwaps}><RefreshCw className="w-4 h-4 me-2" />{t('common.retry')}</Button>
             </div>
           </CardContent>
         </Card>
       ) : swaps.length === 0 ? (
-        <EmptyState icon={SwitchCamera} title="لا توجد طلبات تبديل" description="لا توجد طلبات تحتاج إلى مراجعة حالياً." />
+        <EmptyState icon={SwitchCamera} title={t('admin.swaps.emptyTitle')} description={t('admin.swaps.emptyDescription')} />
       ) : (
         <div className="space-y-3">
           {swaps.map(swap => {
             const cfg = statusConfig[swap.status] || { label: swap.status, variant: 'default' }
-            const requester = swap.requesterId?.name || swap.requesterId?.email || 'مستخدم غير محدد'
+            const requester = swap.requesterId?.name || swap.requesterId?.email || t('admin.swaps.requesterUnknown')
             const disabled = swap.status !== 'pending'
             return (
               <Card key={swap.id} hover>
@@ -133,22 +132,22 @@ export default function AdminSwaps() {
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-semibold text-slate-900">{getScheduleTitle(swap.originalScheduleId)}</h3>
-                        <Badge variant={cfg.variant} dot>{cfg.label}</Badge>
+                        <h3 className="font-semibold text-slate-900">{getScheduleTitle(swap.originalScheduleId, t)}</h3>
+                        <Badge variant={cfg.variant} dot>{t(`status.${swap.status}`)}</Badge>
                       </div>
                       <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                         <div className="rounded-lg bg-slate-50 p-3">
-                          <p className="text-xs text-slate-400 mb-1">الموعد الحالي</p>
-                          <p className="font-medium text-slate-800">{getOriginalText(swap.originalScheduleId)}</p>
+                          <p className="text-xs text-slate-400 mb-1">{t('admin.swaps.currentSchedule')}</p>
+                          <p className="font-medium text-slate-800">{getOriginalText(swap.originalScheduleId, t)}</p>
                         </div>
                         <div className="rounded-lg bg-blue-50 p-3">
-                          <p className="text-xs text-blue-400 mb-1">الموعد المقترح</p>
-                          <p className="font-medium text-blue-900">{getProposalText(swap)}</p>
+                          <p className="text-xs text-blue-400 mb-1">{t('admin.swaps.proposedSchedule')}</p>
+                          <p className="font-medium text-blue-900">{getProposalText(swap, t)}</p>
                         </div>
                       </div>
                       <div className="mt-3 text-sm text-slate-500">
-                        مقدم الطلب: <span className="font-medium text-slate-700 truncate">{requester}</span>
-                        {swap.reason && <span className="truncate"> - السبب: {swap.reason}</span>}
+                        {t('admin.swaps.requester', { name: requester })}
+                        {swap.reason && t('admin.swaps.reason', { reason: swap.reason })}
                       </div>
                     </div>
 
@@ -161,7 +160,7 @@ export default function AdminSwaps() {
                         className="text-red-600 hover:bg-red-50"
                       >
                         <XCircle className="w-4 h-4 me-1" />
-                        رفض
+                        {t('admin.swaps.rejectButton')}
                       </Button>
                       <Button
                         disabled={disabled}
@@ -169,7 +168,7 @@ export default function AdminSwaps() {
                         onClick={() => respond(swap.id, 'approve')}
                       >
                         <CheckCircle className="w-4 h-4 me-1" />
-                        موافقة
+                        {t('admin.swaps.approveButton')}
                       </Button>
                     </div>
                   </div>

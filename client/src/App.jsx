@@ -2,8 +2,10 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './ui/store/authStore'
 import { Toaster } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import ErrorBoundary from './ui/components/ErrorBoundary'
 import Skeleton, { SkeletonCard } from './ui/components/ui/Skeleton'
+import './ui/lib/i18n'
 
 const LoginPage = lazy(() => import('./ui/pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('./ui/pages/auth/RegisterPage'))
@@ -66,7 +68,7 @@ export default function App() {
         position="top-center"
         toastOptions={{
           duration: 3000,
-          style: { fontFamily: 'Tajawal, sans-serif', borderRadius: '12px', padding: '12px 16px' },
+          style: { borderRadius: '12px', padding: '12px 16px' },
           success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
           error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
         }}

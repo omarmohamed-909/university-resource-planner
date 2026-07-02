@@ -1,4 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Card, { CardContent, CardDescription } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Skeleton from '../../components/ui/Skeleton'
@@ -9,9 +10,8 @@ import { FileText, FileSpreadsheet, Printer, QrCode, ClipboardCheck, Camera, X }
 import api from '../../../infrastructure/api/axios'
 import { downloadFile } from '../../../infrastructure/api/download'
 
-const DAY_LABELS = { saturday: 'السبت', sunday: 'الأحد', monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس' }
-
 export default function StudentAttendance() {
+  const { t } = useTranslation()
   const [schedules, setSchedules] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedSchedule, setSelectedSchedule] = useState(null)
@@ -20,6 +20,15 @@ export default function StudentAttendance() {
   const [scanning, setScanning] = useState(false)
   const scannerRef = useRef(null)
   const videoRef = useRef(null)
+
+  const dayLabels = {
+    saturday: t('day.saturday'),
+    sunday: t('day.sunday'),
+    monday: t('day.monday'),
+    tuesday: t('day.tuesday'),
+    wednesday: t('day.wednesday'),
+    thursday: t('day.thursday'),
+  }
 
   useEffect(() => {
     api.get('/schedules')
@@ -41,12 +50,12 @@ export default function StudentAttendance() {
         (decodedText) => {
           setQrData(decodedText)
           stopScanner()
-          toast.success('تم قراءة الرمز بنجاح')
+          toast.success(t('student.attendance.toast.qrScanned'))
         },
         () => {}
       )
     } catch (err) {
-      toast.error('تعذر الوصول إلى الكاميرا')
+      toast.error(t('common.error.cameraAccess'))
       setScanning(false)
     }
   }
@@ -60,17 +69,17 @@ export default function StudentAttendance() {
   }
 
   const handleCheckIn = async () => {
-    if (!selectedSchedule || !qrData) return toast.error('يرجى مسح رمز QR أو إدخاله يدوياً')
+    if (!selectedSchedule || !qrData) return toast.error(t('student.attendance.toast.checkinNoQR'))
     try {
       const { data } = await api.post('/attendance/checkin', {
         scheduleId: selectedSchedule.id,
         qrData
       })
-      toast.success(data.data?.message || 'تم تسجيل الحضور')
+      toast.success(data.data?.message || t('student.attendance.toast.checkinSuccess'))
       setModalOpen(false)
       setQrData('')
     } catch (error) {
-      toast.error(error.response?.data?.message || 'فشل تسجيل الحضور')
+      toast.error(error.response?.data?.message || t('student.attendance.toast.checkinFailed'))
     }
   }
 
@@ -83,24 +92,24 @@ export default function StudentAttendance() {
     <div className="space-y-6 animate-fade-in print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">تسجيل الحضور</h1>
-          <CardDescription>سجل حضورك في المحاضرات عبر مسح رمز QR بالكاميرا</CardDescription>
+          <h1 className="text-2xl font-bold text-slate-900">{t('student.attendance.title')}</h1>
+          <CardDescription>{t('student.attendance.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">
           <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={schedules.length === 0}>
-            <FileText className="w-4 h-4 ml-1" />سجل PDF
+            <FileText className="w-4 h-4 ms-1" />{t('student.attendance.exportPdf')}
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={schedules.length === 0}>
-            <FileSpreadsheet className="w-4 h-4 ml-1" />سجل Excel
+            <FileSpreadsheet className="w-4 h-4 ms-1" />{t('student.attendance.exportExcel')}
           </Button>
-          <Button variant="outline" size="icon" onClick={() => window.print()} title="طباعة">
+          <Button variant="outline" size="icon" onClick={() => window.print()} title={t('common.print')}>
             <Printer className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
       {schedules.length === 0 ? (
-        <EmptyState icon={ClipboardCheck} title="لا توجد محاضرات" description="ليس لديك أي محاضرات مسجلة لتسجيل الحضور فيها." />
+        <EmptyState icon={ClipboardCheck} title={t('student.attendance.emptyTitle')} description={t('student.attendance.emptyDescription')} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {schedules.map(sch => (
@@ -114,10 +123,10 @@ export default function StudentAttendance() {
                   </div>
                 </div>
                 <div className="text-sm text-slate-600 mb-4">
-                  <p>{DAY_LABELS[sch.day] || sch.day} | {sch.startTime} - {sch.endTime}</p>
+                  <p>{dayLabels[sch.day] || sch.day} | {sch.startTime} - {sch.endTime}</p>
                 </div>
                 <Button className="w-full" onClick={() => { setSelectedSchedule(sch); setModalOpen(true) }}>
-                  <QrCode className="w-4 h-4 ml-2" />تسجيل حضور
+                  <QrCode className="w-4 h-4 ms-2" />{t('student.attendance.registerButton')}
                 </Button>
               </CardContent>
             </Card>
@@ -125,13 +134,12 @@ export default function StudentAttendance() {
         </div>
       )}
 
-      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setQrData(''); stopScanner() }} title="تسجيل الحضور" size="lg">
+      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setQrData(''); stopScanner() }} title={t('student.attendance.modalTitle')} size="lg">
         <div className="space-y-4">
           <p className="text-sm text-slate-600">
-            المحاضرة: {selectedSchedule?.courseId?.name || selectedSchedule?.courseId?.code}
+            {selectedSchedule?.courseId?.name || selectedSchedule?.courseId?.code}
           </p>
 
-          {/* QR Scanner */}
           <div className="relative">
             {scanning ? (
               <div className="bg-black rounded-lg overflow-hidden">
@@ -142,34 +150,34 @@ export default function StudentAttendance() {
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <p className="text-center text-xs text-slate-400 py-2 bg-black/80">وجه الكاميرا نحو رمز QR</p>
+                <p className="text-center text-xs text-slate-400 py-2 bg-black/80">{t('student.attendance.scannerHint')}</p>
               </div>
             ) : (
               <Button variant="outline" className="w-full" onClick={startScanner}>
-                <Camera className="w-4 h-4 ml-2" />مسح QR بالكاميرا
+                <Camera className="w-4 h-4 ms-2" />{t('student.attendance.scanButton')}
               </Button>
             )}
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex-1 border-t border-slate-200" />
-            <span className="text-xs text-slate-400">أو أدخل الرمز يدوياً</span>
+            <span className="text-xs text-slate-400">{t('student.attendance.manualDivider')}</span>
             <div className="flex-1 border-t border-slate-200" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">رمز QR</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('student.attendance.qrLabel')}</label>
             <textarea
               className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-mono focus:ring-4 focus:ring-slate-900/10 focus:border-slate-500 outline-none transition-all"
               rows={2}
               value={qrData}
               onChange={e => setQrData(e.target.value)}
-              placeholder="أو قم بلصق رمز QR هنا"
+              placeholder={t('student.attendance.qrPlaceholder')}
             />
           </div>
 
           <Button className="w-full" onClick={handleCheckIn}>
-            <QrCode className="w-4 h-4 ml-2" />تأكيد الحضور
+            <QrCode className="w-4 h-4 ms-2" />{t('student.attendance.confirmButton')}
           </Button>
         </div>
       </Modal>

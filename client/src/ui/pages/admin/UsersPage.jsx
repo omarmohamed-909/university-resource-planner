@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Card, { CardContent, CardDescription } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -13,14 +14,15 @@ import { Pencil, Plus, RefreshCw, Search, Trash2, Users, XCircle } from 'lucide-
 import api from '../../../infrastructure/api/axios'
 
 const roleConfig = {
-  admin: { label: 'مدير', variant: 'danger' },
-  doctor: { label: 'دكتور', variant: 'success' },
-  student: { label: 'طالب', variant: 'info' }
+  admin: { variant: 'danger' },
+  doctor: { variant: 'success' },
+  student: { variant: 'info' }
 }
 
 const emptyForm = { name: '', email: '', password: '', role: 'student', department: '' }
 
 export default function AdminUsers() {
+  const { t } = useTranslation()
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -64,29 +66,29 @@ export default function AdminUsers() {
         const payload = { name: form.name, email: form.email, role: form.role, department: form.department }
         if (form.password) payload.password = form.password
         await api.put(`/users/${editUser.id}`, payload)
-        toast.success('تم تحديث المستخدم')
+        toast.success(t('admin.users.toast.updated'))
       } else {
         await api.post('/auth/register', form)
-        toast.success('تم إضافة المستخدم')
+        toast.success(t('admin.users.toast.added'))
       }
       setModalOpen(false)
       fetchUsers()
     } catch (error) {
-      toast.error(error.response?.data?.message || 'حدث خطأ')
+      toast.error(error.response?.data?.message || t('admin.users.toast.error'))
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async (id) => {
-    const ok = await confirm('هل أنت متأكد من حذف هذا المستخدم؟')
+    const ok = await confirm(t('admin.users.confirmDelete'))
     if (!ok) return
     try {
       await api.delete(`/users/${id}`)
-      toast.success('تم الحذف')
+      toast.success(t('admin.users.toast.deleted'))
       fetchUsers()
     } catch {
-      toast.error('حدث خطأ')
+      toast.error(t('admin.users.toast.error'))
     }
   }
 
@@ -103,15 +105,15 @@ export default function AdminUsers() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">المستخدمون</h1>
-          <CardDescription>إدارة حسابات المستخدمين والصلاحيات الأساسية</CardDescription>
+          <h1 className="text-2xl font-bold text-slate-900">{t('admin.users.title')}</h1>
+          <CardDescription>{t('admin.users.description')}</CardDescription>
         </div>
-        <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />إضافة مستخدم</Button>
+        <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.users.addButton')}</Button>
       </div>
 
       <div className="relative max-w-sm">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <Input value={search} onChange={event => setSearch(event.target.value)} placeholder="بحث عن مستخدم..." className="pr-10" />
+        <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Input value={search} onChange={event => setSearch(event.target.value)} placeholder={t('admin.users.searchPlaceholder')} className="pe-10" />
       </div>
 
       {fetchError ? (
@@ -122,19 +124,19 @@ export default function AdminUsers() {
                 <XCircle className="w-6 h-6 text-red-500" />
               </div>
               <div>
-                <p className="font-semibold text-slate-900">تعذر تحميل المستخدمين</p>
-                <p className="text-sm text-slate-500 mt-1">حدث خطأ في الاتصال. حاول مرة أخرى.</p>
+                <p className="font-semibold text-slate-900">{t('common.error.loadUsers')}</p>
+                <p className="text-sm text-slate-500 mt-1">{t('common.error.tryAgain')}</p>
               </div>
-              <Button variant="outline" onClick={fetchUsers}><RefreshCw className="w-4 h-4 me-2" />إعادة المحاولة</Button>
+              <Button variant="outline" onClick={fetchUsers}><RefreshCw className="w-4 h-4 me-2" />{t('common.retry')}</Button>
             </div>
           </CardContent>
         </Card>
       ) : users.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="لا يوجد مستخدمون"
-          description="لم يتم إضافة أي مستخدم بعد."
-          action={<Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />إضافة مستخدم</Button>}
+          title={t('admin.users.emptyTitle')}
+          description={t('admin.users.emptyDescription')}
+          action={<Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.users.addButton')}</Button>}
         />
       ) : (
         <Card>
@@ -143,11 +145,11 @@ export default function AdminUsers() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b bg-slate-50">
-                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">الاسم</th>
-                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">البريد</th>
-                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">الدور</th>
-                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">القسم</th>
-                    <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-slate-600">إجراءات</th>
+                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('admin.users.tableName')}</th>
+                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('admin.users.tableEmail')}</th>
+                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('admin.users.tableRole')}</th>
+                    <th scope="col" className="px-4 py-3 text-right text-sm font-medium text-slate-600">{t('admin.users.tableDepartment')}</th>
+                    <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-slate-600">{t('admin.users.tableActions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -164,12 +166,12 @@ export default function AdminUsers() {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-500 truncate max-w-[200px]">{user.email}</td>
-                        <td className="px-4 py-3"><Badge variant={cfg.variant} size="lg">{cfg.label}</Badge></td>
+                        <td className="px-4 py-3"><Badge variant={cfg.variant} size="lg">{t(`role.${user.role}`)}</Badge></td>
                         <td className="px-4 py-3 text-sm text-slate-500">{user.department || '-'}</td>
                         <td className="px-4 py-3 text-left">
                           <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(user)} aria-label={`تعديل ${user.name}`}><Pencil className="w-4 h-4" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)} aria-label={`حذف ${user.name}`} className="text-red-400 hover:text-red-600 hover:bg-red-50">
+                            <Button variant="ghost" size="icon" onClick={() => openEdit(user)} aria-label={t('admin.users.editButton', { name: user.name })}><Pencil className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)} aria-label={t('admin.users.deleteButton', { name: user.name })} className="text-red-400 hover:text-red-600 hover:bg-red-50">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -180,44 +182,44 @@ export default function AdminUsers() {
                 </tbody>
               </table>
               {filtered.length === 0 && search && (
-                <div className="py-8 text-center text-sm text-slate-400">لا توجد نتائج للبحث</div>
+                <div className="py-8 text-center text-sm text-slate-400">{t('admin.users.noSearchResults')}</div>
               )}
             </div>
           </CardContent>
         </Card>
       )}
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editUser ? 'تعديل مستخدم' : 'إضافة مستخدم'}>
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editUser ? t('admin.users.modalEdit') : t('admin.users.modalAdd')}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="user-name" className="block text-sm font-medium text-slate-700 mb-1">الاسم</label>
-            <Input id="user-name" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="الاسم" required />
+            <label htmlFor="user-name" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formName')}</label>
+            <Input id="user-name" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder={t('admin.users.formNamePlaceholder')} required />
           </div>
           <div>
-            <label htmlFor="user-email" className="block text-sm font-medium text-slate-700 mb-1">البريد الإلكتروني</label>
-            <Input id="user-email" type="email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} placeholder="البريد الإلكتروني" required />
+            <label htmlFor="user-email" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formEmail')}</label>
+            <Input id="user-email" type="email" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} placeholder={t('admin.users.formEmailPlaceholder')} required />
           </div>
           <div>
-            <label htmlFor="user-password" className="block text-sm font-medium text-slate-700 mb-1">كلمة المرور</label>
-            <Input id="user-password" type="password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} placeholder={editUser ? 'اتركه فارغاً إذا لم ترد التغيير' : 'كلمة المرور'} required={!editUser} />
+            <label htmlFor="user-password" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formPassword')}</label>
+            <Input id="user-password" type="password" value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} placeholder={editUser ? t('admin.users.formPasswordEditPlaceholder') : t('admin.users.formPasswordPlaceholder')} required={!editUser} />
           </div>
           <div>
-            <label htmlFor="user-role" className="block text-sm font-medium text-slate-700 mb-1">الدور</label>
+            <label htmlFor="user-role" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formRole')}</label>
             <Select
               id="user-role"
-              options={[{ value: 'admin', label: 'مدير' }, { value: 'doctor', label: 'دكتور' }, { value: 'student', label: 'طالب' }]}
+              options={[{ value: 'admin', label: t('role.admin') }, { value: 'doctor', label: t('role.doctor') }, { value: 'student', label: t('role.student') }]}
               value={form.role}
               onChange={event => setForm({ ...form, role: event.target.value })}
-              placeholder="الدور"
+              placeholder={t('admin.users.formRolePlaceholder')}
             />
           </div>
           <div>
-            <label htmlFor="user-department" className="block text-sm font-medium text-slate-700 mb-1">القسم</label>
-            <Input id="user-department" value={form.department} onChange={event => setForm({ ...form, department: event.target.value })} placeholder="القسم" />
+            <label htmlFor="user-department" className="block text-sm font-medium text-slate-700 mb-1">{t('admin.users.formDepartment')}</label>
+            <Input id="user-department" value={form.department} onChange={event => setForm({ ...form, department: event.target.value })} placeholder={t('admin.users.formDepartmentPlaceholder')} />
           </div>
           <div className="flex gap-3 pt-2">
-            <Button type="submit" loading={saving}>{editUser ? 'تحديث' : 'إضافة'}</Button>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>إلغاء</Button>
+            <Button type="submit" loading={saving}>{editUser ? t('admin.users.updateButton') : t('admin.users.addButtonSubmit')}</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
           </div>
         </form>
       </Modal>

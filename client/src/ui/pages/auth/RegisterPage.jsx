@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import { GoogleLogin } from '@react-oauth/google'
 import toast from 'react-hot-toast'
 import { UserPlus, GraduationCap, Eye, EyeOff, CheckCircle, Info, ArrowRight, ArrowLeft } from 'lucide-react'
 import QnuLogo from '../../components/ui/QnuLogo'
+import LanguageSwitcher from '../../components/LanguageSwitcher'
 
-/* Google SVG */
 function GoogleIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24">
@@ -18,10 +19,9 @@ function GoogleIcon() {
   )
 }
 
-/* Custom input */
 function Field({ label, hint, children }) {
   return (
-    <div className="flex flex-col gap-1.5 text-right" dir="rtl">
+    <div className="flex flex-col gap-1.5">
       <label className="block text-xs font-bold text-slate-500 uppercase tracking-[0.08em]">{label}</label>
       {children}
       {hint && <p className="text-xs text-slate-400 mt-1">{hint}</p>}
@@ -32,42 +32,43 @@ function Field({ label, hint, children }) {
 function PInput({ rightSlot, leftSlot, className = '', ...props }) {
   return (
     <div className="relative">
-      {rightSlot && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">{rightSlot}</div>}
+      {rightSlot && <div className="absolute end-4 top-1/2 -translate-y-1/2 text-slate-400">{rightSlot}</div>}
       <input
-        className={`w-full h-14 px-5 ${leftSlot ? 'pl-12' : ''} ${rightSlot ? 'pr-12' : ''}
+        className={`w-full h-14 px-5 ${leftSlot ? 'ps-12' : ''} ${rightSlot ? 'pe-12' : ''}
                     rounded-lg border border-slate-200 bg-slate-50/50 shadow-sm text-slate-900 text-base
                    placeholder:text-slate-400
                    focus:outline-none focus:border-slate-500 focus:ring-4 focus:ring-slate-900/15 focus:shadow-md
                    hover:border-slate-300 transition-all duration-200
                    ![autofill]:shadow-[inset_0_0_0px_1000px_white]
                    ![autofill]:text-slate-900 ${className}`}
-        style={{ 
-          paddingLeft: leftSlot ? '48px' : '20px',
-          paddingRight: rightSlot ? '48px' : '20px',
-          ...props.style 
+        style={{
+          paddingInlineStart: leftSlot ? '48px' : '20px',
+          paddingInlineEnd: rightSlot ? '48px' : '20px',
+          ...props.style
         }}
         {...props}
       />
-      {leftSlot && <div className="absolute left-4 top-1/2 -translate-y-1/2">{leftSlot}</div>}
+      {leftSlot && <div className="absolute start-4 top-1/2 -translate-y-1/2">{leftSlot}</div>}
     </div>
   )
 }
 
-/* Password strength */
 function PasswordStrength({ password }) {
+  const { t } = useTranslation()
   if (!password) return null
   const checks = [
-    { ok: password.length >= 8,  label: '٨ أحرف' },
-    { ok: /[A-Z]/.test(password), label: 'كبير' },
-    { ok: /\d/.test(password),    label: 'رقم' },
+    { ok: password.length >= 8,  label: t('auth.register.passwordHint') },
+    { ok: /[A-Z]/.test(password), label: t('auth.register.passwordUppercase') },
+    { ok: /\d/.test(password),    label: t('auth.register.passwordDigit') },
   ]
   const score = checks.filter(c => c.ok).length
   const barColor = ['bg-red-400', 'bg-amber-400', 'bg-emerald-500'][score - 1] || 'bg-slate-200'
-  const strengthLabel = ['ضعيفة', 'متوسطة', 'قوية'][score - 1] || ''
+  const strengthLabels = [t('auth.register.passwordWeak'), t('auth.register.passwordMedium'), t('auth.register.passwordStrong')]
+  const strengthLabel = strengthLabels[score - 1] || ''
   const strengthColor = ['text-red-500', 'text-amber-500', 'text-emerald-600'][score - 1] || ''
 
   return (
-    <div className="flex flex-col gap-2 mt-2.5" dir="rtl">
+    <div className="flex flex-col gap-2 mt-2.5">
       <div className="flex gap-1.5 w-full">
         {[0, 1, 2].map(i => (
           <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < score ? barColor : 'bg-slate-200'}`} />
@@ -88,9 +89,9 @@ function PasswordStrength({ password }) {
   )
 }
 
-/* Step indicator */
 function Steps({ current }) {
-  const steps = ['بياناتك', 'كلمة المرور']
+  const { t } = useTranslation()
+  const steps = [t('auth.register.step1'), t('auth.register.step2')]
   return (
     <div className="flex items-center justify-center gap-2 mt-5">
       {steps.map((s, i) => {
@@ -119,9 +120,11 @@ function Steps({ current }) {
 }
 
 export default function RegisterPage() {
+  const { t, i18n } = useTranslation()
   const navigate    = useNavigate()
   const register    = useAuthStore(s => s.register)
   const googleLogin = useAuthStore(s => s.googleLogin)
+  const isRtl = i18n.dir() === 'rtl'
 
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({ name: '', email: '', department: '', password: '', confirmPassword: '', role: 'student' })
@@ -134,9 +137,9 @@ export default function RegisterPage() {
     setGoogleLoading(true)
     try {
       const user = await googleLogin(credentialResponse.credential)
-      toast.success('تم التسجيل بـ Google بنجاح! 🎉')
+      toast.success(t('auth.register.toast.googleSuccess'))
       navigate(`/${user.role}`)
-    } catch (err) { toast.error(err.response?.data?.message || 'فشل التسجيل') }
+    } catch (err) { toast.error(err.response?.data?.message || t('auth.register.toast.googleFailed')) }
     finally { setGoogleLoading(false) }
   }
 
@@ -146,79 +149,60 @@ export default function RegisterPage() {
   const upd = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
 
   const goNext = () => {
-    if (!form.name.trim())  return toast.error('يرجى إدخال الاسم')
-    if (!form.email.trim()) return toast.error('يرجى إدخال البريد')
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return toast.error('البريد الإلكتروني غير صالح')
+    if (!form.name.trim())  return toast.error(t('auth.register.toast.nameRequired'))
+    if (!form.email.trim()) return toast.error(t('auth.register.toast.emailRequired'))
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return toast.error(t('auth.register.toast.emailInvalid'))
     setStep(2)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (form.password.length < 6)              return toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل')
-    if (form.password !== form.confirmPassword) return toast.error('كلمتا المرور غير متطابقتين')
+    if (form.password.length < 6)              return toast.error(t('auth.register.toast.passwordTooShort'))
+    if (form.password !== form.confirmPassword) return toast.error(t('auth.register.toast.passwordsMismatch'))
     setLoading(true)
     try {
       const { confirmPassword, ...payload } = form
       const user = await register(payload)
-      toast.success('تم إنشاء حسابك بنجاح! 🎉')
+      toast.success(t('auth.register.toast.accountCreated'))
       navigate(`/${user.role}`)
-    } catch (err) { toast.error(err.response?.data?.message || 'خطأ في إنشاء الحساب') }
+    } catch (err) { toast.error(err.response?.data?.message || t('auth.register.toast.accountFailed')) }
     finally { setLoading(false) }
   }
 
-  const handleGoogle = useGoogleLogin({
-    onSuccess: async (token) => {
-      setGoogleLoading(true)
-      try {
-        const user = await googleLogin(token.access_token)
-        toast.success('تم التسجيل بـ Google بنجاح! 🎉')
-        navigate(`/${user.role}`)
-      } catch (err) { toast.error(err.response?.data?.message || 'فشل التسجيل') }
-      finally { setGoogleLoading(false) }
-    },
-    onError: () => toast.error('تم الإلغاء'),
-  })
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 bg-[#f5f7fb]">
+      <div className="fixed top-4 end-4 z-50">
+        <LanguageSwitcher />
+      </div>
 
-      {/* Floating card */}
       <div className="w-full max-w-[560px] animate-slide-up">
 
-        {/* Dark header */}
-        <div className="bg-[#080f1a] rounded-t-lg px-8 pt-8 pb-6 text-center
-                        relative">
+        <div className="bg-[#080f1a] rounded-t-lg px-8 pt-8 pb-6 text-center relative">
           <div className="absolute inset-0 overflow-hidden rounded-t-lg">
-            {/* subtle glow */}
             <div className="absolute inset-0 bg-slate-900/30" />
           </div>
 
-          {/* Absolute floating logo top-right */}
-          <div className="absolute top-3 right-5 w-16 h-16 rounded-full overflow-hidden
-                          bg-white p-1 shadow-xl flex-shrink-0 flex items-center justify-center z-10">
+          <div className="absolute top-3 end-5 w-16 h-16 rounded-full overflow-hidden bg-white p-1 shadow-xl flex-shrink-0 flex items-center justify-center z-10">
             <QnuLogo className="w-full h-full object-contain" />
           </div>
 
           <div className="relative z-10 pt-4 pb-2 text-center mt-4">
-            <h1 className="text-2xl font-bold text-white">إنشاء حساب جديد</h1>
-            <p className="text-blue-400 text-sm mt-1 mb-6">انضم إلى نظام QNU</p>
+            <h1 className="text-2xl font-bold text-white">{t('auth.register.title')}</h1>
+            <p className="text-blue-400 text-sm mt-1 mb-6">{t('auth.register.subtitle')}</p>
             <Steps current={step} />
           </div>
         </div>
 
-        {/* White body */}
         <div className="bg-white rounded-b-lg shadow-xl px-8 pb-8 pt-8 border-x border-b border-slate-100">
 
-          {/* Step 1 */}
           {step === 1 && (
-            <div className="flex flex-col gap-4" dir="rtl">
-              {/* Google */}
+            <div className="flex flex-col gap-4">
               <div style={{ marginTop: '24px' }}>
                 {isGoogleConfigured ? (
                   <div className="w-full flex justify-center">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
-                      onError={() => toast.error('تم الإلغاء')}
+                      onError={() => toast.error(t('auth.register.toast.googleCancelled'))}
                       width={480}
                       text="signup_with"
                       shape="rectangular"
@@ -230,15 +214,11 @@ export default function RegisterPage() {
                 ) : (
                 <div className="relative">
                   <button disabled
-                    className="w-full h-12 flex items-center justify-center gap-3 px-5
-                               border border-slate-200 rounded-lg text-slate-400 font-semibold text-[15px]
-                               opacity-55 cursor-not-allowed">
-                    <GoogleIcon /> التسجيل بحساب Google
+                    className="w-full h-12 flex items-center justify-center gap-3 px-5 border border-slate-200 rounded-lg text-slate-400 font-semibold text-[15px] opacity-55 cursor-not-allowed">
+                    <GoogleIcon /> {t('auth.register.googleButton')}
                   </button>
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap
-                                   bg-amber-50 border border-amber-200 text-amber-700
-                                   text-[11px] font-medium px-3 py-0.5 rounded-full">
-                    يحتاج GOOGLE_CLIENT_ID في .env
+                  <span className="absolute -top-3 inset-x-0 mx-auto w-fit whitespace-nowrap bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-medium px-3 py-0.5 rounded-full">
+                    {t('auth.register.googleNotConfigured')}
                   </span>
                 </div>
               )}
@@ -246,46 +226,38 @@ export default function RegisterPage() {
 
               <div className="flex items-center gap-4">
                 <div className="flex-1 h-px bg-slate-100" />
-                <span className="text-xs text-slate-400">أو بالبريد الإلكتروني</span>
+                <span className="text-xs text-slate-400">{t('auth.register.divider')}</span>
                 <div className="flex-1 h-px bg-slate-100" />
               </div>
 
-              <Field label="الاسم الكامل">
-                <PInput value={form.name} onChange={upd('name')} placeholder="محمد أحمد علي" required />
+              <Field label={t('auth.register.nameLabel')}>
+                <PInput value={form.name} onChange={upd('name')} placeholder={t('auth.register.namePlaceholder')} required />
               </Field>
 
-              <Field label="البريد الإلكتروني">
+              <Field label={t('auth.register.emailLabel')}>
                 <PInput type="email" value={form.email} onChange={upd('email')} placeholder="student@svnu.edu" required dir="ltr" />
               </Field>
 
-              <Field label="القسم" hint="اختياري – مثال: نظم المعلومات">
-                <PInput value={form.department} onChange={upd('department')} placeholder="نظم المعلومات" />
+              <Field label={t('auth.register.departmentLabel')} hint={t('auth.register.departmentHint')}>
+                <PInput value={form.department} onChange={upd('department')} placeholder={t('auth.register.departmentPlaceholder')} />
               </Field>
 
-              {/* Student-only notice */}
               <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-lg">
                 <Info size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-blue-700 leading-relaxed">
-                  التسجيل المباشر متاح للطلاب فقط. حسابات أعضاء هيئة التدريس يضيفها مدير النظام.
-                </p>
+                <p className="text-sm text-blue-700 leading-relaxed">{t('auth.register.infoNotice')}</p>
               </div>
 
               <button onClick={goNext}
-                className="w-full h-14 rounded-lg font-bold text-base text-white
-                           bg-slate-950 hover:bg-slate-800
-                           hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99]
-                           transition-all duration-200 cursor-pointer
-                           flex items-center justify-center gap-2 mt-4">
-                التالي
-                <ArrowLeft size={18} />
+                className="w-full h-14 rounded-lg font-bold text-base text-white bg-slate-950 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-4">
+                {t('auth.register.nextButton')}
+                {isRtl ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
               </button>
             </div>
           )}
 
-          {/* Step 2 */}
           {step === 2 && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5 mt-6" dir="rtl">
-              <Field label="كلمة المرور">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 mt-6">
+              <Field label={t('auth.register.passwordLabel')}>
                 <PInput
                   type={showPass ? 'text' : 'password'}
                   value={form.password} onChange={upd('password')}
@@ -300,7 +272,7 @@ export default function RegisterPage() {
                 <PasswordStrength password={form.password} />
               </Field>
 
-              <Field label="تأكيد كلمة المرور">
+              <Field label={t('auth.register.confirmPasswordLabel')}>
                 <PInput
                   type={showConfirm ? 'text' : 'password'}
                   value={form.confirmPassword} onChange={upd('confirmPassword')}
@@ -315,40 +287,34 @@ export default function RegisterPage() {
                   }
                 />
                 {form.confirmPassword && form.password !== form.confirmPassword && (
-                  <p className="text-xs text-red-500 mt-1.5">كلمتا المرور غير متطابقتين</p>
+                  <p className="text-xs text-red-500 mt-1.5">{t('auth.register.toast.passwordsMismatch')}</p>
                 )}
                 {form.confirmPassword && form.password === form.confirmPassword && form.confirmPassword.length >= 6 && (
                   <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1.5">
-                    <CheckCircle size={12} /> كلمتا المرور متطابقتان ✓
+                    <CheckCircle size={12} /> {t('auth.register.confirmPasswordMatch')}
                   </p>
                 )}
               </Field>
 
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setStep(1)}
-                  className="flex items-center justify-center gap-2 px-5 h-12 rounded-lg
-                             border border-slate-200 text-slate-600 font-semibold text-sm
-                             hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 cursor-pointer">
-                  <ArrowRight size={16} /> رجوع
+                  className="flex items-center justify-center gap-2 px-5 h-12 rounded-lg border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 cursor-pointer">
+                  {isRtl ? <ArrowRight size={16} /> : <ArrowLeft size={16} />} {t('auth.register.backButton')}
                 </button>
                 <button type="submit" disabled={loading}
-                  className="flex-1 h-12 rounded-lg font-bold text-base text-white
-                             bg-slate-950 hover:bg-slate-800
-                             hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99]
-                             transition-all duration-200 cursor-pointer disabled:opacity-60
-                             flex items-center justify-center gap-2">
+                  className="flex-1 h-12 rounded-lg font-bold text-base text-white bg-slate-950 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2">
                   {loading
                     ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                     : <UserPlus size={18} />}
-                  {loading ? 'جاري الإنشاء...' : 'إنشاء الحساب'}
+                  {loading ? t('auth.register.loadingButton') : t('auth.register.submitButton')}
                 </button>
               </div>
             </form>
           )}
 
           <p className="text-center text-sm text-slate-500 mt-6">
-            لديك حساب؟{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">تسجيل الدخول</Link>
+            {t('auth.register.hasAccount')}{' '}
+            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">{t('auth.register.loginLink')}</Link>
           </p>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Card, { CardContent, CardTitle, CardHeader, CardDescription } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -14,6 +15,7 @@ import { Plus, Pencil, Trash2, BookOpen, UserPlus, RefreshCw, XCircle } from 'lu
 import api from '../../../infrastructure/api/axios'
 
 export default function AdminCourses() {
+  const { t } = useTranslation()
   const [courses, setCourses] = useState([])
   const [users, setUsers] = useState([])
   const [students, setStudents] = useState([])
@@ -95,12 +97,12 @@ export default function AdminCourses() {
       await Promise.all(toRemove.map(studentId =>
         api.delete(`/courses/${enrollmentCourse.id}/enroll/${studentId}`)
       ))
-      toast.success('تم تحديث تسجيل الطلاب')
+      toast.success(t('admin.courses.toast.enrollmentUpdated'))
       setEnrollmentOpen(false)
       setEnrollmentCourse(null)
       fetchData()
     } catch (error) {
-      toast.error(error.response?.data?.message || 'تعذر تحديث تسجيل الطلاب')
+      toast.error(error.response?.data?.message || t('admin.courses.toast.enrollmentFailed'))
     } finally {
       setEnrollmentSaving(false)
     }
@@ -108,39 +110,39 @@ export default function AdminCourses() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.doctorId) return toast.error('يجب اختيار دكتور للمادة')
+    if (!form.doctorId) return toast.error(t('admin.courses.toast.noDoctor'))
     try {
       if (editItem) {
         await api.put(`/courses/${editItem.id}`, form)
-        toast.success('تم تحديث المادة')
+        toast.success(t('admin.courses.toast.updated'))
       } else {
         await api.post('/courses', form)
-        toast.success('تم إضافة المادة')
+        toast.success(t('admin.courses.toast.added'))
       }
       setModalOpen(false)
       fetchData()
     } catch (error) {
-      toast.error(error.response?.data?.message || 'حدث خطأ')
+      toast.error(error.response?.data?.message || t('admin.courses.toast.error'))
     }
   }
 
   const handleDelete = async (id) => {
-    const ok = await confirm('هل أنت متأكد من حذف هذه المادة؟')
+    const ok = await confirm(t('admin.courses.confirmDelete'))
     if (!ok) return
     try {
       await api.delete(`/courses/${id}`)
-      toast.success('تم الحذف')
+      toast.success(t('admin.courses.toast.deleted'))
       fetchData()
-    } catch { toast.error('حدث خطأ') }
+    } catch { toast.error(t('admin.courses.toast.error')) }
   }
 
   if (loading) return <Skeleton type="card" count={6} />
   if (fetchError) return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <XCircle className="w-12 h-12 text-red-400 mb-4" />
-      <h2 className="text-lg font-semibold text-slate-900 mb-1">تعذر تحميل البيانات</h2>
-      <p className="text-sm text-slate-500 mb-4">حدث خطأ أثناء الاتصال بالخادم</p>
-      <Button onClick={() => { setFetchError(false); setLoading(true); fetchData().finally(() => setLoading(false)) }}><RefreshCw className="w-4 h-4 me-2" />إعادة المحاولة</Button>
+      <h2 className="text-lg font-semibold text-slate-900 mb-1">{t('common.error.loadData')}</h2>
+      <p className="text-sm text-slate-500 mb-4">{t('common.error.connectionError')}</p>
+      <Button onClick={() => { setFetchError(false); setLoading(true); fetchData().finally(() => setLoading(false)) }}><RefreshCw className="w-4 h-4 me-2" />{t('common.retry')}</Button>
     </div>
   )
 
@@ -148,14 +150,14 @@ export default function AdminCourses() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">المواد الدراسية</h1>
-          <CardDescription>إدارة المواد والمقررات الدراسية</CardDescription>
+          <h1 className="text-2xl font-bold text-slate-900">{t('admin.courses.title')}</h1>
+          <CardDescription>{t('admin.courses.description')}</CardDescription>
         </div>
-        <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />إضافة مادة</Button>
+        <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.courses.addButton')}</Button>
       </div>
 
       {courses.length === 0 ? (
-        <EmptyState icon={BookOpen} title="لا توجد مواد" description="لم يتم إضافة أي مادة بعد. أضف أول مادة دراسية." action={<Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />إضافة مادة</Button>} />
+        <EmptyState icon={BookOpen} title={t('admin.courses.emptyTitle')} description={t('admin.courses.emptyDescription')} action={<Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.courses.addButton')}</Button>} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map(course => {
@@ -175,17 +177,17 @@ export default function AdminCourses() {
                       <p className="text-xs text-slate-500 font-mono">{course.code}</p>
                     </div>
                   </div>
-                  <Badge variant="purple" size="lg">{course.creditHours} ساعات</Badge>
+                  <Badge variant="purple" size="lg">{t('admin.courses.creditHours', { count: course.creditHours })}</Badge>
                 </div>
                 <div className="mt-3 space-y-1 text-sm text-slate-600">
-                  <p>القسم: {course.department || 'غير محدد'}</p>
-                  <p>الدكتور: {users.find(u => u.id === getId(course.doctorId))?.name || 'غير محدد'}</p>
+                  <p>{t('admin.courses.department', { department: course.department || t('admin.courses.departmentUnknown') })}</p>
+                  <p>{t('admin.courses.doctor', { doctor: users.find(u => u.id === getId(course.doctorId))?.name || t('admin.courses.doctorUnknown') })}</p>
                 </div>
                 {/* Enrollment bar */}
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-slate-500">التسجيل</span>
-                    <span className={cn('font-medium', pct >= 80 ? 'text-green-600' : 'text-slate-700')}>{enrolled} طالب</span>
+                    <span className="text-slate-500">{t('admin.courses.enrollment')}</span>
+                    <span className={cn('font-medium', pct >= 80 ? 'text-green-600' : 'text-slate-700')}>{t('admin.courses.enrolled', { count: enrolled })}</span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                     <div className={cn(
@@ -195,9 +197,9 @@ export default function AdminCourses() {
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(course)}><Pencil className="w-4 h-4 me-1" />تعديل</Button>
-                  <Button variant="secondary" size="sm" onClick={() => openEnrollment(course)}><UserPlus className="w-4 h-4 me-1" />الطلاب</Button>
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(course.id)}><Trash2 className="w-4 h-4 me-1" />حذف</Button>
+                  <Button variant="outline" size="sm" onClick={() => openEdit(course)}><Pencil className="w-4 h-4 me-1" />{t('admin.courses.editButton')}</Button>
+                  <Button variant="secondary" size="sm" onClick={() => openEnrollment(course)}><UserPlus className="w-4 h-4 me-1" />{t('admin.courses.enrollButton')}</Button>
+                  <Button variant="destructive" size="sm" onClick={() => handleDelete(course.id)}><Trash2 className="w-4 h-4 me-1" />{t('admin.courses.deleteButton')}</Button>
                 </div>
               </CardContent>
             </Card>
@@ -206,48 +208,48 @@ export default function AdminCourses() {
         </div>
       )}
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'تعديل مادة' : 'إضافة مادة'}>
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? t('admin.courses.modalEdit') : t('admin.courses.modalAdd')}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">كود المادة</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formCode')}</label>
               <Input value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">اسم المادة</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formName')}</label>
               <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">الدكتور</label>
-            <Select value={form.doctorId} onChange={e => setForm({ ...form, doctorId: e.target.value })} placeholder="اختر الدكتور" options={users.map(u => ({ value: u.id, label: u.name }))} />
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formDoctor')}</label>
+            <Select value={form.doctorId} onChange={e => setForm({ ...form, doctorId: e.target.value })} placeholder={t('admin.courses.formDoctorPlaceholder')} options={users.map(u => ({ value: u.id, label: u.name }))} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">القسم</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formDepartment')}</label>
               <Input value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">الساعات المعتمدة</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.courses.formHours')}</label>
               <Input type="number" value={form.creditHours} onChange={e => setForm({ ...form, creditHours: Number(e.target.value) })} />
             </div>
           </div>
           <div className="flex gap-3 pt-2">
-            <Button type="submit">{editItem ? 'تحديث' : 'إضافة'}</Button>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>إلغاء</Button>
+            <Button type="submit">{editItem ? t('admin.courses.updateButton') : t('admin.courses.addButtonSubmit')}</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
           </div>
         </form>
       </Modal>
-      <Modal isOpen={enrollmentOpen} onClose={() => setEnrollmentOpen(false)} title="تسجيل الطلاب في المادة" description={enrollmentCourse ? `${enrollmentCourse.code} - ${enrollmentCourse.name}` : ''} size="lg">
+      <Modal isOpen={enrollmentOpen} onClose={() => setEnrollmentOpen(false)} title={t('admin.courses.modalEnroll')} description={enrollmentCourse ? `${enrollmentCourse.code} - ${enrollmentCourse.name}` : ''} size="lg">
         <div className="space-y-4">
           <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
-            <span className="text-sm text-slate-600">الطلاب المسجلون</span>
+            <span className="text-sm text-slate-600">{t('admin.courses.enrolledStudents')}</span>
             <Badge variant="primary" size="lg">{selectedStudents.length}</Badge>
           </div>
 
           <div className="max-h-[360px] overflow-y-auto rounded-lg border border-slate-200 divide-y">
             {students.length === 0 ? (
-              <div className="p-5 text-center text-sm text-slate-400">لا يوجد طلاب متاحون</div>
+              <div className="p-5 text-center text-sm text-slate-400">{t('admin.courses.noStudents')}</div>
             ) : students.map(student => {
               const checked = selectedStudents.includes(student.id)
               return (
@@ -269,8 +271,8 @@ export default function AdminCourses() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button onClick={handleSaveEnrollment} loading={enrollmentSaving}>حفظ التسجيل</Button>
-            <Button variant="outline" onClick={() => setEnrollmentOpen(false)}>إلغاء</Button>
+            <Button onClick={handleSaveEnrollment} loading={enrollmentSaving}>{t('admin.courses.saveEnrollment')}</Button>
+            <Button variant="outline" onClick={() => setEnrollmentOpen(false)}>{t('common.cancel')}</Button>
           </div>
         </div>
       </Modal>

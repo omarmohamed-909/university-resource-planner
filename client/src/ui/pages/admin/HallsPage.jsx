@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useHallStore } from '../../store/hallStore'
 import { cn } from '../../lib/utils'
 import Card, { CardContent, CardTitle, CardHeader, CardDescription } from '../../components/ui/Card'
@@ -17,16 +18,17 @@ import { useHallAvailability } from './_useHallAvailability'
 
 /* ─── Quick Status Selector ─── */
 function StatusSelect({ value, onChange }) {
+  const { t } = useTranslation()
   return (
     <select
       value={value}
       onChange={onChange}
       className="w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
-      aria-label="تغيير الحالة"
+      aria-label={t('admin.halls.toast.statusError')}
     >
-      <option value="active">نشط</option>
-      <option value="maintenance">صيانة</option>
-      <option value="inactive">غير نشط</option>
+      <option value="active">{t('status.active')}</option>
+      <option value="maintenance">{t('status.maintenance')}</option>
+      <option value="inactive">{t('status.inactive')}</option>
     </select>
   )
 }
@@ -67,22 +69,10 @@ function AvailabilityBadge({ status, label }) {
   )
 }
 
-const typeFilterOptions = [
-  { value: 'all', label: 'الكل' },
-  { value: 'lecture', label: 'مدرج' },
-  { value: 'lab', label: 'معمل' },
-]
-
-const statusFilterOptions = [
-  { value: 'all', label: 'كل الحالات' },
-  { value: 'active', label: 'نشط' },
-  { value: 'maintenance', label: 'صيانة' },
-  { value: 'inactive', label: 'غير نشط' },
-]
-
 const DEFAULT_FORM = { name: '', type: 'lecture', capacity: 30, floor: 1, building: '', status: 'active' }
 
 export default function AdminHalls() {
+  const { t } = useTranslation()
   const { halls, fetchHalls, createHall, updateHall, deleteHall } = useHallStore()
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(false)
@@ -94,6 +84,19 @@ export default function AdminHalls() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+
+  const typeFilterOptions = useMemo(() => [
+    { value: 'all', label: t('status.all') },
+    { value: 'lecture', label: t('hallType.lecture') },
+    { value: 'lab', label: t('hallType.lab') },
+  ], [t])
+
+  const statusFilterOptions = useMemo(() => [
+    { value: 'all', label: t('status.all') },
+    { value: 'active', label: t('status.active') },
+    { value: 'maintenance', label: t('status.maintenance') },
+    { value: 'inactive', label: t('status.inactive') },
+  ], [t])
 
   // Live availability
   const availabilityMap = useHallAvailability(halls)
@@ -126,34 +129,34 @@ export default function AdminHalls() {
     try {
       if (editItem) {
         await updateHall(editItem.id, form)
-        toast.success('تم تحديث المدرج بنجاح')
+        toast.success(t('admin.halls.toast.updated'))
       } else {
         await createHall(form)
-        toast.success('تم إضافة المدرج بنجاح')
+        toast.success(t('admin.halls.toast.added'))
       }
       setModalOpen(false)
     } catch (error) {
-      toast.error(error.response?.data?.message || 'حدث خطأ')
+      toast.error(error.response?.data?.message || t('admin.halls.toast.error'))
     }
   }
 
   const handleDelete = async (id) => {
-    const ok = await confirm('هل أنت متأكد من حذف هذا المدرج؟')
+    const ok = await confirm(t('admin.halls.confirmDelete'))
     if (!ok) return
     try {
       await deleteHall(id)
-      toast.success('تم الحذف بنجاح')
+      toast.success(t('admin.halls.toast.deleted'))
     } catch (error) {
-      toast.error('حدث خطأ')
+      toast.error(t('admin.halls.toast.error'))
     }
   }
 
   const handleQuickStatusToggle = async (hall, newStatus) => {
     try {
       await updateHall(hall.id, { ...hall, status: newStatus })
-      toast.success(`تم تغيير حالة ${hall.name} إلى ${newStatus === 'active' ? 'نشط' : newStatus === 'maintenance' ? 'صيانة' : 'غير نشط'}`)
+      toast.success(t('admin.halls.toast.statusChanged', { name: hall.name, status: t('status.' + newStatus) }))
     } catch (error) {
-      toast.error('حدث خطأ أثناء تحديث الحالة')
+      toast.error(t('admin.halls.toast.statusError'))
     }
   }
 
@@ -161,9 +164,9 @@ export default function AdminHalls() {
   if (fetchError) return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <XCircle className="w-12 h-12 text-red-400 mb-4" />
-      <h2 className="text-lg font-semibold text-slate-900 mb-1">تعذر تحميل البيانات</h2>
-      <p className="text-sm text-slate-500 mb-4">حدث خطأ أثناء الاتصال بالخادم</p>
-      <Button onClick={() => { setFetchError(false); setLoading(true); fetchHalls().catch(() => setFetchError(true)).finally(() => setLoading(false)) }}><RefreshCw className="w-4 h-4 ml-2" />إعادة المحاولة</Button>
+      <h2 className="text-lg font-semibold text-slate-900 mb-1">{t('common.error.loadData')}</h2>
+      <p className="text-sm text-slate-500 mb-4">{t('common.error.connectionError')}</p>
+      <Button onClick={() => { setFetchError(false); setLoading(true); fetchHalls().catch(() => setFetchError(true)).finally(() => setLoading(false)) }}><RefreshCw className="w-4 h-4 ms-2" />{t('common.retry')}</Button>
     </div>
   )
 
@@ -172,23 +175,23 @@ export default function AdminHalls() {
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">المدرجات والمعامل</h1>
-          <CardDescription>إدارة المدرجات والمعامل والتجهيزات</CardDescription>
+          <h1 className="text-2xl font-bold text-slate-900">{t('admin.halls.title')}</h1>
+          <CardDescription>{t('admin.halls.description')}</CardDescription>
         </div>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />إضافة مدرج</Button>
+          <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.halls.addButton')}</Button>
         </motion.div>
       </div>
 
       {/* ── Search & Filters ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="ابحث بالاسم أو المبنى..."
-            className="pr-10"
+            placeholder={t('admin.halls.searchPlaceholder')}
+            className="pe-10"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -202,7 +205,7 @@ export default function AdminHalls() {
             animate={{ opacity: 1, x: 0 }}
             className="text-xs text-slate-400 whitespace-nowrap"
           >
-            {filteredHalls.length} من {halls.length}
+            {filteredHalls.length} {t('common.from')} {halls.length}
           </motion.span>
         )}
       </div>
@@ -211,9 +214,9 @@ export default function AdminHalls() {
       {filteredHalls.length === 0 ? (
         <EmptyState
           icon={DoorOpen}
-          title={search || typeFilter !== 'all' || statusFilter !== 'all' ? 'لا توجد نتائج' : 'لا توجد مدرجات'}
-          description={search || typeFilter !== 'all' || statusFilter !== 'all' ? 'حاول تغيير معايير البحث' : 'لم يتم إضافة أي مدرج بعد. أضف أول مدرج لبدء تنظيم الجداول.'}
-          action={!search && typeFilter === 'all' && statusFilter === 'all' ? <Button onClick={openCreate}><Plus className="w-4 h-4 ml-2" />إضافة مدرج</Button> : undefined}
+          title={search || typeFilter !== 'all' || statusFilter !== 'all' ? t('admin.halls.emptyFilteredTitle') : t('admin.halls.emptyTitle')}
+          description={search || typeFilter !== 'all' || statusFilter !== 'all' ? t('admin.halls.emptyFilteredDescription') : t('admin.halls.emptyDescription')}
+          action={!search && typeFilter === 'all' && statusFilter === 'all' ? <Button onClick={openCreate}><Plus className="w-4 h-4 ms-2" />{t('admin.halls.addButton')}</Button> : undefined}
         />
       ) : (
         <motion.div
@@ -251,11 +254,11 @@ export default function AdminHalls() {
                             <div className="flex items-center gap-2">
                               <h3 className="truncate text-base font-bold text-slate-900">{hall.name}</h3>
                               <Badge variant={hall.status === 'active' ? 'success' : hall.status === 'maintenance' ? 'warning' : 'default'} dot size="lg">
-                                {hall.status === 'active' ? 'نشط' : hall.status === 'maintenance' ? 'صيانة' : 'غير نشط'}
+                                {hall.status === 'active' ? t('status.active') : hall.status === 'maintenance' ? t('status.maintenance') : t('status.inactive')}
                               </Badge>
                             </div>
                             <p className="mt-0.5 text-sm text-slate-500">
-                              {hall.type === 'lecture' ? 'مدرج' : 'معمل'}
+                              {hall.type === 'lecture' ? t('hallType.lecture') : t('hallType.lab')}
                             </p>
                           </div>
                         </div>
@@ -264,15 +267,15 @@ export default function AdminHalls() {
                       {/* Stats grid */}
                       <div className="mt-2 grid grid-cols-3 gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center">
                         <div>
-                          <p className="text-[11px] font-medium text-slate-400">المبنى</p>
-                          <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">{hall.building || 'غير محدد'}</p>
+                          <p className="text-[11px] font-medium text-slate-400">{t('admin.halls.building')}</p>
+                          <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">{hall.building || t('admin.halls.buildingUnknown')}</p>
                         </div>
                         <div className="border-x border-slate-200">
-                          <p className="text-[11px] font-medium text-slate-400">الطابق</p>
+                          <p className="text-[11px] font-medium text-slate-400">{t('admin.halls.floor')}</p>
                           <p className="mt-0.5 text-sm font-semibold text-slate-800">{hall.floor}</p>
                         </div>
                         <div>
-                          <p className="text-[11px] font-medium text-slate-400">السعة</p>
+                          <p className="text-[11px] font-medium text-slate-400">{t('admin.halls.capacity')}</p>
                           <p className="mt-0.5 text-sm font-semibold text-slate-800">{hall.capacity}</p>
                         </div>
                       </div>
@@ -286,8 +289,8 @@ export default function AdminHalls() {
                       {/* Capacity bar */}
                       <div className="mt-2 rounded-lg border border-slate-100 bg-white px-3 py-2">
                         <div className="mb-1.5 flex items-center justify-between text-sm">
-                          <span className="font-medium text-slate-500">السعة القصوى</span>
-                          <span className="font-semibold text-slate-800">{hall.capacity} طالب</span>
+                          <span className="font-medium text-slate-500">{t('capacity.max')}</span>
+                          <span className="font-semibold text-slate-800">{t('capacity.students', { count: hall.capacity })}</span>
                         </div>
                         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
                           <motion.div
@@ -304,7 +307,7 @@ export default function AdminHalls() {
                           'mt-1 text-[11px] font-medium',
                           hall.capacity > 100 ? 'text-amber-600' : 'text-slate-400'
                         )}>
-                          {hall.capacity > 100 ? 'سعة كبيرة' : 'سعة متوسطة'}
+                          {hall.capacity > 100 ? t('capacity.large') : t('capacity.medium')}
                         </p>
                       </div>
                     </CardContent>
@@ -320,18 +323,18 @@ export default function AdminHalls() {
                       <button
                         onClick={() => openEdit(hall)}
                         className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold text-slate-600 transition-colors hover:bg-slate-100 cursor-pointer"
-                        aria-label="تعديل"
+                        aria-label={t('admin.halls.editButton')}
                       >
                         <Pencil className="w-3.5 h-3.5" />
-                        تعديل
+                        {t('admin.halls.editButton')}
                       </button>
                       <button
                         onClick={() => handleDelete(hall.id)}
                         className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
-                        aria-label="حذف"
+                        aria-label={t('admin.halls.deleteButton')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        حذف
+                        {t('admin.halls.deleteButton')}
                       </button>
                     </div>
                   </Card>
@@ -375,13 +378,13 @@ export default function AdminHalls() {
               {/* Modal header */}
               <div className="flex items-start justify-between p-5 pb-4 border-b border-slate-100 bg-slate-50/70">
                 <div>
-                  <h2 id="hall-modal-title" className="text-lg font-bold text-slate-950">{editItem ? 'تعديل مدرج' : 'إضافة مدرج'}</h2>
+                  <h2 id="hall-modal-title" className="text-lg font-bold text-slate-950">{editItem ? t('admin.halls.modalEdit') : t('admin.halls.modalAdd')}</h2>
                   {editItem && <p className="text-sm text-slate-500 mt-1">{editItem.name}</p>}
                 </div>
                 <button
                   onClick={() => setModalOpen(false)}
                   className="text-slate-400 hover:text-slate-700 hover:bg-white rounded-lg p-1.5 transition-colors cursor-pointer"
-                  aria-label="إغلاق"
+                  aria-label={t('common.close')}
                 >
                   <svg aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -392,42 +395,42 @@ export default function AdminHalls() {
               {/* Modal form */}
               <form onSubmit={handleSubmit} className="p-5 space-y-4">
                 <div>
-                  <label htmlFor="hall-name" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">الاسم</label>
+                  <label htmlFor="hall-name" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formName')}</label>
                   <Input id="hall-name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="hall-type" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">النوع</label>
-                    <Select id="hall-type" options={[{ value: 'lecture', label: 'مدرج' }, { value: 'lab', label: 'معمل' }]} value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} />
+                    <label htmlFor="hall-type" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formType')}</label>
+                    <Select id="hall-type" options={[{ value: 'lecture', label: t('hallType.lecture') }, { value: 'lab', label: t('hallType.lab') }]} value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} />
                   </div>
                   <div>
-                    <label htmlFor="hall-capacity" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">السعة</label>
+                    <label htmlFor="hall-capacity" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formCapacity')}</label>
                     <Input id="hall-capacity" type="number" value={form.capacity} onChange={e => setForm({ ...form, capacity: Number(e.target.value) })} required />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="hall-building" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">المبنى</label>
+                    <label htmlFor="hall-building" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formBuilding')}</label>
                     <Input id="hall-building" value={form.building} onChange={e => setForm({ ...form, building: e.target.value })} />
                   </div>
                   <div>
-                    <label htmlFor="hall-floor" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">الطابق</label>
+                    <label htmlFor="hall-floor" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formFloor')}</label>
                     <Input id="hall-floor" type="number" value={form.floor} onChange={e => setForm({ ...form, floor: Number(e.target.value) })} />
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="hall-status" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">الحالة</label>
+                  <label htmlFor="hall-status" className="block text-xs font-semibold text-slate-500 mb-1 tracking-[0.08em]">{t('admin.halls.formStatus')}</label>
                   <Select id="hall-status" options={[
-                    { value: 'active', label: 'نشط' },
-                    { value: 'maintenance', label: 'صيانة' },
-                    { value: 'inactive', label: 'غير نشط' }
+                    { value: 'active', label: t('status.active') },
+                    { value: 'maintenance', label: t('status.maintenance') },
+                    { value: 'inactive', label: t('status.inactive') }
                   ]} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} />
                 </div>
                 <div className="flex gap-3 pt-2">
         <motion.div className="me-auto" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button type="submit">{editItem ? 'تحديث' : 'إضافة'}</Button>
+                    <Button type="submit">{editItem ? t('admin.halls.updateButton') : t('admin.halls.addButtonSubmit')}</Button>
                   </motion.div>
-                  <Button variant="outline" onClick={() => setModalOpen(false)}>إلغاء</Button>
+                  <Button variant="outline" onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
                 </div>
               </form>
             </motion.div>
