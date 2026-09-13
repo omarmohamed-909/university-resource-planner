@@ -90,7 +90,7 @@ export default function Modal({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-slate-950/55 backdrop-blur-md animate-fade-in"
+        className="absolute inset-0 bg-slate-950/60"
         onClick={closeOnBackdrop ? onClose : undefined}
       />
 
@@ -99,13 +99,9 @@ export default function Modal({
         ref={modalRef}
         tabIndex={-1}
         className={cn(
-          'relative w-full bg-surface rounded-2xl border border-border',
-          'shadow-[var(--shadow-2xl)]',
+          'relative w-full bg-surface rounded-xl',
+          'shadow-[0_12px_32px_rgba(0,0,0,0.24)]',
           'flex flex-col max-h-[calc(100vh-2rem)]',
-          'animate-slide-up',
-          'before:absolute before:inset-x-0 before:top-0 before:h-px before:rounded-t-2xl',
-          'before:bg-gradient-to-r before:from-transparent before:via-black/[0.06] before:to-transparent',
-          '[&:before]:content-[""]',
           sizes[size],
           className
         )}
@@ -163,9 +159,7 @@ export default function Modal({
             <button
               onClick={onConfirm}
               className={cn(
-                'inline-flex items-center justify-center h-10 px-4 text-sm font-semibold rounded-lg shadow-sm transition-all cursor-pointer active:translate-y-px',
-                'before:absolute before:inset-x-2 before:top-px before:h-px before:rounded-full before:bg-white/15 before:pointer-events-none',
-                'relative',
+                'inline-flex items-center justify-center h-10 px-4 text-sm font-semibold rounded-lg transition-colors cursor-pointer',
                 confirmBtnVariant === 'destructive' && 'bg-rose-600 text-white hover:bg-rose-700',
                 confirmBtnVariant === 'success' && 'bg-emerald-600 text-white hover:bg-emerald-700',
                 confirmBtnVariant === 'primary' && 'bg-primary-btn text-primary-btn-text hover:brightness-110'

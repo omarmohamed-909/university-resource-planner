@@ -205,7 +205,9 @@
         "nameRequired": "Please enter your name",
         "emailRequired": "Please enter your email",
         "emailInvalid": "Invalid email address",
-        "passwordTooShort": "Password must be at least 6 characters",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "passwordNoUppercase": "Password must contain at least one uppercase letter",
+        "passwordNoDigit": "Password must contain at least one number",
         "passwordsMismatch": "Passwords do not match",
         "accountCreated": "Account created successfully! 🎉",
         "accountFailed": "Failed to create account"

@@ -102,14 +102,10 @@ export default function AdminUsers() {
   if (loading) return <Skeleton type="table" rows={5} />
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <span className="eyebrow mb-2">
-            <span className="w-1 h-1 rounded-full bg-blue-500" />
-            {t('sidebar.users', { defaultValue: 'users' })}
-          </span>
-          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.users.title')}</h1>
+          <h1 className="text-2xl font-bold text-title tracking-[-0.02em] text-balance">{t('admin.users.title')}</h1>
           <CardDescription className="mt-1.5 text-pretty">{t('admin.users.description')}</CardDescription>
         </div>
         <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.users.addButton')}</Button>

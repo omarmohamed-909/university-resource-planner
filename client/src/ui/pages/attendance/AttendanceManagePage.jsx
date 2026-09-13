@@ -98,9 +98,9 @@ export default function AttendanceManagePage() {
   if (loading) return <Skeleton type="card" count={4} />
 
   return (
-    <div className="space-y-6 animate-fade-in print-container">
+    <div className="space-y-6 print-container">
       <div>
-        <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('attendance.title')}</h1>
+        <h1 className="text-2xl font-bold text-title tracking-[-0.02em] text-balance">{t('attendance.title')}</h1>
         <CardDescription>{t('attendance.description')}</CardDescription>
       </div>
 

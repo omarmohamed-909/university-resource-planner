@@ -89,10 +89,10 @@ export default function StudentAttendance() {
   if (loading) return <Skeleton type="card" count={6} />
 
   return (
-    <div className="space-y-6 animate-fade-in print-container">
+    <div className="space-y-6 print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('student.attendance.title')}</h1>
+          <h1 className="text-2xl font-bold text-title tracking-[-0.02em] text-balance">{t('student.attendance.title')}</h1>
           <CardDescription>{t('student.attendance.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">

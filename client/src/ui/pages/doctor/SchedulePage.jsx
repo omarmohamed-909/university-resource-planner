@@ -49,10 +49,10 @@ export default function DoctorSchedule() {
   const timeSlots = ['08:00', '09:30', '11:00', '12:30', '14:00', '15:30']
 
   return (
-    <div className="space-y-6 animate-fade-in print-container">
+    <div className="space-y-6 print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('doctor.schedule.title')}</h1>
+          <h1 className="text-2xl font-bold text-title tracking-[-0.02em] text-balance">{t('doctor.schedule.title')}</h1>
           <CardDescription>{t('doctor.schedule.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">

@@ -2,18 +2,16 @@ import { useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHallStore } from '../../store/hallStore'
 import { cn } from '../../lib/utils'
-import Card, { CardContent, CardTitle, CardHeader, CardDescription } from '../../components/ui/Card'
+import Card, { CardContent, CardDescription } from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
-import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
 import { useConfirm } from '../../components/ui/ConfirmModal'
 import toast from 'react-hot-toast'
 import { Plus, Pencil, Trash2, DoorOpen, Search, Filter, RefreshCw, XCircle } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useHallAvailability } from './_useHallAvailability'
 
 /* ─── Quick Status Selector ─── */
@@ -36,9 +34,7 @@ function StatusSelect({ value, onChange }) {
 /* ─── Availability Badge ─── */
 function AvailabilityBadge({ status, label }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <span
       className={cn(
         'flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold',
         status === 'available' && 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
@@ -65,7 +61,7 @@ function AvailabilityBadge({ status, label }) {
         )} />
       </span>
       {label}
-    </motion.div>
+    </span>
   )
 }
 
@@ -161,7 +157,7 @@ export default function AdminHalls() {
   }
 
   if (loading) return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
           <Skeleton variant="title" className="w-48" />
@@ -191,20 +187,14 @@ export default function AdminHalls() {
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <span className="eyebrow mb-2">
-            <span className="w-1 h-1 rounded-full bg-blue-500" />
-            {t('sidebar.halls')}
-          </span>
-          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.halls.title')}</h1>
+          <h1 className="text-2xl font-bold text-title tracking-[-0.02em] text-balance">{t('admin.halls.title')}</h1>
           <CardDescription className="mt-1.5 text-pretty">{t('admin.halls.description')}</CardDescription>
         </div>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.halls.addButton')}</Button>
-        </motion.div>
+        <Button onClick={openCreate}><Plus className="w-4 h-4 me-2" />{t('admin.halls.addButton')}</Button>
       </div>
 
       {/* ── Search & Filters ── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-3 sm:flex-row sm:items-center">
         <div className="relative flex-1 max-w-sm group">
           <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none transition-colors group-focus-within:text-primary-500" />
           <Input
@@ -220,13 +210,9 @@ export default function AdminHalls() {
           <Select options={statusFilterOptions} value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-36" />
         </div>
         {filteredHalls.length < halls.length && (
-          <motion.span
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-xs text-muted whitespace-nowrap"
-          >
+          <span className="text-xs text-muted whitespace-nowrap">
             {filteredHalls.length} {t('common.from')} {halls.length}
-          </motion.span>
+          </span>
         )}
       </div>
 
@@ -239,207 +225,83 @@ export default function AdminHalls() {
           action={!search && typeFilter === 'all' && statusFilter === 'all' ? <Button onClick={openCreate}><Plus className="w-4 h-4 ms-2" />{t('admin.halls.addButton')}</Button> : undefined}
         />
       ) : (
-        <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredHalls.map(hall => {
-              const avail = availabilityMap[hall.id || hall._id] || { status: 'unknown', label: '' }
-              return (
-                <motion.div
-                  key={hall.id || hall._id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                >
-                  <Card hover className="relative flex flex-col overflow-hidden group">
-
-                    <CardContent className="flex flex-1 flex-col p-6">
-                      {/* Header row */}
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            className={cn(
-                              'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-sm flex-shrink-0',
-                              hall.type === 'lecture' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400' : 'bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400'
-                            )}
-                          >
-                            <DoorOpen className="w-5 h-5" />
-                          </motion.div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="truncate text-base font-bold text-title">{hall.name}</h3>
-                              <Badge variant={hall.status === 'active' ? 'success' : hall.status === 'maintenance' ? 'warning' : 'default'} dot size="sm">
-                                {hall.status === 'active' ? t('status.active') : hall.status === 'maintenance' ? t('status.maintenance') : t('status.inactive')}
-                              </Badge>
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[860px]">
+                <thead>
+                  <tr className="border-b border-border bg-hover/40">
+                    <th className="px-5 py-3 text-start text-xs font-semibold text-label">{t('admin.halls.formName')}</th>
+                    <th className="px-5 py-3 text-start text-xs font-semibold text-label">{t('admin.halls.formType')}</th>
+                    <th className="px-5 py-3 text-start text-xs font-semibold text-label">{t('admin.halls.building')}</th>
+                    <th className="px-5 py-3 text-start text-xs font-semibold text-label">{t('admin.halls.floor')}</th>
+                    <th className="px-5 py-3 text-start text-xs font-semibold text-label">{t('admin.halls.capacity')}</th>
+                    <th className="px-5 py-3 text-start text-xs font-semibold text-label">{t('admin.halls.formStatus')}</th>
+                    <th className="px-5 py-3 text-end text-xs font-semibold text-label">{t('admin.users.tableActions')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredHalls.map(hall => {
+                    const avail = availabilityMap[hall.id || hall._id] || { status: 'unknown', label: '' }
+                    return (
+                      <tr key={hall.id || hall._id} className="border-b border-border last:border-0 hover:bg-hover/35">
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', hall.type === 'lecture' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400' : 'bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400')}>
+                              <DoorOpen className="h-4 w-4" />
                             </div>
-                            <p className="mt-0.5 text-sm text-label">
-                              {hall.type === 'lecture' ? t('hallType.lecture') : t('hallType.lab')}
-                            </p>
+                            <div><p className="font-semibold text-title">{hall.name}</p>{avail.status !== 'unknown' && <div className="mt-1"><AvailabilityBadge status={avail.status} label={avail.label} /></div>}</div>
                           </div>
-                        </div>
-                      </div>
-
-                      {/* Stats grid */}
-                      <div className="mt-2 grid grid-cols-3 gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-center">
-                        <div>
-                          <p className="text-[11px] font-medium text-muted">{t('admin.halls.building')}</p>
-                          <p className="mt-0.5 truncate text-sm font-semibold text-title">{hall.building || t('admin.halls.buildingUnknown')}</p>
-                        </div>
-                        <div className="border-x border-border">
-                          <p className="text-[11px] font-medium text-muted">{t('admin.halls.floor')}</p>
-                          <p className="mt-0.5 text-sm font-semibold text-title">{hall.floor}</p>
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-medium text-muted">{t('admin.halls.capacity')}</p>
-                          <p className="mt-0.5 text-sm font-semibold text-title">{hall.capacity}</p>
-                        </div>
-                      </div>
-
-                      {avail.status !== 'unknown' && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <AvailabilityBadge status={avail.status} label={avail.label} />
-                      </div>
-                      )}
-
-                      {/* Capacity bar */}
-                      <div className="mt-2 rounded-lg border border-border bg-surface px-3 py-2">
-                        <div className="mb-1.5 flex items-center justify-between text-sm">
-                          <span className="font-medium text-label">{t('capacity.max')}</span>
-                          <span className="font-semibold text-title">{t('capacity.students', { count: hall.capacity })}</span>
-                        </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-hover">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min((hall.capacity / 200) * 100, 100)}%` }}
-                            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-                            className={cn(
-                              'h-full rounded-full',
-                              hall.capacity > 100 ? 'bg-amber-500' : 'bg-primary-500'
-                            )}
-                          />
-                        </div>
-                        <p className={cn(
-                          'mt-1 text-[11px] font-medium',
-                          hall.capacity > 100 ? 'text-amber-600' : 'text-muted'
-                        )}>
-                          {hall.capacity > 100 ? t('capacity.large') : t('capacity.medium')}
-                        </p>
-                      </div>
-                    </CardContent>
-
-                    {/* Quick Actions */}
-                    <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface/80 px-6 py-2">
-                      <div className="relative flex-1">
-                        <StatusSelect
-                          value={hall.status}
-                          onChange={e => handleQuickStatusToggle(hall, e.target.value)}
-                        />
-                      </div>
-                      <button
-                        onClick={() => openEdit(hall)}
-                        className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold text-body transition-colors hover:bg-hover cursor-pointer"
-                        aria-label={t('admin.halls.editButton')}
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                        {t('admin.halls.editButton')}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(hall.id)}
-                        className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold text-red-600 transition-colors hover:bg-red-100/50 cursor-pointer"
-                        aria-label={t('admin.halls.deleteButton')}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        {t('admin.halls.deleteButton')}
-                      </button>
-                    </div>
-                  </Card>
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
-        </motion.div>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-body">{hall.type === 'lecture' ? t('hallType.lecture') : t('hallType.lab')}</td>
+                        <td className="px-5 py-4 text-sm text-body">{hall.building || t('admin.halls.buildingUnknown')}</td>
+                        <td className="px-5 py-4 text-sm tabular-nums text-body">{hall.floor}</td>
+                        <td className="px-5 py-4 text-sm tabular-nums text-body">{t('capacity.students', { count: hall.capacity })}</td>
+                        <td className="px-5 py-4"><div className="w-36"><StatusSelect value={hall.status} onChange={e => handleQuickStatusToggle(hall, e.target.value)} /></div></td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon-sm" onClick={() => openEdit(hall)} aria-label={t('admin.halls.editButton')}><Pencil className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(hall.id)} aria-label={t('admin.halls.deleteButton')} className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-500/10"><Trash2 className="h-4 w-4" /></Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* ── Morphing Modal ── */}
-      <AnimatePresence>
-        {modalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setModalOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 20 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="hall-modal-title"
-              className={cn(
-                'relative bg-surface rounded-lg shadow-[0_25px_50px_rgba(15,23,42,0.25)] w-full overflow-hidden border border-white/70',
-                'max-w-lg'
-              )}
-            >
-              {/* Modal header */}
-              <div className="flex items-start justify-between p-5 pb-4 border-b border-border bg-surface">
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? t('admin.halls.modalEdit') : t('admin.halls.modalAdd')} description={editItem?.name} hideFooter>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <h2 id="hall-modal-title" className="text-lg font-bold text-title">{editItem ? t('admin.halls.modalEdit') : t('admin.halls.modalAdd')}</h2>
-                  {editItem && <p className="text-sm text-label mt-1">{editItem.name}</p>}
-                </div>
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="text-muted hover:text-body hover:bg-hover rounded-lg p-1.5 transition-colors cursor-pointer"
-                  aria-label={t('common.close')}
-                >
-                  <svg aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Modal form */}
-              <form onSubmit={handleSubmit} className="p-5 space-y-4">
-                <div>
-                  <label htmlFor="hall-name" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formName')}</label>
+                    <label htmlFor="hall-name" className="block text-sm font-medium text-body mb-1.5">{t('admin.halls.formName')}</label>
                   <Input id="hall-name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="hall-type" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formType')}</label>
+                    <label htmlFor="hall-type" className="block text-sm font-medium text-body mb-1.5">{t('admin.halls.formType')}</label>
                     <Select id="hall-type" options={[{ value: 'lecture', label: t('hallType.lecture') }, { value: 'lab', label: t('hallType.lab') }]} value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} />
                   </div>
                   <div>
-                    <label htmlFor="hall-capacity" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formCapacity')}</label>
+                    <label htmlFor="hall-capacity" className="block text-sm font-medium text-body mb-1.5">{t('admin.halls.formCapacity')}</label>
                     <Input id="hall-capacity" type="number" value={form.capacity} onChange={e => setForm({ ...form, capacity: Number(e.target.value) })} required />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="hall-building" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formBuilding')}</label>
+                    <label htmlFor="hall-building" className="block text-sm font-medium text-body mb-1.5">{t('admin.halls.formBuilding')}</label>
                     <Input id="hall-building" value={form.building} onChange={e => setForm({ ...form, building: e.target.value })} />
                   </div>
                   <div>
-                    <label htmlFor="hall-floor" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formFloor')}</label>
+                    <label htmlFor="hall-floor" className="block text-sm font-medium text-body mb-1.5">{t('admin.halls.formFloor')}</label>
                     <Input id="hall-floor" type="number" value={form.floor} onChange={e => setForm({ ...form, floor: Number(e.target.value) })} />
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="hall-status" className="block text-xs font-semibold text-label mb-1 tracking-[0.08em]">{t('admin.halls.formStatus')}</label>
+                  <label htmlFor="hall-status" className="block text-sm font-medium text-body mb-1.5">{t('admin.halls.formStatus')}</label>
                   <Select id="hall-status" options={[
                     { value: 'active', label: t('status.active') },
                     { value: 'maintenance', label: t('status.maintenance') },
@@ -447,16 +309,11 @@ export default function AdminHalls() {
                   ]} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} />
                 </div>
                 <div className="flex gap-3 pt-2">
-        <motion.div className="me-auto" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button type="submit">{editItem ? t('admin.halls.updateButton') : t('admin.halls.addButtonSubmit')}</Button>
-                  </motion.div>
+                  <Button type="submit">{editItem ? t('admin.halls.updateButton') : t('admin.halls.addButtonSubmit')}</Button>
                   <Button variant="outline" onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
                 </div>
               </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </Modal>
 
       <ConfirmModal />
     </div>

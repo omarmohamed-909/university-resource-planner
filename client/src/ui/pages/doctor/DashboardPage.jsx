@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import Card, { CardContent, CardTitle, CardHeader, CardDescription } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
-import { CalendarDays, BookOpen, Bell, Clock, Sparkles } from 'lucide-react'
+import { CalendarDays, BookOpen, Bell, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../../../infrastructure/api/axios'
 import { useAuthStore } from '../../store/authStore'
@@ -51,61 +51,33 @@ export default function DoctorDashboard() {
   ]
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-7">
 
       {/* Hero welcome banner */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-blue-50/40 to-transparent dark:from-emerald-500/[0.06] dark:via-blue-500/[0.05] dark:to-transparent" />
-          <div
-            className="aurora-blob w-72 h-72 -top-24 -end-16"
-            style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%)', animationDuration: '22s' }}
-          />
-          <div className="absolute inset-0 bg-grid bg-grid-fade opacity-30 dark:opacity-[0.15]" />
-        </div>
-
-        <div className="relative px-6 py-7 sm:px-8 sm:py-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-surface/80 backdrop-blur px-3 py-1.5 border border-border shadow-sm">
-            <span className="relative flex w-1.5 h-1.5">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-            </span>
-            <span className="text-xs font-semibold text-muted">{formatDate(Date.now())}</span>
-          </div>
-
-          <h1 className="mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-title text-balance">
+      <section className="border-b border-border pb-7">
+          <p className="text-sm font-medium text-label">{formatDate(Date.now())}</p>
+          <h1 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-title text-balance">
             {t('doctor.dashboard.welcome', { name: user?.name })}
           </h1>
-          <CardDescription className="mt-2 max-w-xl text-pretty">
+          <CardDescription className="mt-2 max-w-2xl text-pretty">
             {t('doctor.dashboard.description')}
           </CardDescription>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface/70 border border-border text-[11px] font-semibold text-label backdrop-blur">
-              <Sparkles className="w-3 h-3 text-emerald-500" />
-              {todaySchedules.length} {t('doctor.dashboard.todayLectures')}
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* Stats */}
       <div>
-        <h2 className="mb-4 text-xs font-bold tracking-widest text-muted uppercase">{t('common.overview')}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 stagger">
+        <h2 className="mb-3 text-sm font-semibold text-title">{t('common.overview')}</h2>
+        <div className="grid grid-cols-1 overflow-hidden rounded-xl border border-border bg-surface md:grid-cols-3">
           {stats.map((stat) => (
-            <Card key={stat.label} className="hover-lift overflow-hidden">
-              <CardContent className="flex items-center gap-5 px-6 py-5">
-                <div className={`relative w-12 h-12 rounded-xl ${stat.bg} ${stat.color} ${stat.dark} flex items-center justify-center flex-shrink-0`}>
-                  <stat.icon className="w-6 h-6" strokeWidth={2.2} />
-                  <div className={`absolute inset-0 rounded-xl ${stat.accent} opacity-0 hover:opacity-10 transition-opacity`} />
-                </div>
+            <div key={stat.label} className="border-b border-e border-border p-5 last:border-e-0 md:border-b-0">
+              <div className="flex items-center gap-4">
+                <stat.icon className={`h-5 w-5 ${stat.color}`} strokeWidth={2} />
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-muted truncate">{stat.label}</p>
-                  <p className="mt-1 text-2xl font-extrabold text-title leading-none tabular-nums">{stat.value}</p>
+                  <p className="mt-1 text-2xl font-bold text-title leading-none tabular-nums">{stat.value}</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </div>

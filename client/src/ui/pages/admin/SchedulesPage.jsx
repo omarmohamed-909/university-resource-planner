@@ -13,18 +13,17 @@ import EmptyState from '../../components/ui/EmptyState'
 import { useConfirm } from '../../components/ui/ConfirmModal'
 import toast from 'react-hot-toast'
 import { Plus, CalendarDays, Trash2, LayoutGrid, List, FileText, FileSpreadsheet, Printer } from 'lucide-react'
-import { cn } from '../../lib/utils'
 import api from '../../../infrastructure/api/axios'
 import { downloadFile } from '../../../infrastructure/api/download'
 
 const DAYS = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
 const DAY_STYLES = {
-  saturday: { bar: 'bg-blue-500', title: 'text-blue-600', bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-500' },
-  sunday: { bar: 'bg-emerald-500', title: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-500' },
-  monday: { bar: 'bg-indigo-500', title: 'text-indigo-600', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-500' },
-  tuesday: { bar: 'bg-violet-500', title: 'text-violet-600', bg: 'bg-violet-500/10', border: 'border-violet-500/20', text: 'text-violet-500' },
-  wednesday: { bar: 'bg-amber-500', title: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-500' },
-  thursday: { bar: 'bg-rose-500', title: 'text-rose-600', bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-500' },
+  saturday: { title: 'text-blue-600 dark:text-blue-400' },
+  sunday: { title: 'text-emerald-600 dark:text-emerald-400' },
+  monday: { title: 'text-indigo-600 dark:text-indigo-400' },
+  tuesday: { title: 'text-violet-600 dark:text-violet-400' },
+  wednesday: { title: 'text-amber-600 dark:text-amber-400' },
+  thursday: { title: 'text-rose-600 dark:text-rose-400' },
 }
 
 export default function AdminSchedules() {
@@ -78,14 +77,10 @@ export default function AdminSchedules() {
   const totalSchedules = schedules.length
 
   return (
-    <div className="space-y-6 animate-fade-in print-container">
+    <div className="space-y-6 print-container">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <span className="eyebrow mb-2">
-            <span className="w-1 h-1 rounded-full bg-blue-500" />
-            {t('sidebar.schedules', { defaultValue: 'schedules' })}
-          </span>
-          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.schedules.title')}</h1>
+          <h1 className="text-2xl font-bold text-title tracking-[-0.02em] text-balance">{t('admin.schedules.title')}</h1>
           <CardDescription className="mt-1.5 text-pretty">{t('admin.schedules.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2 no-print">
@@ -129,11 +124,11 @@ export default function AdminSchedules() {
                       <p className="text-sm text-muted text-center py-4">{t('admin.schedules.noLectures')}</p>
                     )}
                     {(groupedByDay[day] || []).map(sch => (
-                      <div key={sch.id} className={cn('p-3 rounded-lg text-sm hover:shadow-sm transition-all border', style.bg, style.border)}>
+                      <div key={sch.id} className="rounded-lg border border-border bg-hover/25 p-3 text-sm transition-colors hover:bg-hover/50">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="font-medium text-title">{sch.courseId?.name || sch.courseId?.code || t('admin.schedules.courseUnknown')}</p>
-                            <p className={cn('text-xs mt-1', style.text)}>{sch.startTime} - {sch.endTime}</p>
+                            <p className="mt-1 text-xs font-medium text-primary-600 dark:text-blue-400">{sch.startTime} - {sch.endTime}</p>
                             <p className="text-label text-xs">{sch.hallId?.name || t('admin.schedules.hallUnknown')}</p>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">

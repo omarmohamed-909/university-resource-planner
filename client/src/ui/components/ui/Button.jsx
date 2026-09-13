@@ -28,7 +28,7 @@ const variants = {
   success:
     'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm dark:bg-emerald-700 dark:hover:bg-emerald-600',
   gradient:
-    'bg-gradient-to-r from-primary-600 to-indigo-600 text-white hover:from-primary-700 hover:to-indigo-700 active:from-primary-800 active:to-indigo-800 shadow-sm shadow-primary-500/30',
+    'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800',
   link:
     'text-primary-600 hover:text-primary-800 dark:text-blue-400 dark:hover:text-blue-300 underline-offset-4 hover:underline p-0 h-auto',
 }
@@ -67,8 +67,6 @@ export default function Button({
   ...props
 }) {
   const isDisabled = disabled || loading
-  const isSolid = variant === 'primary' || variant === 'destructive' || variant === 'success' || variant === 'gradient'
-
   return (
     <button
       type={type}
@@ -78,7 +76,6 @@ export default function Button({
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
         'disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed',
         'active:translate-y-px',
-        isSolid && 'before:absolute before:inset-x-1 before:top-px before:h-px before:rounded-full before:bg-white/15 before:pointer-events-none',
         variants[variant],
         sizes[size],
         className

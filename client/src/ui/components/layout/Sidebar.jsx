@@ -19,21 +19,21 @@ const roleMeta = {
     accent: '#3b82f6',
     accentSoft: 'bg-blue-500/15',
     accentText: 'text-blue-400',
-    avatar: 'from-blue-600 to-blue-800',
+    avatar: 'bg-blue-600',
     labelKey: 'role.adminFull',
   },
   doctor: {
     accent: '#10b981',
     accentSoft: 'bg-emerald-500/15',
     accentText: 'text-emerald-400',
-    avatar: 'from-emerald-600 to-emerald-800',
+    avatar: 'bg-emerald-600',
     labelKey: 'role.doctorFull',
   },
   student: {
     accent: '#8b5cf6',
     accentSoft: 'bg-violet-500/15',
     accentText: 'text-violet-400',
-    avatar: 'from-violet-600 to-violet-800',
+    avatar: 'bg-violet-600',
     labelKey: 'role.studentFull',
   },
 }
@@ -101,19 +101,10 @@ export default function Sidebar({ role, onClose }) {
         shrunk && 'overflow-hidden scrollbar-hide'
       )}
     >
-      {/* Subtle top radial accent */}
-      <div
-        aria-hidden="true"
-        className="absolute top-0 inset-x-0 h-32 pointer-events-none opacity-60"
-        style={{
-          background: `radial-gradient(ellipse 300px 80px at 50% 0%, ${cfg.accent}22 0%, transparent 70%)`,
-        }}
-      />
-
       {/* ── Brand / Logo ── */}
       <div className={cn('relative pt-5 pb-4', shrunk ? 'px-0 w-full flex justify-center' : 'px-4')}>
         <div className={cn('flex items-center', shrunk ? 'justify-center' : 'gap-3')}>
-          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white ring-1 ring-white/10 flex-shrink-0 shadow-md group">
+          <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0 p-0.5">
             <QnuLogo className="w-full h-full" />
             <div className="absolute inset-0 ring-1 ring-inset ring-white/5 rounded-xl pointer-events-none" />
           </div>
@@ -144,32 +135,25 @@ export default function Sidebar({ role, onClose }) {
           {shrunk ? (
             <div className="relative flex-shrink-0">
               <div className={cn(
-                'w-9 h-9 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-zinc-900',
+                'w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm',
                 cfg.avatar
               )}>
                 {user.name?.charAt(0)?.toUpperCase()}
               </div>
               <div className="absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-zinc-900">
-                <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60" />
               </div>
             </div>
           ) : (
-            <div className="relative rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm overflow-hidden p-3 transition-all duration-200">
-              <div
-                aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-px opacity-50"
-                style={{ background: `linear-gradient(to right, transparent, ${cfg.accent}, transparent)` }}
-              />
+            <div className="relative rounded-lg bg-white/[0.045] overflow-hidden p-3 transition-colors duration-200">
               <div className="flex items-center gap-3">
                 <div className="relative flex-shrink-0">
                   <div className={cn(
-                    'w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-zinc-900',
+                    'w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm',
                     cfg.avatar
                   )}>
                     {user.name?.charAt(0)?.toUpperCase()}
                   </div>
                   <div className="absolute -bottom-0.5 -end-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-zinc-900">
-                    <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60" />
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
@@ -197,15 +181,14 @@ export default function Sidebar({ role, onClose }) {
         'flex-1 space-y-1 overflow-y-auto scrollbar-hide',
         shrunk ? 'px-0 w-full flex flex-col items-center' : 'px-3'
       )}>
-        {items.map((item, idx) => (
+        {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === `/${role}`}
             onClick={onClose}
             title={shrunk ? t(item.labelKey) : undefined}
-            className={cn("animate-fade-in w-full", shrunk ? "flex justify-center" : "block")}
-            style={{ animationDelay: `${idx * 35}ms` }}
+            className={cn("w-full", shrunk ? "flex justify-center" : "block")}
           >
             {({ isActive }) => (
               <div
@@ -216,13 +199,6 @@ export default function Sidebar({ role, onClose }) {
                     : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
                 )}
               >
-                {/* Active accent bar (left edge indicator) */}
-                {isActive && !shrunk && (
-                  <span
-                    className="absolute top-1.5 bottom-1.5 -start-3 w-1 rounded-full shadow-sm"
-                    style={{ backgroundColor: cfg.accent }}
-                  />
-                )}
                 {/* Active dot indicator for shrunk mode */}
                 {isActive && shrunk && (
                   <span

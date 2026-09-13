@@ -68,10 +68,10 @@ export default function DoctorSwap() {
   if (loading) return <Skeleton type="card" count={3} />
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('doctor.swap.title')}</h1>
+          <h1 className="text-2xl font-bold text-title tracking-[-0.02em] text-balance">{t('doctor.swap.title')}</h1>
           <CardDescription>{t('doctor.swap.description')}</CardDescription>
         </div>
         <Button onClick={() => setModalOpen(true)}><Plus className="w-4 h-4 ms-2" />{t('doctor.swap.requestButton')}</Button>

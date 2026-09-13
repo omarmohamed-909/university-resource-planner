@@ -38,12 +38,8 @@ export default function Card({
   return (
     <Tag
       className={cn(
-        'relative bg-surface rounded-xl border border-border transition-all duration-200',
-        'shadow-[var(--shadow-sm)]',
-        'before:absolute before:inset-x-0 before:top-0 before:h-px before:rounded-t-xl',
-        'before:bg-gradient-to-r before:from-transparent before:via-black/[0.04] before:to-transparent',
-        '[&:before]:content-[""]',
-        hover && 'hover:shadow-[var(--shadow-lg)] hover:border-active/60 hover:-translate-y-0.5',
+        'relative bg-surface rounded-xl border border-border transition-[background-color,border-color] duration-200',
+        hover && 'hover:border-slate-400 hover:bg-hover/35',
         isClickable && 'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
         padding === 'none' && 'p-0',
         hasTone && tones[tone],

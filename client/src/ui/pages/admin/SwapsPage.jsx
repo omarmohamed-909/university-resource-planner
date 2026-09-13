@@ -89,14 +89,10 @@ export default function AdminSwaps() {
   if (loading) return <Skeleton type="card" count={4} />
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <span className="eyebrow mb-2">
-            <span className="w-1 h-1 rounded-full bg-blue-500" />
-            {t('sidebar.swaps', { defaultValue: 'swaps' })}
-          </span>
-          <h1 className="text-2xl font-extrabold text-title tracking-tight text-balance">{t('admin.swaps.title')}</h1>
+          <h1 className="text-2xl font-bold text-title tracking-[-0.02em] text-balance">{t('admin.swaps.title')}</h1>
           <CardDescription className="mt-1.5 text-pretty">{t('admin.swaps.description')}</CardDescription>
         </div>
         <div className="flex items-center gap-2">

@@ -23,7 +23,7 @@ function GoogleIcon() {
 function Field({ label, hint, children }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="block text-xs font-bold text-label uppercase tracking-[0.08em]">{label}</label>
+      <label className="block text-sm font-semibold text-body">{label}</label>
       {children}
       {hint && <p className="text-xs text-muted mt-1">{hint}</p>}
     </div>
@@ -33,21 +33,21 @@ function Field({ label, hint, children }) {
 function PInput({ rightSlot, leftSlot, className = '', ...props }) {
   return (
     <div className="relative">
-      {rightSlot && <div className="absolute end-4 top-1/2 -translate-y-1/2 text-muted">{rightSlot}</div>}
+      {rightSlot && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-muted">{rightSlot}</div>}
       <input
-        className={`w-full h-14 px-5 ${leftSlot ? 'ps-12' : ''} ${rightSlot ? 'pe-12' : ''}
-                    rounded-lg border border-border bg-surface shadow-sm text-title text-base
+        className={`w-full h-12
+                    rounded-lg border border-border bg-surface text-title text-[15px]
                    placeholder:text-muted
-                   focus:outline-none focus:border-slate-500 focus:ring-4 focus:ring-slate-900/15 focus:shadow-md
-                   hover:border-active transition-all duration-200 ${className}`}
+                   focus:outline-none focus:border-primary-600 focus:ring-2 focus:ring-primary-600/15
+                   hover:border-slate-400 transition-[border-color,box-shadow] duration-200 ${className}`}
         style={{
-          paddingInlineStart: leftSlot ? '48px' : '20px',
-          paddingInlineEnd: rightSlot ? '48px' : '20px',
+          paddingLeft: leftSlot ? '48px' : '20px',
+          paddingRight: rightSlot ? '48px' : '20px',
           ...props.style
         }}
         {...props}
       />
-      {leftSlot && <div className="absolute start-4 top-1/2 -translate-y-1/2">{leftSlot}</div>}
+      {leftSlot && <div className="absolute left-4 top-1/2 -translate-y-1/2">{leftSlot}</div>}
     </div>
   )
 }
@@ -144,6 +144,7 @@ export default function RegisterPage() {
 
   const isGoogleConfigured = import.meta.env.VITE_GOOGLE_CLIENT_ID &&
     import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id_here'
+  const googleButtonWidth = typeof window === 'undefined' ? 350 : Math.min(440, window.innerWidth - 32)
 
   const upd = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
 
@@ -156,8 +157,10 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (form.password.length < 6)              return toast.error(t('auth.register.toast.passwordTooShort'))
-    if (form.password !== form.confirmPassword) return toast.error(t('auth.register.toast.passwordsMismatch'))
+    if (form.password.length < 8)                  return toast.error(t('auth.register.toast.passwordTooShort'))
+    if (!/[A-Z]/.test(form.password))               return toast.error(t('auth.register.toast.passwordNoUppercase'))
+    if (!/\d/.test(form.password))                  return toast.error(t('auth.register.toast.passwordNoDigit'))
+    if (form.password !== form.confirmPassword)     return toast.error(t('auth.register.toast.passwordsMismatch'))
     setLoading(true)
     try {
       const { confirmPassword, ...payload } = form
@@ -169,40 +172,28 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 bg-canvas relative">
-      <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-primary-500/[0.05] to-transparent pointer-events-none" />
+    <main className="min-h-screen flex items-center justify-center bg-canvas relative" style={{ padding: '96px 16px' }}>
       <div className="fixed top-4 end-4 z-50 flex items-center gap-2">
         <DarkModeToggle />
         <LanguageSwitcher />
       </div>
 
-      <div className="relative w-full max-w-[560px] animate-slide-up">
+      <div className="relative w-full max-w-[520px]">
 
-        <div className="relative rounded-t-2xl px-8 pt-8 pb-6 text-center overflow-hidden">
-          {/* Aurora background */}
-          <div className="absolute inset-0 bg-[#070b14]" />
-          <div
-            className="aurora-blob w-[400px] h-[400px] -top-32 -end-20"
-            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)' }}
-          />
-          <div
-            className="aurora-blob w-[300px] h-[300px] -bottom-24 -start-16"
-            style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%)', animationDelay: '-8s' }}
-          />
-          <div className="absolute inset-0 bg-grid bg-grid-fade opacity-30" />
+        <div className="relative rounded-t-xl bg-[#101827] px-8 pt-8 pb-7 text-center overflow-hidden">
 
-          <div className="absolute top-3 end-5 w-16 h-16 rounded-xl overflow-hidden bg-white/10 border border-white/15 backdrop-blur p-1.5 shadow-xl flex-shrink-0 flex items-center justify-center z-10">
+          <div className="absolute top-5 end-6 w-12 h-12 rounded-lg overflow-hidden bg-white p-1 flex-shrink-0 flex items-center justify-center z-10">
             <QnuLogo className="w-full h-full object-contain" />
           </div>
 
-          <div className="relative z-10 pt-4 pb-2 text-center mt-4">
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">{t('auth.register.title')}</h1>
-            <p className="text-blue-300/80 text-sm mt-1.5 mb-6 font-medium">{t('auth.register.subtitle')}</p>
+          <div className="relative z-10 pb-1 text-center">
+            <h1 className="text-2xl font-bold text-white tracking-[-0.02em]">{t('auth.register.title')}</h1>
+            <p className="text-slate-300 text-sm mt-1.5 mb-6">{t('auth.register.subtitle')}</p>
             <Steps current={step} />
           </div>
         </div>
 
-         <div className="bg-surface rounded-b-2xl shadow-2xl px-8 pb-8 pt-8 border-x border-b border-border">
+         <div className="bg-surface rounded-b-xl px-6 sm:px-8 pb-8 pt-8 border-x border-b border-border">
 
           {step === 1 && (
             <div className="flex flex-col gap-4">
@@ -212,7 +203,7 @@ export default function RegisterPage() {
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
                       onError={() => toast.error(t('auth.register.toast.googleCancelled'))}
-                      width={480}
+                      width={googleButtonWidth}
                       text="signup_with"
                       shape="rectangular"
                       theme="outline"
@@ -234,9 +225,9 @@ export default function RegisterPage() {
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-border" />
+                <div className="flex-1 h-px bg-border" />
                 <span className="text-xs text-muted font-medium">{t('auth.register.divider')}</span>
-                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-border" />
+                <div className="flex-1 h-px bg-border" />
               </div>
 
               <Field label={t('auth.register.nameLabel')}>
@@ -257,7 +248,7 @@ export default function RegisterPage() {
               </div>
 
               <button onClick={goNext}
-                className="w-full h-14 rounded-lg font-bold text-base text-primary-btn-text bg-primary-btn hover:bg-primary-btn/90 hover:shadow-lg active:scale-[0.99] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-4">
+                className="w-full h-12 rounded-lg font-bold text-[15px] text-primary-btn-text bg-primary-btn hover:bg-primary-700 active:bg-primary-800 transition-colors duration-200 cursor-pointer flex items-center justify-center gap-2 mt-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
                 {t('auth.register.nextButton')}
                 {isRtl ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
               </button>
@@ -298,7 +289,7 @@ export default function RegisterPage() {
                 {form.confirmPassword && form.password !== form.confirmPassword && (
                   <p className="text-xs text-red-500 mt-1.5">{t('auth.register.toast.passwordsMismatch')}</p>
                 )}
-                {form.confirmPassword && form.password === form.confirmPassword && form.confirmPassword.length >= 6 && (
+                {form.confirmPassword && form.password === form.confirmPassword && form.confirmPassword.length >= 8 && (
                   <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1.5">
                     <CheckCircle size={12} /> {t('auth.register.confirmPasswordMatch')}
                   </p>
@@ -311,7 +302,7 @@ export default function RegisterPage() {
                   {isRtl ? <ArrowRight size={16} /> : <ArrowLeft size={16} />} {t('auth.register.backButton')}
                 </button>
                 <button type="submit" disabled={loading}
-                  className="flex-1 h-12 rounded-lg font-bold text-base text-primary-btn-text bg-primary-btn hover:bg-primary-btn/90 hover:shadow-lg active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2">
+                  className="flex-1 h-12 rounded-lg font-bold text-[15px] text-primary-btn-text bg-primary-btn hover:bg-primary-700 active:bg-primary-800 transition-colors duration-200 cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
                   {loading
                     ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                     : <UserPlus size={18} />}
@@ -327,6 +318,6 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

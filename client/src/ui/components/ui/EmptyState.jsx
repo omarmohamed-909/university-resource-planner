@@ -16,8 +16,8 @@ import { cn } from '../../lib/utils'
 
 const sizes = {
   sm: { wrapper: 'py-8',  icon: 'w-12 h-12 rounded-xl',  iconSize: 'w-5 h-5', title: 'text-sm',   desc: 'text-xs' },
-  md: { wrapper: 'py-12', icon: 'w-14 h-14 rounded-2xl', iconSize: 'w-6 h-6', title: 'text-base', desc: 'text-sm' },
-  lg: { wrapper: 'py-20', icon: 'w-16 h-16 rounded-2xl', iconSize: 'w-7 h-7', title: 'text-lg',   desc: 'text-sm' },
+  md: { wrapper: 'py-12', icon: 'w-14 h-14 rounded-xl', iconSize: 'w-6 h-6', title: 'text-base', desc: 'text-sm' },
+  lg: { wrapper: 'py-20', icon: 'w-16 h-16 rounded-xl', iconSize: 'w-7 h-7', title: 'text-lg',   desc: 'text-sm' },
 }
 
 export default function EmptyState({
@@ -31,12 +31,10 @@ export default function EmptyState({
   const cfg = sizes[size] || sizes.md
 
   return (
-    <div className={cn('flex flex-col items-center justify-center text-center animate-fade-in', cfg.wrapper, className)}>
+    <div className={cn('flex flex-col items-center justify-center text-center', cfg.wrapper, className)}>
       {Icon && (
-        <div className="relative mb-3">
-          {/* Soft halo behind icon */}
-          <div className="absolute inset-0 rounded-2xl bg-primary-500/5 blur-xl" />
-          <div className={cn('relative flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/80 dark:to-slate-800/40 text-muted ring-1 ring-border', cfg.icon)}>
+        <div className="mb-3">
+          <div className={cn('flex items-center justify-center border border-border bg-hover/50 text-label', cfg.icon)}>
             <Icon className={cfg.iconSize} strokeWidth={1.8} />
           </div>
         </div>
