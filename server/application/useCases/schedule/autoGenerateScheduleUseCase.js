@@ -19,17 +19,25 @@ class AutoGenerateScheduleUseCase {
    * @param {number}  params.maxGenerations
    * @param {number}  params.mutationRate
    */
-  async execute({ semester, dryRun = false, populationSize, maxGenerations, mutationRate } = {}) {
+  async execute({ semester, department, dryRun = false, populationSize, maxGenerations, mutationRate } = {}) {
     if (!semester) throw new Error('الفصل الدراسي مطلوب');
+    const departmentRequired = process.env.AUTO_SCHEDULE_REQUIRE_DEPARTMENT === 'true' ||
+      (process.env.NODE_ENV === 'production' && process.env.AUTO_SCHEDULE_REQUIRE_DEPARTMENT !== 'false');
+    if (departmentRequired && !department) {
+      throw new Error('القسم مطلوب لتقسيم الجدولة ومنع معالجة الجامعة بالكامل في مهمة واحدة');
+    }
 
-    const [halls, courses, existing] = await Promise.all([
+    const courseFilter = department ? { department } : {};
+    const [halls, courses] = await Promise.all([
       this.hallRepository.findAll({ status: 'active' }),
-      this.courseRepository.findAll(),
-      this.scheduleRepository.findBySemester(semester),
+      this.courseRepository.findAll(courseFilter),
     ]);
 
     if (!halls.length)   throw new Error('لا توجد قاعات دراسية نشطة');
     if (!courses.length) throw new Error('لا توجد مواد دراسية لجدولتها');
+    const courseIds = courses.map(course => course.id);
+    const scopeFilter = { semester, courseId: { $in: courseIds } };
+    const existing = await this.scheduleRepository.findAll(scopeFilter);
 
     // Run GA
     const ga = new GeneticScheduler({
@@ -71,28 +79,52 @@ class AutoGenerateScheduleUseCase {
     }
 
     // ── Apply ────────────────────────────────────────────────────────────────
-    // ملاحظة: transactions تحتاج Replica Set — للإنتاج فقط
-    if (existing.length) {
-      await this.scheduleRepository.deleteMany({ semester });
-    }
+    // نستخدم MongoDB Transaction عند توفر Replica Set للحفاظ على سلامة البيانات
+    // عند الفشل الجزئي يُرجع الحالة كاملاً (rollback)
+    const mongoose = require('mongoose');
+    const supportsTransactions = mongoose.connection.readyState === 1 &&
+      mongoose.connection.db?.serverConfig?.s?.description?.type === 'ReplicaSetWithPrimary' ||
+      (mongoose.connection.db && await (async () => {
+        try {
+          const info = await mongoose.connection.db.command({ isMaster: 1 });
+          return !!info.setName; // إذا وجد setName فهو Replica Set
+        } catch { return false; }
+      })());
 
-    const savedSchedules = [];
-    for (const item of scheduled) {
-      const saved = await this.scheduleRepository.save(
-        new Schedule({ ...item, semester })
+    let savedSchedules = [];
+
+    if (supportsTransactions) {
+      const session = await mongoose.startSession();
+      try {
+        await session.withTransaction(async () => {
+          savedSchedules = await this.scheduleRepository.replaceMany(
+            scopeFilter,
+            scheduled.map(item => new Schedule({ ...item, semester })),
+            { session }
+          );
+        });
+      } finally {
+        await session.endSession();
+      }
+    } else {
+      // Standalone MongoDB — بدون transaction (تحذير في logs)
+      if (process.env.NODE_ENV === 'production') {
+        console.warn('[AutoSchedule] ⚠️ تشغيل بدون MongoDB Replica Set — لا تتوفر الـ Transactions. راجع DEPLOYMENT.md');
+      }
+      savedSchedules = await this.scheduleRepository.replaceMany(
+        scopeFilter,
+        scheduled.map(item => new Schedule({ ...item, semester }))
       );
-      savedSchedules.push(saved);
     }
 
     this.socketService.broadcast('schedules:regenerated', {
-      semester, count: savedSchedules.length, applied: true,
+      semester, department, count: savedSchedules.length, applied: true,
     });
 
     return { schedules: savedSchedules, unscheduled, analytics, applied: true };
   }
 
   _analytics(scheduled, courses, halls, convergence, bestFitness, generationsRun) {
-    const hallMap = new Map(halls.map(h => [String(h.id), h]));
     const dayLoad = Object.fromEntries(DAYS.map(d => [d, 0]));
     const hallLoad = Object.fromEntries(halls.map(h => [String(h.id), 0]));
 

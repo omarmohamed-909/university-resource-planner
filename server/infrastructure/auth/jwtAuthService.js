@@ -34,7 +34,7 @@ class JwtAuthService {
   verifyToken(token) {
     try {
       return jwt.verify(token, this.secret);
-    } catch (error) {
+    } catch {
       return null;
     }
   }

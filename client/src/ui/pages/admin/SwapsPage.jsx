@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
+import Pagination from '../../components/ui/Pagination'
 import { useConfirm } from '../../components/ui/ConfirmModal'
 import toast from 'react-hot-toast'
 import api from '../../../infrastructure/api/axios'
@@ -39,17 +40,20 @@ function getProposalText(swap, t) {
 export default function AdminSwaps() {
   const { t } = useTranslation()
   const [swaps, setSwaps] = useState([])
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState(null)
   const { confirm, ConfirmModal } = useConfirm()
 
   const [fetchError, setFetchError] = useState(null)
 
-  const fetchSwaps = async () => {
+  const fetchSwaps = async (targetPage = page) => {
     setFetchError(null)
     try {
-      const { data } = await api.get('/swaps')
+      const { data } = await api.get(`/swaps?page=${targetPage}&limit=20`)
       setSwaps(data.data || [])
+      setPagination(data.pagination || { page: 1, pages: 1, total: data.data?.length || 0 })
     } catch (err) {
       setFetchError(err)
       setSwaps([])
@@ -58,7 +62,7 @@ export default function AdminSwaps() {
 
   useEffect(() => {
     fetchSwaps().finally(() => setLoading(false))
-  }, [])
+  }, [page])
 
   const pendingCount = useMemo(() => swaps.filter(swap => swap.status === 'pending').length, [swaps])
 
@@ -179,6 +183,7 @@ export default function AdminSwaps() {
         </div>
       )}
 
+      <Pagination page={pagination.page} pages={pagination.pages} total={pagination.total} onPageChange={setPage} />
       <ConfirmModal />
     </div>
   )

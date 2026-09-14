@@ -1,18 +1,42 @@
 {
   "name": "qnu",
   "version": "1.0.0",
+  "description": "University Resource Planner — scheduling, halls, attendance, RBAC, and real-time updates.",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omarmohamed-909/university-resource-planner.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "workspaces": [
     "server",
     "client"
   ],
+  "overrides": {
+    "body-parser": "1.20.6",
+    "qs": "6.16.0",
+    "socket.io-parser": "4.2.7",
+    "ip-address": "10.7.0",
+    "uuid": "11.1.1",
+    "minimatch@3.1.5": {
+      "brace-expansion": "1.1.18"
+    },
+    "minimatch@5.1.9": {
+      "brace-expansion": "2.1.4"
+    }
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm run dev -w server",
     "dev:client": "npm run dev -w client",
     "build": "npm run build -w client && npm run build -w server",
     "test": "npm run test -w server",
-    "start": "npm run start -w server"
+    "test:load": "node scripts/load-test.mjs",
+    "start": "npm run start -w server",
+    "lint": "npm run lint -w server --if-present && npm run lint -w client --if-present"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

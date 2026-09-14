@@ -10,6 +10,7 @@ import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
+import Pagination from '../../components/ui/Pagination'
 import { useConfirm } from '../../components/ui/ConfirmModal'
 import toast from 'react-hot-toast'
 import { Plus, CalendarDays, Trash2, LayoutGrid, List, FileText, FileSpreadsheet, Printer } from 'lucide-react'
@@ -28,12 +29,13 @@ const DAY_STYLES = {
 
 export default function AdminSchedules() {
   const { t } = useTranslation()
-  const { schedules, fetchSchedules, createSchedule, deleteSchedule } = useScheduleStore()
+  const { schedules, pagination, fetchSchedules, createSchedule, deleteSchedule } = useScheduleStore()
   const { halls, fetchHalls } = useHallStore()
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [viewMode, setViewMode] = useState('grid')
+  const [page, setPage] = useState(1)
   const [form, setForm] = useState({
     courseId: '', hallId: '', day: 'saturday', startTime: '08:00', endTime: '09:30', weekPattern: 'weekly', semester: '2026-1'
   })
@@ -41,11 +43,12 @@ export default function AdminSchedules() {
 
   useEffect(() => {
     Promise.all([
-      fetchSchedules(),
-      fetchHalls(),
-      api.get('/courses').then(r => setCourses(Array.isArray(r.data.data) ? r.data.data : [])).catch(err => console.error('[SchedulesPage] courses:', err?.message))
+      fetchHalls({ limit: 100 }),
+      api.get('/courses?limit=100').then(r => setCourses(Array.isArray(r.data.data) ? r.data.data : [])).catch(err => console.error('[SchedulesPage] courses:', err?.message))
     ]).finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => { fetchSchedules({ page, limit: 60 }) }, [page])
 
   const handleCreate = async (e) => {
     e.preventDefault()
@@ -74,7 +77,7 @@ export default function AdminSchedules() {
 
   const groupedByDay = {}
   DAYS.forEach(d => { groupedByDay[d] = schedules.filter(s => s.day === d) })
-  const totalSchedules = schedules.length
+  const totalSchedules = pagination.total
 
   return (
     <div className="space-y-6 print-container">
@@ -186,6 +189,8 @@ export default function AdminSchedules() {
           </CardContent>
         </Card>
       )}
+
+      <Pagination page={pagination.page} pages={pagination.pages} total={pagination.total} onPageChange={setPage} />
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={t('admin.schedules.modalTitle')} size="lg">
         <form onSubmit={handleCreate} className="space-y-4">

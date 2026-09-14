@@ -3,7 +3,7 @@ import api from '../../infrastructure/api/axios'
 import { connectSocket, joinUser, disconnectSocket } from '../../infrastructure/socket/socketClient'
 import { setToken, setUser, setRefreshToken, clearAuth, getUser, getToken } from '../../infrastructure/storage/authStorage'
 
-export const useAuthStore = create((set, get) => ({
+export const useAuthStore = create((set) => ({
   user: getUser(),
   token: getToken(),
   loading: false,

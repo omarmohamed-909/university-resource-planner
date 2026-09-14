@@ -25,29 +25,31 @@ function GoogleIcon({ size = 20 }) {
 
 function Field({ label, children }) {
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-semibold text-body">{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[13px] font-semibold text-body">{label}</label>
       {children}
     </div>
   )
 }
 
 function AuthInput({ icon: Icon, type = 'text', action, ...props }) {
+  const hasEnd = Icon || action
   return (
     <div className="relative group/input">
       {Icon && (
-        <Icon className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted transition-colors group-focus-within/input:text-primary-600" />
+        <Icon className="absolute right-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted transition-colors duration-200 group-focus-within/input:text-primary-600" />
       )}
       <input
         type={type}
-        className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-title outline-none transition-[border-color,box-shadow] placeholder:text-muted hover:border-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/15"
-        style={{ paddingRight: Icon ? '44px' : '16px', paddingLeft: action ? '44px' : '16px' }}
+        className="h-12 w-full rounded-lg border border-border bg-canvas px-4 text-[15px] text-title outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-muted hover:border-primary-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/15"
+        style={{ paddingRight: hasEnd ? '44px' : '16px' }}
         {...props}
       />
-      {action && <div className="absolute left-4 top-1/2 -translate-y-1/2">{action}</div>}
+      {action && <div className="absolute right-3.5 top-1/2 -translate-y-1/2">{action}</div>}
     </div>
   )
 }
+
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -66,7 +68,7 @@ export default function LoginPage() {
   const googleButtonWidth = typeof window === 'undefined' ? 350 : Math.min(440, window.innerWidth - 40)
 
   const demos = import.meta.env.DEV ? [
-    { label: t('auth.login.demoAdmin'), role: 'admin', email: 'admin@svnu.edu', password: 'admin123', icon: Shield, color: 'bg-blue-500' },
+    { label: t('auth.login.demoAdmin'), role: 'admin', email: 'admin@svnu.edu', password: 'admin123', icon: Shield, color: 'bg-primary-600' },
     { label: t('auth.login.demoDoctor'), role: 'doctor', email: 'ahmed@svnu.edu', password: 'doctor123', icon: BookOpen, color: 'bg-emerald-500' },
     { label: t('auth.login.demoStudent'), role: 'student', email: 'student@svnu.edu', password: 'student123', icon: GraduationCap, color: 'bg-violet-500' },
   ] : []
@@ -119,37 +121,48 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-canvas lg:grid lg:grid-cols-[minmax(360px,42%)_1fr]">
-      <div className="fixed end-4 top-4 z-50 flex items-center gap-2">
+    <main className="h-dvh overflow-hidden bg-canvas lg:grid lg:grid-cols-[minmax(360px,42%)_1fr]">
+      {/* ─── Controls ─── */}
+      <div className="fixed end-4 top-4 z-50 hidden items-center gap-2 lg:flex">
         <DarkModeToggle />
         <LanguageSwitcher />
       </div>
 
-      <section className="relative hidden min-h-screen overflow-hidden bg-[#101827] text-white lg:flex lg:flex-col lg:justify-between" style={{ padding: '40px clamp(40px, 5vw, 64px)' }}>
-        <div className="absolute inset-y-0 end-0 w-px bg-white/10" aria-hidden="true" />
-        <div className="flex items-center gap-3">
-          <div className="h-11 w-11 overflow-hidden rounded-lg bg-white p-1">
+      {/* ═══════════════════════════════════════════
+          BRAND PANEL — dark, institutional, grounded
+         ═══════════════════════════════════════════ */}
+      <section className="auth-brand-panel relative hidden h-full overflow-hidden text-white lg:flex lg:flex-col lg:justify-between" style={{ padding: 'clamp(28px, 5vh, 40px) clamp(40px, 5vw, 56px)' }}>
+        {/* subtle dot texture */}
+        <div className="bg-dots absolute inset-0 opacity-[0.35]" style={{ WebkitMaskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black, transparent)', maskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black, transparent)' }} aria-hidden="true" />
+        {/* edge line */}
+        <div className="absolute inset-y-0 end-0 w-px bg-white/[0.06]" aria-hidden="true" />
+
+        {/* logo + name */}
+        <div className="relative flex items-center gap-3">
+          <div className="h-10 w-10 overflow-hidden rounded-lg bg-white p-1">
             <QnuLogo className="h-full w-full" />
           </div>
           <div>
-            <p className="text-lg font-bold leading-none">QNU</p>
+            <p className="text-base font-bold leading-none tracking-tight">QNU</p>
             <p className="mt-1 text-xs text-slate-400">{t('auth.login.systemTitle')}</p>
           </div>
         </div>
 
-        <div className="max-w-lg py-14">
-          <p className="mb-5 text-sm font-medium text-blue-300">South Valley National University</p>
-          <h1 className="max-w-[12ch] text-4xl font-bold leading-[1.22] tracking-[-0.025em] text-balance xl:text-5xl">
-            {t('auth.login.platformTitle')} {t('auth.login.platformHighlight')}
+        {/* hero text — short, confident, not marketing */}
+        <div className="relative max-w-md">
+          <p className="mb-3 text-[13px] font-medium text-primary-300">South Valley National University</p>
+          <h1 className="text-[2rem] font-bold leading-[1.25] tracking-[-0.02em] text-white text-balance xl:text-[2.5rem]">
+            {t('auth.login.platformTitle')}
           </h1>
-          <p className="mt-5 max-w-md text-base leading-8 text-slate-300 text-pretty">{t('auth.login.platformDesc')}</p>
+          <p className="mt-4 max-w-sm text-[15px] leading-7 text-slate-400 text-pretty">{t('auth.login.platformDesc')}</p>
         </div>
 
-        <div className="border-t border-white/10 pt-6">
-          <div className="flex flex-wrap gap-x-7 gap-y-3">
-            {features.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-2 text-sm text-slate-300">
-                <Icon className="h-4 w-4 text-blue-300" />
+        {/* features — simple inline row */}
+        <div className="relative border-t border-white/[0.08] pt-5">
+          <div className="flex flex-wrap gap-x-6 gap-y-2.5">
+            {features.map(({ icon: FIcon, label }) => (
+              <div key={label} className="flex items-center gap-2 text-[13px] text-slate-400">
+                <FIcon className="h-4 w-4 shrink-0 text-slate-500" />
                 <span>{label}</span>
               </div>
             ))}
@@ -157,58 +170,87 @@ export default function LoginPage() {
         </div>
       </section>
 
-      <section className="flex min-h-screen items-center justify-center py-24" style={{ paddingInline: '20px' }}>
-        <div className="w-full max-w-md">
-          <div className="mb-10 flex items-center gap-3 lg:hidden">
-            <div className="h-11 w-11 overflow-hidden rounded-lg border border-border bg-white p-1"><QnuLogo className="h-full w-full" /></div>
-            <div><p className="font-bold text-title">QNU</p><p className="text-xs text-muted">{t('auth.login.systemTitle')}</p></div>
+      {/* ═══════════════════════════════════════════
+          FORM PANEL
+         ═══════════════════════════════════════════ */}
+      <section className="auth-form-panel flex h-full min-h-0 items-center justify-center px-5 py-4 sm:py-6 lg:py-5">
+        <div className="w-full max-w-[420px]">
+          {/* mobile logo */}
+          <div className="mb-5 flex items-center justify-between gap-4 lg:hidden">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="auth-logo-tile h-10 w-10 overflow-hidden rounded-lg border border-border p-1">
+                <QnuLogo className="h-full w-full" />
+              </div>
+              <div>
+                <p className="font-bold text-title">QNU</p>
+                <p className="hidden text-xs text-muted sm:block">{t('auth.login.systemTitle')}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <DarkModeToggle />
+              <LanguageSwitcher />
+            </div>
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold tracking-[-0.025em] text-title text-balance">{t('auth.login.welcomeBack')}</h2>
+          {/* heading */}
+          <div className="mb-5">
+            <h2 className="text-[1.75rem] font-bold tracking-[-0.02em] text-title text-balance">{t('auth.login.welcomeBack')}</h2>
             <p className="mt-2 text-[15px] text-label">{t('auth.login.subtitle')}</p>
           </div>
 
-          <div className="mb-6">
+          {/* google login */}
+          <div className="mb-4">
             {isGoogleConfigured ? (
               <div className="flex w-full justify-center" aria-busy={googleLoading}>
                 <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error(t('auth.login.toast.googleFailed'))} width={googleButtonWidth} text="continue_with" shape="rectangular" theme="outline" size="large" useOneTap={false} />
               </div>
             ) : (
               <div>
-                <button disabled className="flex h-12 w-full cursor-not-allowed items-center justify-center gap-3 rounded-lg border border-border bg-surface px-5 text-[15px] font-semibold text-label opacity-70"><GoogleIcon /> {t('auth.login.googleButton')}</button>
-                <p className="mt-2 text-center text-xs text-amber-700 dark:text-amber-400">{t('auth.login.googleNotConfigured')}</p>
+                <button disabled className="flex h-12 w-full cursor-not-allowed items-center justify-center gap-3 rounded-lg border border-border bg-canvas px-5 text-[15px] font-semibold text-label opacity-60">
+                  <GoogleIcon /> {t('auth.login.googleButton')}
+                </button>
+                <p className="auth-warning mt-2 text-center text-xs">{t('auth.login.googleNotConfigured')}</p>
               </div>
             )}
           </div>
 
-          <div className="mb-6 flex items-center gap-4"><div className="h-px flex-1 bg-border" /><span className="text-xs text-muted">{t('auth.login.divider')}</span><div className="h-px flex-1 bg-border" /></div>
+          {/* divider */}
+          <div className="mb-4 flex items-center gap-4">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium text-muted">{t('auth.login.divider')}</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* form */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
             <Field label={t('auth.login.emailLabel')}>
               <AuthInput icon={Mail} type="email" value={email} onChange={event => setEmail(event.target.value)} placeholder={t('auth.login.emailPlaceholder')} required dir="ltr" autoComplete="email" />
             </Field>
             <Field label={t('auth.login.passwordLabel')}>
               <AuthInput type={showPass ? 'text' : 'password'} value={password} onChange={event => setPassword(event.target.value)} placeholder={t('auth.login.passwordPlaceholder')} required dir="ltr" autoComplete="current-password" action={(
-                <button type="button" onClick={() => setShowPass(value => !value)} className="rounded p-1 text-muted transition-colors hover:text-title focus-visible:outline-2 focus-visible:outline-primary-600" aria-label={showPass ? t('auth.login.hidePassword', { defaultValue: 'إخفاء' }) : t('auth.login.showPassword', { defaultValue: 'إظهار' })}>
+                <button type="button" onClick={() => setShowPass(value => !value)} className="rounded p-1 text-muted transition-colors duration-200 hover:text-title focus-visible:outline-2 focus-visible:outline-primary-600" aria-label={showPass ? t('auth.login.hidePassword', { defaultValue: 'إخفاء' }) : t('auth.login.showPassword', { defaultValue: 'إظهار' })}>
                   {showPass ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>
               )} />
             </Field>
-            <button type="submit" disabled={loading} className="mt-1 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-5 text-[15px] font-bold text-white transition-colors hover:bg-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 active:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60">
-              {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> : <LogIn className="h-4 w-4 rtl:scale-x-[-1]" />}
+            <button type="submit" disabled={loading} className="mt-1 flex h-12 w-full items-center justify-center gap-2.5 rounded-lg bg-primary-600 px-5 text-[15px] font-bold text-white transition-colors duration-200 hover:bg-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 active:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60">
+              {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <LogIn className="h-4 w-4 rtl:scale-x-[-1]" />}
               {loading ? t('auth.login.loadingButton') : t('auth.login.submitButton')}
             </button>
           </form>
 
+          {/* demo quick login */}
           {demos.length > 0 && (
-            <div className="mt-8 border-t border-border pt-6">
-              <div className="mb-3 flex items-baseline justify-between gap-4"><p className="text-sm font-semibold text-title">{t('auth.login.quickLogin')}</p><p className="text-xs text-muted">{t('auth.login.quickLoginHint')}</p></div>
+            <div className="mt-5 border-t border-border pt-4">
+              <div className="mb-2.5 flex items-baseline justify-between gap-4">
+                <p className="text-[13px] font-semibold text-title">{t('auth.login.quickLogin')}</p>
+                <p className="text-xs text-muted">{t('auth.login.quickLoginHint')}</p>
+              </div>
               <div className="grid grid-cols-3 gap-2">
                 {demos.map(demo => {
                   const Icon = demo.icon
                   return (
-                    <button key={demo.role} onClick={() => quickLogin(demo)} disabled={!!quickLoading} className="flex h-10 items-center justify-center gap-2 rounded-lg border border-border bg-surface px-2 text-sm font-semibold text-body transition-colors hover:border-slate-400 hover:bg-hover focus-visible:outline-2 focus-visible:outline-primary-600 disabled:opacity-50">
+                    <button key={demo.role} onClick={() => quickLogin(demo)} disabled={!!quickLoading} className="flex h-10 items-center justify-center gap-2 rounded-lg border border-border bg-canvas px-2 text-[13px] font-semibold text-body transition-colors duration-200 hover:border-primary-400 hover:bg-hover focus-visible:outline-2 focus-visible:outline-primary-600 disabled:opacity-50">
                       {quickLoading === demo.role ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-title" /> : <span className={`flex h-5 w-5 items-center justify-center rounded ${demo.color}`}><Icon className="h-3 w-3 text-white" /></span>}
                       <span className="truncate">{demo.label}</span>
                     </button>
@@ -218,9 +260,10 @@ export default function LoginPage() {
             </div>
           )}
 
-          <p className="mt-8 flex items-center justify-center gap-1.5 text-sm text-label">
+          {/* register link */}
+          <p className="mt-5 flex items-center justify-center gap-1.5 text-sm text-label">
             {t('auth.login.noAccount')}
-            <Link to="/register" className="inline-flex items-center gap-1 font-semibold text-primary-700 hover:underline dark:text-blue-400">{t('auth.login.createAccount')}<ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" /></Link>
+            <Link to="/register" className="auth-link inline-flex items-center gap-1 font-semibold transition-colors duration-200 hover:underline">{t('auth.login.createAccount')}<ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" /></Link>
           </p>
         </div>
       </section>

@@ -13,5 +13,7 @@ const scheduleSchema = new mongoose.Schema({
 scheduleSchema.index({ hallId: 1, day: 1, weekPattern: 1 });
 scheduleSchema.index({ courseId: 1 });
 scheduleSchema.index({ semester: 1 });
+scheduleSchema.index({ semester: 1, day: 1, startTime: 1 });
+scheduleSchema.index({ courseId: 1, semester: 1 });
 
 module.exports = mongoose.model('Schedule', scheduleSchema);

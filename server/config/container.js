@@ -1,4 +1,4 @@
-const { createContainer, asClass, asValue, asFunction } = require('awilix');
+const { createContainer, asClass, asValue } = require('awilix');
 
 const container = createContainer();
 
@@ -37,6 +37,7 @@ function registerDependencies() {
   registerPath('infrastructure/socket', asClass);
   registerPath('infrastructure/email', asClass);
   registerPath('infrastructure/export', asClass);
+  registerPath('infrastructure/jobs', asClass);
   registerPath('interfaces/controllers', asClass);
 
   // Create aliases for repository interfaces
@@ -46,7 +47,8 @@ function registerDependencies() {
     ['mongooseCourseRepository', 'courseRepository'],
     ['mongooseScheduleRepository', 'scheduleRepository'],
     ['mongooseAttendanceRepository', 'attendanceRepository'],
-    ['mongooseSwapRepository', 'swapRepository']
+    ['mongooseSwapRepository', 'swapRepository'],
+    ['mongooseEnrollmentRepository', 'enrollmentRepository']
   ];
   for (const [impl, alias] of repoAliases) {
     if (container.hasRegistration(impl)) {

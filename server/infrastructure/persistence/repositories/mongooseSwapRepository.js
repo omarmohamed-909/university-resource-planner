@@ -25,6 +25,18 @@ class MongooseSwapRepository {
     return docs.map(doc => ({ id: doc._id.toString(), ...doc, _id: undefined }));
   }
 
+  async findAllPaginated(filter = {}, page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const [docs, total] = await Promise.all([
+      this.queryWithRelations(SwapRequestModel.find(filter).sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit)).lean(),
+      SwapRequestModel.countDocuments(filter),
+    ]);
+    return {
+      data: docs.map(doc => ({ id: doc._id.toString(), ...doc, _id: undefined })),
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    };
+  }
+
   async save(data) {
     const doc = await SwapRequestModel.create(data);
     const populated = await this.queryWithRelations(SwapRequestModel.findById(doc._id)).lean();

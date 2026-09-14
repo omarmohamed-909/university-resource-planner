@@ -18,7 +18,7 @@ export default function DoctorDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/schedules')
+    api.get('/schedules?limit=100')
       .then(r => setSchedules(Array.isArray(r.data.data) ? r.data.data : []))
       .catch(err => {
         console.error('[DoctorDashboard] schedules:', err?.message)

@@ -12,6 +12,7 @@ function courseRoutes(container) {
 
   router.get('/', (req, res, next) => controller.list(req, res, next));
   router.get('/:id', (req, res, next) => controller.getById(req, res, next));
+  router.get('/:id/enrollments', role('admin', 'doctor'), (req, res, next) => controller.listEnrollments(req, res, next));
   router.post('/', role('admin'), validate(createCourseSchema), (req, res, next) => controller.create(req, res, next));
   router.put('/:id', role('admin'), validate(updateCourseSchema), (req, res, next) => controller.update(req, res, next));
   router.delete('/:id', role('admin'), (req, res, next) => controller.delete(req, res, next));

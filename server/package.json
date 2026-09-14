@@ -1,19 +1,28 @@
 {
   "name": "qnu-server",
   "version": "1.0.0",
+  "description": "QNU backend — Node.js/Express REST API with Clean Architecture.",
   "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "node -e \"console.log('No server build step required')\"",
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node seed.js",
-    "test": "node --test tests/*.test.js"
+    "migrate:enrollments": "node scripts/migrateEnrollments.js",
+    "test": "node --test tests/*.test.js",
+    "lint": "eslint . --ext .js --max-warnings=0"
   },
   "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
     "arabic-reshaper": "^1.1.0",
     "awilix": "^12.0.0",
     "bcryptjs": "^2.4.3",
     "bidi-js": "^1.0.3",
+    "bullmq": "^6.3.5",
     "cors": "^2.8.5",
     "dotenv": "^16.4.0",
     "exceljs": "^4.4.0",
@@ -21,17 +30,22 @@
     "express-rate-limit": "^8.5.2",
     "google-auth-library": "^10.9.0",
     "helmet": "^8.2.0",
+    "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^7.4.0",
     "mongoose": "^8.8.0",
-    "morgan": "^1.10.0",
-    "nodemailer": "^9.0.1",
+    "morgan": "^1.12.1",
+    "nodemailer": "^9.1.1",
     "pdfkit": "^0.19.1",
     "qrcode": "^1.5.4",
-    "socket.io": "^4.8.0",
+    "rate-limit-redis": "^6.0.1",
+    "redis": "^6.2.1",
+    "socket.io": "^4.8.3",
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.7.0",
     "nodemon": "^3.1.0"
   }
 }

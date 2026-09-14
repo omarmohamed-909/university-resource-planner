@@ -21,8 +21,20 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Test
+      - name: Lint
+        run: npm run lint
+
+      - name: i18n Key Parity Check
+        run: node scripts/check-i18n-keys.mjs
+
+      - name: Server Tests
         run: npm test
+
+      - name: Client Tests
+        run: npm run test -w client --if-present
+
+      - name: Security Audit
+        run: npm audit --audit-level=high
 
       - name: Build
         run: npm run build

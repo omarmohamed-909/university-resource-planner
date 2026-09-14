@@ -5,13 +5,27 @@ class CourseController {
 
   async list(req, res, next) {
     try {
-      const page = req.query.page ? parseInt(req.query.page, 10) : null;
-      const limit = parseInt(req.query.limit, 10) || 20;
+      const { parsePagination } = require('../http/queryPagination');
+      const { page, limit } = parsePagination(req.query);
       const result = await this.courseUseCase.list({
         role: req.user.role,
         userId: req.user.id,
         page,
-        limit
+        limit,
+        search: req.query.search,
+      });
+      res.json({ success: true, ...result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async listEnrollments(req, res, next) {
+    try {
+      const { parsePagination } = require('../http/queryPagination');
+      const result = await this.courseUseCase.listEnrollments(req.params.id, {
+        ...parsePagination(req.query),
+        search: req.query.search,
       });
       res.json({ success: true, ...result });
     } catch (error) {

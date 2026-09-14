@@ -9,6 +9,7 @@ import Select from '../../components/ui/Select'
 import Modal from '../../components/ui/Modal'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
+import Pagination from '../../components/ui/Pagination'
 import { useConfirm } from '../../components/ui/ConfirmModal'
 import toast from 'react-hot-toast'
 import { Plus, Pencil, Trash2, DoorOpen, Search, Filter, RefreshCw, XCircle } from 'lucide-react'
@@ -69,7 +70,7 @@ const DEFAULT_FORM = { name: '', type: 'lecture', capacity: 30, floor: 1, buildi
 
 export default function AdminHalls() {
   const { t } = useTranslation()
-  const { halls, fetchHalls, createHall, updateHall, deleteHall } = useHallStore()
+  const { halls, pagination, fetchHalls, createHall, updateHall, deleteHall } = useHallStore()
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
@@ -80,6 +81,7 @@ export default function AdminHalls() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [page, setPage] = useState(1)
 
   const typeFilterOptions = useMemo(() => [
     { value: 'all', label: t('status.all') },
@@ -97,16 +99,18 @@ export default function AdminHalls() {
   // Live availability
   const availabilityMap = useHallAvailability(halls)
 
-  useEffect(() => { fetchHalls().catch(() => setFetchError(true)).finally(() => setLoading(false)) }, [])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = { page, limit: 20 }
+      if (search.trim()) params.search = search.trim()
+      if (typeFilter !== 'all') params.type = typeFilter
+      if (statusFilter !== 'all') params.status = statusFilter
+      fetchHalls(params).catch(() => setFetchError(true)).finally(() => setLoading(false))
+    }, search ? 300 : 0)
+    return () => clearTimeout(timer)
+  }, [page, search, typeFilter, statusFilter])
 
-  const filteredHalls = useMemo(() => {
-    return halls.filter(hall => {
-      const matchesSearch = !search || hall.name.toLowerCase().includes(search.toLowerCase()) || hall.building?.toLowerCase().includes(search.toLowerCase())
-      const matchesType = typeFilter === 'all' || hall.type === typeFilter
-      const matchesStatus = statusFilter === 'all' || hall.status === statusFilter
-      return matchesSearch && matchesType && matchesStatus
-    })
-  }, [halls, search, typeFilter, statusFilter])
+  const filteredHalls = halls
 
   const openCreate = () => {
     setEditItem(null)
@@ -199,19 +203,19 @@ export default function AdminHalls() {
           <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none transition-colors group-focus-within:text-primary-500" />
           <Input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => { setSearch(e.target.value); setPage(1) }}
             placeholder={t('admin.halls.searchPlaceholder')}
             className="pe-10"
           />
         </div>
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted" />
-          <Select options={typeFilterOptions} value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="w-32" />
-          <Select options={statusFilterOptions} value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-36" />
+          <Select options={typeFilterOptions} value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1) }} className="w-32" />
+          <Select options={statusFilterOptions} value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1) }} className="w-36" />
         </div>
-        {filteredHalls.length < halls.length && (
+        {pagination.total > halls.length && (
           <span className="text-xs text-muted whitespace-nowrap">
-            {filteredHalls.length} {t('common.from')} {halls.length}
+            {halls.length} {t('common.from')} {pagination.total}
           </span>
         )}
       </div>
@@ -273,6 +277,8 @@ export default function AdminHalls() {
           </CardContent>
         </Card>
       )}
+
+      <Pagination page={pagination.page} pages={pagination.pages} total={pagination.total} onPageChange={setPage} />
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? t('admin.halls.modalEdit') : t('admin.halls.modalAdd')} description={editItem?.name} hideFooter>
               <form onSubmit={handleSubmit} className="space-y-4">

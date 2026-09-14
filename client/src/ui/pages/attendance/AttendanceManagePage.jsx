@@ -7,6 +7,7 @@ import Input from '../../components/ui/Input'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
+import Pagination from '../../components/ui/Pagination'
 import { formatTime } from '../../lib/formatDate'
 import toast from 'react-hot-toast'
 import { ClipboardCheck, FileText, FileSpreadsheet, Printer, QrCode, RefreshCw, Users } from 'lucide-react'
@@ -28,6 +29,9 @@ export default function AttendanceManagePage() {
   const [selectedScheduleId, setSelectedScheduleId] = useState('')
   const [date, setDate] = useState(today())
   const [records, setRecords] = useState([])
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
+  const [summary, setSummary] = useState({ present: 0, absent: 0, total: 0 })
   const [qr, setQr] = useState(null)
   const [loading, setLoading] = useState(true)
   const [recordsLoading, setRecordsLoading] = useState(false)
@@ -39,7 +43,7 @@ export default function AttendanceManagePage() {
   )
 
   const fetchSchedules = async () => {
-    const { data } = await api.get('/schedules')
+    const { data } = await api.get('/schedules?limit=100')
     const items = data.data || []
     setSchedules(items)
     if (!selectedScheduleId && items[0]) setSelectedScheduleId(items[0].id)
@@ -49,8 +53,11 @@ export default function AttendanceManagePage() {
     if (!selectedScheduleId) return
     setRecordsLoading(true)
     try {
-      const { data } = await api.get(`/attendance/schedule/${selectedScheduleId}?date=${date}`)
+      const params = new URLSearchParams({ date, page, limit: 25 })
+      const { data } = await api.get(`/attendance/schedule/${selectedScheduleId}?${params}`)
       setRecords(data.data || [])
+      setPagination(data.pagination || { page: 1, pages: 1, total: data.data?.length || 0 })
+      setSummary(data.summary || { present: 0, absent: 0, total: data.data?.length || 0 })
     } catch (error) {
       toast.error(error.response?.data?.message || t('attendance.toast.loadFailed'))
       setRecords([])
@@ -91,9 +98,9 @@ export default function AttendanceManagePage() {
 
   useEffect(() => {
     fetchRecords()
-  }, [selectedScheduleId, date])
+  }, [selectedScheduleId, date, page])
 
-  const presentCount = records.filter(record => record.status === 'present').length
+  const presentCount = summary.present
 
   if (loading) return <Skeleton type="card" count={4} />
 
@@ -118,6 +125,7 @@ export default function AttendanceManagePage() {
                     value={selectedScheduleId}
                     onChange={event => {
                       setSelectedScheduleId(event.target.value)
+                      setPage(1)
                       setQr(null)
                     }}
                     options={schedules.map(schedule => ({
@@ -128,7 +136,7 @@ export default function AttendanceManagePage() {
                 </div>
                 <div>
                   <label htmlFor="att-date" className="block text-sm font-medium text-body mb-1">{t('attendance.formDate')}</label>
-                  <Input id="att-date" type="date" value={date} onChange={event => setDate(event.target.value)} />
+                  <Input id="att-date" type="date" value={date} onChange={event => { setDate(event.target.value); setPage(1) }} />
                 </div>
                 <Button onClick={generateQr} loading={qrLoading}>
                   <QrCode className="w-4 h-4 ms-2" />
@@ -201,8 +209,9 @@ export default function AttendanceManagePage() {
                     <p className="text-sm text-muted">{t('attendance.recordsEmpty')}</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
+                  <div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
                       <thead>
                         <tr className="border-b bg-surface">
                           <th scope="col" className="px-4 py-3 text-start text-sm font-medium text-body">{t('attendance.tableStudent')}</th>
@@ -225,7 +234,11 @@ export default function AttendanceManagePage() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                      </table>
+                    </div>
+                    <div className="px-4 pb-4">
+                      <Pagination page={pagination.page} pages={pagination.pages} total={pagination.total} onPageChange={setPage} />
+                    </div>
                   </div>
                 )}
               </CardContent>

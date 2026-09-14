@@ -19,14 +19,10 @@ class HallController {
       const filter = {};
       if (req.query.type) filter.type = req.query.type;
       if (req.query.status) filter.status = req.query.status;
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 20;
-      if (req.query.page) {
-        const result = await this.hallRepository.findAllPaginated(filter, page, limit);
-        return res.json({ success: true, ...result });
-      }
-      const halls = await this.hallRepository.findAll(filter);
-      res.json({ success: true, data: halls });
+      const { parsePagination } = require('../http/queryPagination');
+      const { page, limit } = parsePagination(req.query);
+      const result = await this.hallRepository.findAllPaginated(filter, page, limit, req.query.search);
+      res.json({ success: true, ...result });
     } catch (error) {
       next(error);
     }

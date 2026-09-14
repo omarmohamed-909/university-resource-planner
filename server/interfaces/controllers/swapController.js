@@ -24,8 +24,10 @@ class SwapController {
       if (req.user.role === 'doctor') {
         filter.requesterId = req.user.id;
       }
-      const swaps = await this.swapRepository.findAll(filter);
-      res.json({ success: true, data: swaps });
+      const { parsePagination } = require('../http/queryPagination');
+      const { page, limit } = parsePagination(req.query);
+      const result = await this.swapRepository.findAllPaginated(filter, page, limit);
+      res.json({ success: true, ...result });
     } catch (error) {
       next(error);
     }

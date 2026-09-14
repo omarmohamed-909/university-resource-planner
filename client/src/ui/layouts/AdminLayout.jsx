@@ -80,7 +80,7 @@ export default function AdminLayout() {
 
               <div className="hidden sm:flex items-center gap-2 text-sm">
                 <span className="inline-flex items-center gap-1.5 text-muted">
-                  <Shield className="w-3.5 h-3.5 text-blue-500" />
+                  <Shield className="w-3.5 h-3.5 text-primary-600" />
                   {t('layout.admin.prefix')}
                 </span>
                 {currentPage && (
@@ -104,12 +104,12 @@ export default function AdminLayout() {
               <div className="hidden sm:block text-end">
                 <p className="text-sm font-semibold text-title leading-tight">{user?.name}</p>
                 <p className="text-xs text-muted leading-tight flex items-center gap-1 justify-end">
-                  <span className="w-1 h-1 rounded-full bg-blue-500" />
+                  <span className="w-1 h-1 rounded-full bg-primary-500" />
                   {t('layout.admin.role')}
                 </p>
               </div>
               <div className="relative">
-                <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-9 h-9 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold text-sm">
                   {user?.name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div className="absolute -bottom-0.5 -end-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-surface">

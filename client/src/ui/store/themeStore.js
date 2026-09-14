@@ -8,14 +8,13 @@ function getSystemPreference() {
 
 export const useThemeStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       isDark: getSystemPreference(),
       toggle: () => set(s => ({ isDark: !s.isDark })),
       setTheme: (isDark) => set({ isDark }),
     }),
     {
       name: 'qnu-theme',
-      skipHydration: true,
     }
   )
 )

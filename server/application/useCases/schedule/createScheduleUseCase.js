@@ -29,7 +29,6 @@ class CreateScheduleUseCase {
       throw new Error(`Hall conflict: already scheduled at this time`);
     }
 
-    const allSchedules = await this.scheduleRepository.findAll({ semester: dto.semester });
     const doctorCourses = await this.courseRepository.findByDoctor(course.doctorId);
     const doctorScheduleIds = [];
     for (const dc of doctorCourses) {

@@ -8,6 +8,7 @@ import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
+import Pagination from '../../components/ui/Pagination'
 import { useConfirm } from '../../components/ui/ConfirmModal'
 import { cn } from '../../lib/utils'
 import toast from 'react-hot-toast'
@@ -17,6 +18,8 @@ import api from '../../../infrastructure/api/axios'
 export default function AdminCourses() {
   const { t } = useTranslation()
   const [courses, setCourses] = useState([])
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
   const [users, setUsers] = useState([])
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -25,6 +28,8 @@ export default function AdminCourses() {
   const [enrollmentOpen, setEnrollmentOpen] = useState(false)
   const [enrollmentCourse, setEnrollmentCourse] = useState(null)
   const [selectedStudents, setSelectedStudents] = useState([])
+  const [initialSelectedStudents, setInitialSelectedStudents] = useState([])
+  const [studentSearch, setStudentSearch] = useState('')
   const [enrollmentSaving, setEnrollmentSaving] = useState(false)
   const [editItem, setEditItem] = useState(null)
   const [form, setForm] = useState({ code: '', name: '', doctorId: '', department: '', creditHours: 3 })
@@ -36,15 +41,16 @@ export default function AdminCourses() {
     return value.id || value._id || String(value)
   }
 
-  const fetchData = async () => {
+  const fetchData = async (targetPage = page) => {
     try {
       const [coursesRes, usersRes, studentsRes] = await Promise.all([
-        api.get('/courses'),
-        api.get('/users?role=doctor'),
-        api.get('/users?role=student')
+        api.get(`/courses?page=${targetPage}&limit=18`),
+        api.get('/users?role=doctor&limit=100'),
+        api.get('/users?role=student&limit=100')
       ])
       const cData = coursesRes.data.data || coursesRes.data
       setCourses(Array.isArray(cData) ? cData : [])
+      setPagination(coursesRes.data.pagination || { page: 1, pages: 1, total: cData?.length || 0 })
       setUsers(usersRes.data.data || usersRes.data || [])
       setStudents(studentsRes.data.data || studentsRes.data || [])
     } catch {
@@ -55,7 +61,7 @@ export default function AdminCourses() {
     }
   }
 
-  useEffect(() => { fetchData().finally(() => setLoading(false)) }, [])
+  useEffect(() => { fetchData(page).finally(() => setLoading(false)) }, [page])
 
   const openCreate = () => {
     setEditItem(null)
@@ -71,9 +77,34 @@ export default function AdminCourses() {
 
   const openEnrollment = (course) => {
     setEnrollmentCourse(course)
-    setSelectedStudents((course.studentIds || []).map(getId))
+    setStudentSearch('')
     setEnrollmentOpen(true)
   }
+
+  useEffect(() => {
+    if (!enrollmentOpen || !enrollmentCourse) return undefined
+    const timer = setTimeout(async () => {
+      const query = new URLSearchParams({ role: 'student', limit: 100 })
+      const enrolledQuery = new URLSearchParams({ limit: 100 })
+      if (studentSearch.trim()) {
+        query.set('search', studentSearch.trim())
+        enrolledQuery.set('search', studentSearch.trim())
+      }
+      try {
+        const [studentResponse, enrolledResponse] = await Promise.all([
+          api.get(`/users?${query}`),
+          api.get(`/courses/${enrollmentCourse.id}/enrollments?${enrolledQuery}`),
+        ])
+        setStudents(studentResponse.data.data || [])
+        const ids = (enrolledResponse.data.data || []).map(getId)
+        setSelectedStudents(ids)
+        setInitialSelectedStudents(ids)
+      } catch {
+        setStudents([])
+      }
+    }, studentSearch ? 300 : 0)
+    return () => clearTimeout(timer)
+  }, [enrollmentOpen, enrollmentCourse?.id, studentSearch])
 
   const toggleStudent = (studentId) => {
     setSelectedStudents(current =>
@@ -86,7 +117,7 @@ export default function AdminCourses() {
   const handleSaveEnrollment = async () => {
     if (!enrollmentCourse) return
     setEnrollmentSaving(true)
-    const previous = (enrollmentCourse.studentIds || []).map(getId)
+    const previous = initialSelectedStudents
     const toAdd = selectedStudents.filter(id => !previous.includes(id))
     const toRemove = previous.filter(id => !selectedStudents.includes(id))
 
@@ -162,7 +193,7 @@ export default function AdminCourses() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map(course => {
             const maxStudents = 100
-            const enrolled = course.studentIds?.length || 0
+            const enrolled = course.studentCount ?? course.studentIds?.length ?? 0
             const pct = Math.min((enrolled / maxStudents) * 100, 100)
             return (
             <Card key={course.id} hover>
@@ -208,6 +239,8 @@ export default function AdminCourses() {
         </div>
       )}
 
+      <Pagination page={pagination.page} pages={pagination.pages} total={pagination.total} onPageChange={setPage} />
+
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? t('admin.courses.modalEdit') : t('admin.courses.modalAdd')}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -246,6 +279,12 @@ export default function AdminCourses() {
             <span className="text-sm text-body">{t('admin.courses.enrolledStudents')}</span>
             <Badge variant="primary" size="lg">{selectedStudents.length}</Badge>
           </div>
+
+          <Input
+            value={studentSearch}
+            onChange={event => setStudentSearch(event.target.value)}
+            placeholder={t('admin.users.searchPlaceholder')}
+          />
 
           <div className="max-h-[360px] overflow-y-auto rounded-lg border border-border divide-y">
             {students.length === 0 ? (

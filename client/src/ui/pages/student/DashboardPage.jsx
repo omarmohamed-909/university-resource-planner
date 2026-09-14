@@ -16,7 +16,7 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/schedules')
+    api.get('/schedules?limit=100')
       .then(r => setSchedules(r.data.data || []))
       .catch(() => {})
       .finally(() => setLoading(false))

@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal'
 import Skeleton from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
 import Badge from '../../components/ui/Badge'
+import Pagination from '../../components/ui/Pagination'
 import { useConfirm } from '../../components/ui/ConfirmModal'
 import toast from 'react-hot-toast'
 import { Pencil, Plus, RefreshCw, Search, Trash2, Users, XCircle } from 'lucide-react'
@@ -25,6 +26,8 @@ export default function AdminUsers() {
   const { t } = useTranslation()
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
@@ -33,10 +36,13 @@ export default function AdminUsers() {
   const [saving, setSaving] = useState(false)
   const { confirm, ConfirmModal } = useConfirm()
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (targetPage = page, searchValue = search) => {
     try {
-      const { data } = await api.get('/users')
+      const params = new URLSearchParams({ page: targetPage, limit: 20 })
+      if (searchValue.trim()) params.set('search', searchValue.trim())
+      const { data } = await api.get(`/users?${params}`)
       setUsers(data.data || data || [])
+      setPagination(data.pagination || { page: 1, pages: 1, total: data.data?.length || 0 })
       setFetchError(null)
     } catch {
       setUsers([])
@@ -44,7 +50,12 @@ export default function AdminUsers() {
     }
   }
 
-  useEffect(() => { fetchUsers().finally(() => setLoading(false)) }, [])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers(page, search).finally(() => setLoading(false))
+    }, search ? 300 : 0)
+    return () => clearTimeout(timer)
+  }, [page, search])
 
   const openCreate = () => {
     setEditUser(null)
@@ -72,7 +83,7 @@ export default function AdminUsers() {
         toast.success(t('admin.users.toast.added'))
       }
       setModalOpen(false)
-      fetchUsers()
+      fetchUsers(page, search)
     } catch (error) {
       toast.error(error.response?.data?.message || t('admin.users.toast.error'))
     } finally {
@@ -86,18 +97,12 @@ export default function AdminUsers() {
     try {
       await api.delete(`/users/${id}`)
       toast.success(t('admin.users.toast.deleted'))
-      fetchUsers()
+      if (users.length === 1 && page > 1) setPage(page - 1)
+      else fetchUsers(page, search)
     } catch {
       toast.error(t('admin.users.toast.error'))
     }
   }
-
-  const filtered = users.filter(user =>
-    !search ||
-    user.name?.includes(search) ||
-    user.email?.includes(search) ||
-    user.department?.includes(search)
-  )
 
   if (loading) return <Skeleton type="table" rows={5} />
 
@@ -113,7 +118,7 @@ export default function AdminUsers() {
 
       <div className="relative max-w-sm">
         <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-        <Input value={search} onChange={event => setSearch(event.target.value)} placeholder={t('admin.users.searchPlaceholder')} className="pe-10" />
+        <Input value={search} onChange={event => { setSearch(event.target.value); setPage(1) }} placeholder={t('admin.users.searchPlaceholder')} className="pe-10" />
       </div>
 
       {fetchError ? (
@@ -153,7 +158,7 @@ export default function AdminUsers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map(user => {
+                  {users.map(user => {
                     const cfg = roleConfig[user.role] || { label: user.role, variant: 'default' }
                     return (
                       <tr key={user.id} className="border-b last:border-0 hover:bg-hover transition-colors">
@@ -181,9 +186,12 @@ export default function AdminUsers() {
                   })}
                 </tbody>
               </table>
-              {filtered.length === 0 && search && (
+              {users.length === 0 && search && (
                 <div className="py-8 text-center text-sm text-muted">{t('admin.users.noSearchResults')}</div>
               )}
+            </div>
+            <div className="px-4 pb-4">
+              <Pagination page={pagination.page} pages={pagination.pages} total={pagination.total} onPageChange={setPage} />
             </div>
           </CardContent>
         </Card>

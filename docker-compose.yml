@@ -6,21 +6,58 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mongo-init:
+    image: mongo:7
+    restart: "no"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    command: ["mongosh", "--host", "mongo:27017", "--eval", "try { rs.status() } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}) }"]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID:-}
     restart: unless-stopped
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       PORT: 5000
-      MONGODB_URI: mongodb://mongo:27017/svnu
-      CLIENT_URL: http://localhost:5173
-      JWT_SECRET: change-this-before-production
-      QR_SECRET: change-this-before-production
+      MONGODB_URI: mongodb://mongo:27017/svnu?replicaSet=rs0
+      REDIS_URL: redis://redis:6379
+      SCHEDULE_WORKER_CONCURRENCY: 1
+      AUTO_SCHEDULE_REQUIRE_DEPARTMENT: "true"
+      CLIENT_URL: http://localhost:5000
+      TRUST_PROXY: "false"
     depends_on:
-      - mongo
+      mongo-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
 
 volumes:
   mongo_data:
+  redis_data:

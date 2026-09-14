@@ -30,7 +30,7 @@ const variants = {
   gradient:
     'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800',
   link:
-    'text-primary-600 hover:text-primary-800 dark:text-blue-400 dark:hover:text-blue-300 underline-offset-4 hover:underline p-0 h-auto',
+    'text-primary-700 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 underline-offset-4 hover:underline p-0 h-auto',
 }
 
 const sizes = {

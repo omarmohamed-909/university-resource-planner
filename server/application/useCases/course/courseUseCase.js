@@ -1,15 +1,26 @@
 const Course = require('../../../domain/entities/courseEntity');
 
 class CourseUseCase {
-  constructor({ courseRepository }) {
+  constructor({ courseRepository, enrollmentRepository }) {
     this.courseRepository = courseRepository;
+    this.enrollmentRepository = enrollmentRepository;
   }
 
-  async list({ role, userId, page, limit }) {
-    if (role === 'doctor') return { data: await this.courseRepository.findByDoctor(userId) };
-    if (role === 'student') return { data: await this.courseRepository.findByStudent(userId) };
-    if (page) return this.courseRepository.findAllPaginated({}, page, limit);
-    return { data: await this.courseRepository.findAll() };
+  async list({ role, userId, page, limit, search }) {
+    if (role === 'doctor') {
+      if (this.courseRepository.findByDoctorPaginated && page) {
+        return this.courseRepository.findByDoctorPaginated(userId, page, limit);
+      }
+      return { data: await this.courseRepository.findByDoctor(userId) };
+    }
+    if (role === 'student') {
+      if (this.courseRepository.findByStudentPaginated && page) {
+        return this.courseRepository.findByStudentPaginated(userId, page, limit);
+      }
+      return { data: await this.courseRepository.findByStudent(userId) };
+    }
+    if (!page && this.courseRepository.findAll) return { data: await this.courseRepository.findAll() };
+    return this.courseRepository.findAllPaginated({}, page, limit, search);
   }
 
   async getById(id) {
@@ -17,7 +28,9 @@ class CourseUseCase {
   }
 
   async create(dto) {
-    return this.courseRepository.save(new Course(dto));
+    const saved = await this.courseRepository.save(new Course(dto));
+    await this.enrollmentRepository.enrollMany(saved.id, dto.studentIds || []);
+    return saved;
   }
 
   async update(id, dto) {
@@ -25,7 +38,10 @@ class CourseUseCase {
   }
 
   async delete(id) {
-    await this.courseRepository.delete(id);
+    await Promise.all([
+      this.courseRepository.delete(id),
+      this.enrollmentRepository.deleteByCourse(id),
+    ]);
     return { deleted: true };
   }
 
@@ -33,15 +49,21 @@ class CourseUseCase {
     if (!Array.isArray(studentIds) || studentIds.length === 0) {
       throw new Error('studentIds must be a non-empty array');
     }
+    const added = await this.enrollmentRepository.enrollMany(courseId, studentIds);
     return this.courseRepository.update(courseId, {
-      $addToSet: { studentIds: { $each: studentIds } }
+      ...(added ? { $inc: { studentCount: added } } : {})
     });
   }
 
   async unenroll(courseId, studentId) {
+    const removed = await this.enrollmentRepository.unenroll(courseId, studentId);
     return this.courseRepository.update(courseId, {
-      $pull: { studentIds: studentId }
+      ...(removed ? { $inc: { studentCount: -removed } } : {})
     });
+  }
+
+  async listEnrollments(courseId, { page, limit, search }) {
+    return this.enrollmentRepository.listByCourse(courseId, page, limit, search);
   }
 }
 

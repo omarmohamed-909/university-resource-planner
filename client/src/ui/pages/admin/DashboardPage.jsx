@@ -24,15 +24,17 @@ export default function AdminDashboard() {
   const { t } = useTranslation()
   const { halls, fetchHalls, loading: hallLoading } = useHallStore()
   const { schedules, fetchSchedules, loading: scheduleLoading } = useScheduleStore()
-  const [studentCount, setStudentCount] = useState(0)
-  const [doctorCount, setDoctorCount] = useState(0)
+  const [overview, setOverview] = useState(null)
+  const [statsLoading, setStatsLoading] = useState(true)
   const user = useAuthStore(s => s.user)
 
   useEffect(() => {
-    fetchHalls()
-    fetchSchedules()
-    api.get('/users?role=student').then(r => setStudentCount(r.data.data?.length || 0)).catch(err => console.error('[Dashboard] student count:', err?.message))
-    api.get('/users?role=doctor').then(r => setDoctorCount(r.data.data?.length || 0)).catch(err => console.error('[Dashboard] doctor count:', err?.message))
+    fetchHalls({ page: 1, limit: 6 })
+    fetchSchedules({ page: 1, limit: 6 })
+    api.get('/stats/overview')
+      .then(r => setOverview(r.data.data))
+      .catch(err => console.error('[Dashboard] overview:', err?.message))
+      .finally(() => setStatsLoading(false))
   }, [])
 
   const formatDate = (date) => {
@@ -54,7 +56,7 @@ export default function AdminDashboard() {
     return t('admin.dashboard.greetingEvening', { defaultValue: 'Good evening' })
   }, [t])
 
-  const loading = hallLoading || scheduleLoading
+  const loading = hallLoading || scheduleLoading || statsLoading
   if (loading) return (
     <div className="space-y-6">
       <div className="h-32 rounded-xl skeleton-shimmer" />
@@ -66,15 +68,17 @@ export default function AdminDashboard() {
     </div>
   )
 
-  const activeHalls = halls.filter(h => h.status === 'active').length
-  const maintenanceHalls = halls.filter(h => h.status === 'maintenance').length
-  const activePercent = Math.round((activeHalls / (halls.length || 1)) * 100)
+  const activeHalls = overview?.activeHalls || 0
+  const maintenanceHalls = overview?.maintenanceHalls || 0
+  const hallTotal = overview?.halls || 0
+  const scheduleTotal = overview?.schedules || 0
+  const activePercent = Math.round((activeHalls / (hallTotal || 1)) * 100)
 
   const stats = [
-    { label: t('admin.dashboard.statHalls'), value: halls.length, icon: DoorOpen, color: 'text-blue-600' },
-    { label: t('admin.dashboard.statSchedules'), value: schedules.length, icon: CalendarDays, color: 'text-violet-600' },
-    { label: t('admin.dashboard.statDoctors'), value: doctorCount, icon: GraduationCap, color: 'text-teal-600' },
-    { label: t('admin.dashboard.statStudents'), value: studentCount, icon: UserCog, color: 'text-indigo-600' },
+    { label: t('admin.dashboard.statHalls'), value: hallTotal, icon: DoorOpen, color: 'text-blue-600' },
+    { label: t('admin.dashboard.statSchedules'), value: scheduleTotal, icon: CalendarDays, color: 'text-violet-600' },
+    { label: t('admin.dashboard.statDoctors'), value: overview?.doctors || 0, icon: GraduationCap, color: 'text-teal-600' },
+    { label: t('admin.dashboard.statStudents'), value: overview?.students || 0, icon: UserCog, color: 'text-indigo-600' },
     { label: t('admin.dashboard.statActiveHalls'), value: activeHalls, icon: Activity, color: 'text-emerald-600' },
     { label: t('admin.dashboard.statMaintenance'), value: maintenanceHalls, icon: Wrench, color: 'text-amber-600' },
   ]
@@ -92,7 +96,7 @@ export default function AdminDashboard() {
         <div className="min-w-56">
           <div className="flex items-center justify-between text-sm">
             <span className="font-semibold text-title">{t('admin.dashboard.statActiveHalls')}</span>
-            <span className="tabular-nums text-label">{activeHalls}/{halls.length}</span>
+            <span className="tabular-nums text-label">{activeHalls}/{hallTotal}</span>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-500/15">
             <div className="h-full rounded-full bg-emerald-500" style={{ width: `${activePercent}%` }} />
@@ -127,7 +131,7 @@ export default function AdminDashboard() {
               </div>
               <div className="min-w-0">
                 <CardTitle>{t('admin.dashboard.hallsCard')}</CardTitle>
-                <CardDescription>{t('admin.dashboard.hallsDesc', { count: halls.length })}</CardDescription>
+                <CardDescription>{t('admin.dashboard.hallsDesc', { count: hallTotal })}</CardDescription>
               </div>
             </div>
             <Badge variant="info" className="flex-shrink-0">{t('admin.dashboard.hallsActive', { count: activeHalls })}</Badge>
@@ -185,10 +189,10 @@ export default function AdminDashboard() {
               </div>
               <div className="min-w-0">
                 <CardTitle>{t('admin.dashboard.schedulesCard')}</CardTitle>
-                <CardDescription>{t('admin.dashboard.schedulesDesc', { count: schedules.length })}</CardDescription>
+                <CardDescription>{t('admin.dashboard.schedulesDesc', { count: scheduleTotal })}</CardDescription>
               </div>
             </div>
-            <Badge variant="primary" className="flex-shrink-0">{t('admin.dashboard.schedulesTotal', { count: schedules.length })}</Badge>
+            <Badge variant="primary" className="flex-shrink-0">{t('admin.dashboard.schedulesTotal', { count: scheduleTotal })}</Badge>
           </CardHeader>
           <CardContent padding="none">
             {schedules.length === 0 ? (

@@ -21,7 +21,10 @@ class CreateSwapRequestUseCase {
       
       const docIdFromCourse = course ? String(getId(course.doctorId)) : 'undefined';
       const docIdFromReq = String(dto.requesterId);
-      console.log(`[SWAP DEBUG] Course Doctor: ${docIdFromCourse} | Requester: ${docIdFromReq} | Match: ${docIdFromCourse === docIdFromReq}`);
+      // Debug: only log ownership mismatches outside production
+      if (process.env.NODE_ENV !== 'production' && docIdFromCourse !== docIdFromReq) {
+        console.log(`[SWAP] Ownership mismatch — Course Doctor: ${docIdFromCourse} | Requester: ${docIdFromReq}`);
+      }
       
       if (!course || docIdFromCourse !== docIdFromReq) {
         throw new Error('يمكنك فقط طلب تبديل محاضراتك الخاصة');
@@ -34,7 +37,7 @@ class CreateSwapRequestUseCase {
       if (!hall.isAvailable()) throw new Error('Proposed hall is not available');
     }
 
-    const swapRequest = new SwapRequest(dto);
+    new SwapRequest(dto); // validate domain rules
     const saved = await this.swapRepository.save({
       requesterId: dto.requesterId,
       originalScheduleId: dto.originalScheduleId,

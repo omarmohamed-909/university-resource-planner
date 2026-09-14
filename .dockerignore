@@ -1,0 +1,30 @@
+# Dependencies
+node_modules
+
+# Git history
+.git
+
+# Build artifacts
+dist
+client/dist
+
+# Environment files (never bake secrets into the image)
+.env
+.env.*
+!.env.example
+!server/.env.example
+!client/.env.example
+
+# Test artifacts
+coverage
+
+# Logs
+*.log
+
+# Editor / tool configs
+.cursor
+.agents
+.codex
+.impeccable
+.npm-cache
+check-layout.js

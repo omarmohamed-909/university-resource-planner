@@ -3,25 +3,24 @@ class GetScheduleUseCase {
     this.scheduleRepository = scheduleRepository;
   }
 
-  async execute({ semester, role, userId, page, limit }) {
-    if (role === 'admin' && page) {
-      const filter = {};
-      if (semester) filter.semester = semester;
-      return this.scheduleRepository.findAllPaginated(filter, page, limit || 20);
+  async execute({ semester, role, userId, page = 1, limit = 20, unpaginated = false }) {
+    if (unpaginated) {
+      if (role === 'doctor') return { data: await this.scheduleRepository.findByDoctor(userId) };
+      if (role === 'student') return { data: await this.scheduleRepository.findByStudent(userId) };
+      return { data: semester ? await this.scheduleRepository.findBySemester(semester) : await this.scheduleRepository.findAll() };
     }
     if (role === 'admin') {
-      const schedules = semester
-        ? await this.scheduleRepository.findBySemester(semester)
-        : await this.scheduleRepository.findAll();
-      return { data: schedules };
+      const filter = {};
+      if (semester) filter.semester = semester;
+      return this.scheduleRepository.findAllPaginated(filter, page, limit);
     }
     if (role === 'doctor') {
-      return { data: await this.scheduleRepository.findByDoctor(userId) };
+      return this.scheduleRepository.findByDoctorPaginated(userId, page, limit, semester);
     }
     if (role === 'student') {
-      return { data: await this.scheduleRepository.findByStudent(userId) };
+      return this.scheduleRepository.findByStudentPaginated(userId, page, limit, semester);
     }
-    return { data: await this.scheduleRepository.findAll() };
+    return this.scheduleRepository.findAllPaginated({}, page, limit);
   }
 
   async getById(id) {

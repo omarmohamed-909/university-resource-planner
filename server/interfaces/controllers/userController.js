@@ -5,9 +5,14 @@ class UserController {
 
   async list(req, res, next) {
     try {
-      const page = req.query.page ? parseInt(req.query.page, 10) : null;
-      const limit = parseInt(req.query.limit, 10) || 20;
-      const result = await this.userUseCase.list({ role: req.query.role, page, limit });
+      const { parsePagination } = require('../http/queryPagination');
+      const { page, limit } = parsePagination(req.query);
+      const result = await this.userUseCase.list({
+        role: req.query.role,
+        search: req.query.search,
+        page,
+        limit,
+      });
       res.json({ success: true, ...result });
     } catch (error) {
       next(error);

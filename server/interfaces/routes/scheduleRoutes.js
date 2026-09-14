@@ -14,6 +14,7 @@ function scheduleRoutes(container) {
   router.get('/export/pdf', (req, res, next) => controller.exportPdf(req, res, next));
   router.get('/export/excel', (req, res, next) => controller.exportExcel(req, res, next));
   router.post('/auto-generate', role('admin'), (req, res, next) => controller.autoGenerate(req, res, next));
+  router.get('/auto-generate/jobs/:jobId', role('admin'), (req, res, next) => controller.autoGenerateStatus(req, res, next));
   router.get('/available', (req, res, next) => {
     const hallController = container.resolve('hallController');
     hallController.getAvailable(req, res, next);

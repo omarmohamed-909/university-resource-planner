@@ -16,7 +16,7 @@ export function useHallAvailability(halls) {
     const dayName = dayMap[today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()]
 
     const fetchSchedule = () => {
-      api.get('/schedules')
+      api.get('/schedules?limit=100')
         .then(r => {
           const all = r.data.data || []
           const todaySchedules = all.filter(s => s.day === dayName && s.hallId)

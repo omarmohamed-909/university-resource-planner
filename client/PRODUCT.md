@@ -50,4 +50,4 @@ This system must **not** resemble legacy academic portals:
 - **RTL-first:** Arabic-first platform for an Egyptian university — RTL layout must feel native, not a forced LTR flip
 - **Contrast & readability:** High contrast text against backgrounds, suitable for older monitors and projectors common in university settings
 - **Responsive scaling:** Must remain highly usable on mobile devices for students checking schedules on the go
-- **Foundation:** Built on Radix UI primitives (via shadcn/ui) for strong keyboard navigation, focus management, and ARIA support
+- **Foundation:** Built on a **custom component library** (Button, Card, Input, Badge, Modal, Skeleton, EmptyState, etc.) with strong ARIA attributes, semantic HTML, and keyboard-accessible patterns — styled entirely with vanilla CSS and custom design tokens.

@@ -13,5 +13,7 @@ const swapRequestSchema = new mongoose.Schema({
 
 swapRequestSchema.index({ requesterId: 1, status: 1 });
 swapRequestSchema.index({ originalScheduleId: 1 });
+swapRequestSchema.index({ status: 1, createdAt: -1 });
+swapRequestSchema.index({ requesterId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('SwapRequest', swapRequestSchema);

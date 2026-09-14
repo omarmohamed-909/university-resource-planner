@@ -24,8 +24,21 @@ class AttendanceController {
     try {
       const { scheduleId } = req.params;
       const { date } = req.query;
-      const records = await this.attendanceRepository.findBySchedule(scheduleId, date);
-      res.json({ success: true, data: records });
+      const { parsePagination } = require('../http/queryPagination');
+      const { page, limit } = parsePagination(req.query);
+      const result = await this.attendanceRepository.findBySchedulePaginated(scheduleId, date, page, limit);
+      res.json({ success: true, ...result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getMine(req, res, next) {
+    try {
+      const { parsePagination } = require('../http/queryPagination');
+      const { page, limit } = parsePagination(req.query);
+      const result = await this.attendanceRepository.findByStudentPaginated(req.user.id, page, limit);
+      res.json({ success: true, ...result });
     } catch (error) {
       next(error);
     }
@@ -56,6 +69,10 @@ class AttendanceController {
         this.scheduleRepository.findById(scheduleId)
       ]);
 
+      if (records.length > 10000) {
+        return res.status(413).json({ success: false, message: 'Export is too large; select a specific date' });
+      }
+
       const scheduleInfo = schedule ? {
         courseName: schedule.courseId?.name || '',
         day: schedule.day,
@@ -75,6 +92,9 @@ class AttendanceController {
       if (!scheduleId) return res.status(400).json({ success: false, message: 'Schedule ID is required' });
 
       const records = await this.attendanceRepository.findBySchedule(scheduleId, date);
+      if (records.length > 10000) {
+        return res.status(413).json({ success: false, message: 'Export is too large; select a specific date' });
+      }
       const buffer = await this.excelExportService.exportAttendance(records);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="attendance.xlsx"');
@@ -85,6 +105,9 @@ class AttendanceController {
   async exportMyPdf(req, res, next) {
     try {
       const records = await this.attendanceRepository.findByStudent(req.user.id);
+      if (records.length > 10000) {
+        return res.status(413).json({ success: false, message: 'Export is too large; contact administration for an archive export' });
+      }
       const buffer = await this.pdfExportService.exportStudentAttendance(records, req.user);
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'attachment; filename="my-attendance.pdf"');
@@ -95,6 +118,9 @@ class AttendanceController {
   async exportMyExcel(req, res, next) {
     try {
       const records = await this.attendanceRepository.findByStudent(req.user.id);
+      if (records.length > 10000) {
+        return res.status(413).json({ success: false, message: 'Export is too large; contact administration for an archive export' });
+      }
       const buffer = await this.excelExportService.exportStudentAttendance(records, req.user);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="my-attendance.xlsx"');

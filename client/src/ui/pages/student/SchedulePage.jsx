@@ -35,7 +35,7 @@ export default function StudentSchedule() {
   }
 
   useEffect(() => {
-    api.get('/schedules')
+    api.get('/schedules?limit=100')
       .then(r => setSchedules(r.data.data || []))
       .catch(() => {})
       .finally(() => setLoading(false))

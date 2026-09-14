@@ -3,11 +3,10 @@ class UserUseCase {
     this.userRepository = userRepository;
   }
 
-  async list({ role, page, limit }) {
+  async list({ role, search, page, limit }) {
     const filter = {};
     if (role) filter.role = role;
-    if (page) return this.userRepository.findAllPaginated(filter, page, limit);
-    return { data: await this.userRepository.findAll(filter) };
+    return this.userRepository.findAllPaginated(filter, page, limit, search);
   }
 
   async getById(id) {

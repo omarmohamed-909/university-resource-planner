@@ -10,7 +10,7 @@ import { cn } from '../../lib/utils'
    Added: subtle inner-top highlight on solid variants. */
 const softVariants = {
   default:  'bg-slate-100 text-slate-700 ring-slate-200/70 dark:bg-slate-800/60 dark:text-slate-300 dark:ring-slate-700/60',
-  primary:  'bg-blue-50 text-blue-700 ring-blue-200/70 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-500/25',
+  primary:  'bg-primary-50 text-primary-800 ring-primary-200/70 dark:bg-primary-500/15 dark:text-primary-300 dark:ring-primary-500/25',
   success:  'bg-emerald-50 text-emerald-700 ring-emerald-200/70 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/25',
   warning:  'bg-amber-50 text-amber-700 ring-amber-200/70 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-500/25',
   danger:   'bg-rose-50 text-rose-700 ring-rose-200/70 dark:bg-rose-500/15 dark:text-rose-300 dark:ring-rose-500/25',
@@ -20,7 +20,7 @@ const softVariants = {
 
 const solidVariants = {
   default:  'bg-slate-700 text-white ring-slate-700/50',
-  primary:  'bg-blue-600 text-white ring-blue-600/50',
+  primary:  'bg-primary-600 text-white ring-primary-600/50',
   success:  'bg-emerald-600 text-white ring-emerald-600/50',
   warning:  'bg-amber-500 text-white ring-amber-500/50',
   danger:   'bg-rose-600 text-white ring-rose-600/50',
@@ -30,7 +30,7 @@ const solidVariants = {
 
 const dotColors = {
   default:  'bg-slate-500',
-  primary:  'bg-blue-500',
+  primary:  'bg-primary-500',
   success:  'bg-emerald-500',
   warning:  'bg-amber-500',
   danger:   'bg-rose-500',

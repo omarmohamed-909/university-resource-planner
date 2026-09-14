@@ -15,7 +15,7 @@ class SocketService {
     this.connectedUsers = new Map();
   }
 
-  init(server) {
+  async init(server) {
     this.io = new Server(server, {
       cors: {
         origin: process.env.CLIENT_URL || 'http://localhost:5173',
@@ -71,6 +71,19 @@ class SocketService {
         console.log('Client disconnected:', socket.id);
       });
     });
+
+    if (process.env.REDIS_URL) {
+      const { createAdapter } = require('@socket.io/redis-adapter');
+      const { createClient } = require('redis');
+      const pubClient = createClient({ url: process.env.REDIS_URL });
+      const subClient = pubClient.duplicate();
+      pubClient.on('error', error => console.error('[socket-redis:pub]', error));
+      subClient.on('error', error => console.error('[socket-redis:sub]', error));
+      await Promise.all([pubClient.connect(), subClient.connect()]);
+      this.io.adapter(createAdapter(pubClient, subClient));
+      this.redisClients = [pubClient, subClient];
+      console.log('[socket] Redis adapter ready');
+    }
   }
 
   emitHallStatusUpdate(hallId, status) {

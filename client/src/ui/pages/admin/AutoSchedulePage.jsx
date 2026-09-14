@@ -270,6 +270,7 @@ export default function AdminAutoSchedule() {
   const { t } = useTranslation()
   const { autoGenerate } = useScheduleStore()
   const [semester, setSemester] = useState('2026-1')
+  const [department, setDepartment] = useState('')
   const [populationSize, setPopulationSize] = useState(100)
   const [maxGenerations, setMaxGenerations] = useState(200)
   const [mutationRate, setMutationRate] = useState(0.05)
@@ -288,10 +289,11 @@ export default function AdminAutoSchedule() {
 
   const handlePreview = async () => {
     if (!semester.trim()) return toast.error(t('admin.autoSchedule.toast.semesterRequired'))
+    if (!department.trim()) return toast.error('اكتب اسم القسم قبل بدء الجدولة')
     pendingRef.current = true
     setLoading(true); setStep(2); setPreview(null);
     try {
-      const data = await autoGenerate(semester, true, { populationSize, maxGenerations, mutationRate })
+      const data = await autoGenerate(semester, true, { department: department.trim() || undefined, populationSize, maxGenerations, mutationRate })
       if (!pendingRef.current) return
       setPreview(data); setStep(3);
     } catch (err) {
@@ -307,7 +309,7 @@ export default function AdminAutoSchedule() {
     pendingRef.current = true
     setLoading(true)
     try {
-      const data = await autoGenerate(semester, false, { populationSize, maxGenerations, mutationRate })
+      const data = await autoGenerate(semester, false, { department: department.trim() || undefined, populationSize, maxGenerations, mutationRate })
       if (!pendingRef.current) return
       setResult(data); setStep(4);
       if (data.applied) toast.success(t('admin.autoSchedule.toast.applied', { count: data.schedules?.length || 0 }))
@@ -333,7 +335,7 @@ export default function AdminAutoSchedule() {
             <span className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shadow-sm">
               <Brain className="w-4 h-4 text-white" />
             </span>
-            AI Genetic Scheduler 🧬
+            مُنشئ الجدول الدراسي
           </h1>
           <p className="text-label text-sm mt-1">{t('admin.autoSchedule.description')}</p>
         </div>
@@ -351,10 +353,14 @@ export default function AdminAutoSchedule() {
               <div><CardTitle>{t('admin.autoSchedule.setupCard')}</CardTitle><CardDescription>{t('admin.autoSchedule.setupDescription')}</CardDescription></div>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                 <div>
                   <label className="block text-sm font-semibold text-body mb-1.5">{t('admin.autoSchedule.semesterLabel')}</label>
                   <Input value={semester} onChange={e => setSemester(e.target.value)} placeholder={t('admin.autoSchedule.semesterPlaceholder')} className="font-mono" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-body mb-1.5">القسم</label>
+                  <Input value={department} onChange={e => setDepartment(e.target.value)} placeholder="مثال: Computer Science" />
                 </div>
                 <div className="flex gap-3">
                   <Button onClick={() => setShowAdvanced(!showAdvanced)} variant="outline" className="h-10 flex-1 border-dashed">

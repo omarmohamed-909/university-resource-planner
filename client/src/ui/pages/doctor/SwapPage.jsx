@@ -41,8 +41,8 @@ export default function DoctorSwap() {
   const fetchData = async () => {
     try {
       const [sRes, hRes, swapRes] = await Promise.all([
-        api.get('/schedules'),
-        api.get('/halls'),
+        api.get('/schedules?limit=100'),
+        api.get('/halls?limit=100'),
         api.get('/swaps')
       ])
       setSchedules(sRes.data.data || [])

@@ -13,6 +13,8 @@ function validateEnv() {
     { key: 'JWT_SECRET',    critical: true  },
     { key: 'QR_SECRET',     critical: isProd },
     { key: 'CLIENT_URL',    critical: isProd },
+    { key: 'REDIS_URL',     critical: isProd },
+    { key: 'SMTP_HOST',     critical: isProd },  // إلزامي في production لإرسال OTP والإشعارات
   ];
 
   const missing = required.filter(({ key }) => !process.env[key]);

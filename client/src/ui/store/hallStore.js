@@ -3,6 +3,7 @@ import api from '../../infrastructure/api/axios'
 
 export const useHallStore = create((set) => ({
   halls: [],
+  pagination: { page: 1, pages: 1, total: 0, limit: 20 },
   loading: false,
 
   fetchHalls: async (filter = {}) => {
@@ -10,7 +11,11 @@ export const useHallStore = create((set) => ({
     try {
       const params = new URLSearchParams(filter).toString()
       const { data } = await api.get(`/halls${params ? `?${params}` : ''}`)
-      set({ halls: Array.isArray(data.data) ? data.data : (data.data || []), loading: false })
+      set({
+        halls: Array.isArray(data.data) ? data.data : (data.data || []),
+        pagination: data.pagination || { page: 1, pages: 1, total: data.data?.length || 0, limit: 20 },
+        loading: false,
+      })
     } catch (error) {
       set({ loading: false })
       console.error('[hallStore] fetchHalls failed:', error?.response?.data?.message || error?.message)

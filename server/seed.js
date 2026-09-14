@@ -9,6 +9,12 @@ const users = [
 ];
 
 async function seed() {
+  // ⚠️ سكربت تطوير فقط — لا تشغّل في production
+  if (process.env.NODE_ENV === 'production') {
+    console.error('❌ Seed script must NOT run in production. Exiting.');
+    process.exit(1);
+  }
+
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/svnu';
   await mongoose.connect(uri);
   console.log('Connected to MongoDB');

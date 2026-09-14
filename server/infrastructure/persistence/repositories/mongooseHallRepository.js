@@ -13,10 +13,16 @@ class MongooseHallRepository {
     return docs.map(doc => new Hall({ id: doc._id.toString(), ...doc, _id: undefined }));
   }
 
-  async findAllPaginated(filter = {}, page = 1, limit = 20) {
+  async findAllPaginated(filter = {}, page = 1, limit = 20, search = '') {
+    const normalizedSearch = String(search || '').trim();
+    if (normalizedSearch) {
+      const { escapeRegex } = require('../../../interfaces/http/queryPagination');
+      const term = new RegExp(`^${escapeRegex(normalizedSearch)}`, 'i');
+      filter = { ...filter, $or: [{ name: term }, { building: term }] };
+    }
     const skip = (page - 1) * limit;
     const [docs, total] = await Promise.all([
-      HallModel.find(filter).skip(skip).limit(limit).lean(),
+      HallModel.find(filter).sort({ name: 1, _id: 1 }).skip(skip).limit(limit).lean(),
       HallModel.countDocuments(filter)
     ]);
     return {
@@ -25,27 +31,31 @@ class MongooseHallRepository {
     };
   }
 
+  async count(filter = {}) {
+    return HallModel.countDocuments(filter);
+  }
+
   async findAvailable({ day, startTime, endTime, semester, excludeScheduleId } = {}) {
     const ScheduleModel = require('../models/scheduleModel');
     const query = { status: 'active' };
-    const halls = await HallModel.find(query).lean();
 
     if (!day || !startTime || !endTime) {
+      const halls = await HallModel.find(query).lean();
       return halls.map(doc => new Hall({ id: doc._id.toString(), ...doc, _id: undefined }));
     }
 
-    const scheduleQuery = { day, semester };
+    const scheduleQuery = {
+      day,
+      semester,
+      startTime: { $lt: endTime },
+      endTime: { $gt: startTime },
+    };
     if (excludeScheduleId) {
       scheduleQuery._id = { $ne: excludeScheduleId };
     }
-    const schedules = await ScheduleModel.find(scheduleQuery).lean();
-
-    const availableHalls = halls.filter(hall => {
-      const hallSchedules = schedules.filter(s => s.hallId.toString() === hall._id.toString());
-      return !hallSchedules.some(s => {
-        return startTime < s.endTime && endTime > s.startTime;
-      });
-    });
+    const occupiedHallIds = await ScheduleModel.find(scheduleQuery).distinct('hallId');
+    query._id = { $nin: occupiedHallIds };
+    const availableHalls = await HallModel.find(query).lean();
 
     return availableHalls.map(doc => new Hall({ id: doc._id.toString(), ...doc, _id: undefined }));
   }

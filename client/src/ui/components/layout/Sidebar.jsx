@@ -16,10 +16,10 @@ import QnuLogo from '../ui/QnuLogo'
    and indicator dots — so the sidebar feels personalized per role. */
 const roleMeta = {
   admin: {
-    accent: '#3b82f6',
-    accentSoft: 'bg-blue-500/15',
-    accentText: 'text-blue-400',
-    avatar: 'bg-blue-600',
+    accent: 'oklch(68% 0.15 80)',
+    accentSoft: 'bg-primary-500/15',
+    accentText: 'text-primary-300',
+    avatar: 'bg-primary-600',
     labelKey: 'role.adminFull',
   },
   doctor: {
@@ -86,7 +86,7 @@ export default function Sidebar({ role, onClose }) {
   /* Nav item class — shared between menu items and logout button */
   const itemBase = cn(
     'group relative flex items-center rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer select-none',
-    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
     shrunk
       ? 'justify-center w-10 h-10 mx-auto'
       : 'px-3.5 h-11 gap-3 w-full'

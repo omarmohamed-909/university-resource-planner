@@ -18,7 +18,9 @@ class CheckInUseCase {
     const course = await this.courseRepository.findById(courseId);
     if (!course) throw new Error('Course not found');
 
-    const isEnrolled = course.studentIds.some(id => id.toString() === studentId);
+    const isEnrolled = this.courseRepository.isStudentEnrolled
+      ? await this.courseRepository.isStudentEnrolled(courseId, studentId)
+      : course.studentIds.some(id => id.toString() === studentId);
     if (!isEnrolled) {
       throw new Error('Student is not enrolled in this course');
     }
